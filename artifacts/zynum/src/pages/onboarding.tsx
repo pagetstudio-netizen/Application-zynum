@@ -133,7 +133,7 @@ export default function Onboarding() {
       className={`h-screen overflow-hidden flex flex-col bg-gradient-to-br ${BG_GRADIENTS[current]} transition-all duration-700`}
     >
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 pt-10 pb-2">
+      <div className="flex items-center justify-between px-6 pt-4 pb-2">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl overflow-hidden">
             <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />

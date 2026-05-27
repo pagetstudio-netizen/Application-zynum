@@ -82,7 +82,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-white px-4 pt-10 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
+      <div className="bg-white px-4 pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md shadow-blue-500/30">
             <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />
@@ -244,7 +244,7 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
   if (view === "recharge") {
     return (
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="bg-white px-4 pt-10 pb-3 flex items-center gap-3 shrink-0 border-b border-gray-100">
+        <div className="bg-white px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 border-b border-gray-100">
           <button onClick={() => setView("main")} className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
             <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
@@ -260,7 +260,7 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-white px-4 pt-10 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
+      <div className="bg-white px-4 pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
         <h1 className="font-extrabold text-gray-900 text-xl">Wallet</h1>
         <button className="relative p-2 rounded-xl bg-gray-100">
           <Bell className="w-5 h-5 text-gray-600" />
@@ -362,7 +362,7 @@ function SubPage({ title, onBack, children }: { title: string; onBack: () => voi
       transition={{ type: "spring", damping: 28, stiffness: 280 }}
       className="flex-1 flex flex-col overflow-hidden"
     >
-      <div className="bg-white px-4 pt-10 pb-3 flex items-center gap-3 shrink-0 border-b border-gray-100">
+      <div className="bg-white px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 border-b border-gray-100">
         <button onClick={onBack} className="p-2 -ml-1 rounded-xl hover:bg-gray-100 active:scale-90 transition-all">
           <ChevronLeft className="w-5 h-5 text-gray-700" />
         </button>
@@ -1022,7 +1022,7 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
         transition={{ duration: 0.2 }}
         className="flex-1 flex flex-col overflow-hidden"
       >
-        <div className="bg-white px-4 pt-10 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
+        <div className="bg-white px-4 pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
           <h1 className="font-extrabold text-gray-900 text-xl">Compte</h1>
           <button onClick={() => nav("params")} className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
             <Settings className="w-5 h-5 text-gray-600" />
@@ -1284,7 +1284,7 @@ export default function Dashboard() {
           {activeTab === "accueil" && <HomeTab user={user} onNavigate={navigate} />}
           {activeTab === "numeros" && (
             <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="bg-white px-4 pt-10 pb-3 shrink-0 border-b border-gray-100">
+              <div className="bg-white px-4 pt-4 pb-3 shrink-0 border-b border-gray-100">
                 <h1 className="font-extrabold text-gray-900 text-xl">Acheter un numéro</h1>
               </div>
               <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
@@ -1296,7 +1296,7 @@ export default function Dashboard() {
           )}
           {activeTab === "sms" && (
             <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="bg-white px-4 pt-10 pb-3 shrink-0 border-b border-gray-100">
+              <div className="bg-white px-4 pt-4 pb-3 shrink-0 border-b border-gray-100">
                 <h1 className="font-extrabold text-gray-900 text-xl">Mes SMS</h1>
               </div>
               <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
