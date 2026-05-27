@@ -1,22 +1,33 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: ZyNum API - Virtual Numbers Platform
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: numbers
+    description: Virtual number operations
+  - name: orders
+    description: Order history operations
+  - name: balance
+    description: Balance and account operations
+  - name: services
+    description: Available services and countries
+  - name: developer
+    description: Developer API endpoints
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +35,274 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /v1/auth/register:
+    post:
+      operationId: registerUser
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/auth/login:
+    post:
+      operationId: loginUser
+      tags: [auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/auth/logout:
+    post:
+      operationId: logoutUser
+      tags: [auth]
+      summary: Logout user
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /v1/auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/services:
+    get:
+      operationId: getServices
+      tags: [services]
+      summary: Get available services
+      responses:
+        "200":
+          description: List of services
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServicesResponse"
+
+  /v1/countries:
+    get:
+      operationId: getCountries
+      tags: [services]
+      summary: Get available countries
+      parameters:
+        - name: service
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of countries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountriesResponse"
+
+  /v1/buy:
+    post:
+      operationId: buyNumber
+      tags: [numbers]
+      summary: Buy a virtual number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BuyNumberRequest"
+      responses:
+        "200":
+          description: Number purchased
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "402":
+          description: Insufficient balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/check/{orderId}:
+    get:
+      operationId: checkSms
+      tags: [numbers]
+      summary: Check SMS for an order
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: SMS status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmsStatusResponse"
+        "404":
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/orders:
+    get:
+      operationId: getOrderHistory
+      tags: [orders]
+      summary: Get order history
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Order history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderHistoryResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/balance:
+    get:
+      operationId: getBalance
+      tags: [balance]
+      summary: Get 5SIM balance
+      responses:
+        "200":
+          description: Balance info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/developer/apikey:
+    get:
+      operationId: getDeveloperApiKey
+      tags: [developer]
+      summary: Get developer API key
+      responses:
+        "200":
+          description: API key info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeyResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: regenerateDeveloperApiKey
+      tags: [developer]
+      summary: Regenerate developer API key
+      responses:
+        "200":
+          description: New API key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeyResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +313,283 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
+
+    RegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        confirmPassword:
+          type: string
+      required:
+        - name
+        - email
+        - password
+        - confirmPassword
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserProfile"
+        token:
+          type: string
+      required:
+        - user
+        - token
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - createdAt
+
+    Service:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        icon:
+          type: string
+        color:
+          type: string
+        category:
+          type: string
+      required:
+        - id
+        - name
+        - icon
+        - color
+        - category
+
+    ServicesResponse:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            $ref: "#/components/schemas/Service"
+      required:
+        - services
+
+    Country:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        flag:
+          type: string
+        priceUsd:
+          type: number
+        priceFcfa:
+          type: number
+        available:
+          type: integer
+      required:
+        - code
+        - name
+        - flag
+        - priceUsd
+        - priceFcfa
+        - available
+
+    CountriesResponse:
+      type: object
+      properties:
+        countries:
+          type: array
+          items:
+            $ref: "#/components/schemas/Country"
+      required:
+        - countries
+
+    BuyNumberRequest:
+      type: object
+      properties:
+        service:
+          type: string
+        country:
+          type: string
+        currency:
+          type: string
+          enum: [USD, FCFA]
+          default: USD
+      required:
+        - service
+        - country
+
+    OrderStatus:
+      type: string
+      enum: [PENDING, RECEIVED, FINISHED, TIMEOUT, BANNED, CANCELED]
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        externalId:
+          type: string
+        phone:
+          type: string
+        service:
+          type: string
+        serviceName:
+          type: string
+        country:
+          type: string
+        countryName:
+          type: string
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+        smsCode:
+          type: string
+          nullable: true
+        smsText:
+          type: string
+          nullable: true
+        priceUsd:
+          type: number
+        priceFcfa:
+          type: number
+        currency:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - externalId
+        - phone
+        - service
+        - serviceName
+        - country
+        - countryName
+        - status
+        - priceUsd
+        - priceFcfa
+        - currency
+        - createdAt
+        - updatedAt
+
+    OrderResponse:
+      type: object
+      properties:
+        order:
+          $ref: "#/components/schemas/Order"
+      required:
+        - order
+
+    SmsStatusResponse:
+      type: object
+      properties:
+        order:
+          $ref: "#/components/schemas/Order"
+      required:
+        - order
+
+    OrderHistoryResponse:
+      type: object
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - orders
+        - total
+        - page
+        - limit
+
+    BalanceResponse:
+      type: object
+      properties:
+        balance:
+          type: number
+        currency:
+          type: string
+        lowBalanceThreshold:
+          type: number
+        isLow:
+          type: boolean
+      required:
+        - balance
+        - currency
+        - lowBalanceThreshold
+        - isLow
+
+    ApiKeyResponse:
+      type: object
+      properties:
+        apiKey:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - apiKey
+        - createdAt

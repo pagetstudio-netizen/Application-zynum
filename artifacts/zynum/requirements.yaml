@@ -1,0 +1,20 @@
+packages:
+  "framer-motion": "For page transitions, smooth enter animations, and micro-interactions"
+  "date-fns": "For formatting dates in the order history"
+  "clsx": "For conditional tailwind classes"
+  "tailwind-merge": "For merging tailwind classes safely"
+  "@radix-ui/react-slot": "For Radix UI primitives"
+  "lucide-react": "For beautiful consistent iconography"
+
+images:
+  - path: "artifacts/zynum/public/images/hero-bg.png"
+    description: "Abstract dark navy blue and bright cyan gradient mesh background with subtle glowing digital network nodes and geometric fintech patterns, highly premium and sleek"
+    aspect_ratio: "16:9"
+  - path: "artifacts/zynum/public/images/logo.png"
+    description: "Minimalist geometric letter Z logo in bright electric blue and white, tech startup style on transparent background"
+    aspect_ratio: "1:1"
+
+notes:
+  - All API calls use the generated hooks from @workspace/api-client-react
+  - Token authentication relies on 'zynum_token' in localStorage
+  - Theme is strictly dark mode (navy blue / cyan)
