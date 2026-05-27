@@ -194,6 +194,14 @@ async function ensureSchema() {
     )
   `);
 
+  // Email verification and login tracking columns (idempotent)
+  for (const col of [
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified boolean NOT NULL DEFAULT false`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at timestamp with time zone`,
+  ]) {
+    await db.execute(sql.raw(col)).catch(() => {});
+  }
+
   // Affiliate system columns (idempotent)
   for (const col of [
     `ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code text`,
