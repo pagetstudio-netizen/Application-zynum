@@ -130,7 +130,7 @@ export default function Onboarding() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col bg-gradient-to-br ${BG_GRADIENTS[current]} transition-all duration-700`}
+      className={`h-screen overflow-hidden flex flex-col bg-gradient-to-br ${BG_GRADIENTS[current]} transition-all duration-700`}
     >
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 pt-10 pb-2">
@@ -186,10 +186,10 @@ export default function Onboarding() {
         <AnimatePresence mode="wait">
           <motion.div
             key={current}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.35 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
             className="text-center space-y-3"
           >
             <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">
