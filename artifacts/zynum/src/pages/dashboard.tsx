@@ -120,8 +120,8 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
           onClick={() => onNavigate("numeros")}
           className="w-full bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-gray-100 hover:shadow-md transition-all active:scale-98"
         >
-          <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-            <Smartphone className="w-5 h-5 text-blue-600" />
+          <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 overflow-hidden">
+            <img src="/buy-icon.png" alt="Acheter" className="w-8 h-8 object-contain" />
           </div>
           <div className="flex-1 text-left">
             <p className="font-bold text-gray-900 text-sm">Acheter un numéro</p>
