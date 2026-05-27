@@ -1262,7 +1262,7 @@ export default function Dashboard() {
   const navigate = (tab: Tab) => setActiveTab(tab);
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-50 flex flex-col max-w-lg mx-auto relative">
+    <div className="h-[100dvh] overflow-hidden bg-gray-50 flex flex-col max-w-lg mx-auto relative">
       <NotificationBanner />
 
       <AnimatePresence mode="wait">
