@@ -997,7 +997,6 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
     { id: "infos",    icon: <User className="w-5 h-5" />,      label: "Informations personnelles", color: "text-blue-600 bg-blue-50" },
     { id: "security", icon: <Lock className="w-5 h-5" />,       label: "Sécurité",                  color: "text-orange-600 bg-orange-50" },
     { id: "referral", icon: <Gift className="w-5 h-5" />,       label: "Parrainage",                color: "text-purple-600 bg-purple-50", badge: "10%" },
-    { id: "api",      icon: <Code2 className="w-5 h-5" />,      label: "API & Développeurs",        color: "text-indigo-600 bg-indigo-50" },
     { id: "params",   icon: <Settings className="w-5 h-5" />,   label: "Paramètres",                color: "text-gray-600 bg-gray-100" },
     { id: "help",     icon: <HelpCircle className="w-5 h-5" />, label: "Centre d'aide",             color: "text-teal-600 bg-teal-50" },
   ];
@@ -1051,26 +1050,6 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
               <span className="text-blue-500 font-semibold">Modifier le profil →</span>
             </div>
           </button>
-
-          {/* Quick toggles */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-2xl p-3 border border-gray-100">
-              <p className="text-xs text-gray-400 font-medium mb-2">Devise</p>
-              <div className="flex bg-gray-100 rounded-xl p-0.5">
-                {(["USD", "FCFA"] as const).map(c => (
-                  <button key={c} onClick={() => setCurrency(c)} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${currency === c ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"}`}>{c}</button>
-                ))}
-              </div>
-            </div>
-            <div className="bg-white rounded-2xl p-3 border border-gray-100">
-              <p className="text-xs text-gray-400 font-medium mb-2">Langue</p>
-              <div className="flex bg-gray-100 rounded-xl p-0.5">
-                {(["fr", "en"] as const).map(l => (
-                  <button key={l} onClick={() => { setLang(l); setCurrency(l === "fr" ? "FCFA" : "USD"); }} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${lang === l ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"}`}>{l === "fr" ? "FR" : "EN"}</button>
-                ))}
-              </div>
-            </div>
-          </div>
 
           {/* Menu */}
           <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
