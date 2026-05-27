@@ -1,19 +1,15 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, User, Mail, Lock, Eye, EyeOff, ArrowRight, ChevronLeft, Check } from "lucide-react";
+import { Loader2, User, Lock, Eye, EyeOff, ArrowRight, ChevronLeft, Check } from "lucide-react";
 import { useRegisterUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
-
-type Step = "form" | "verify";
 
 export default function Register() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [step, setStep] = useState<Step>("form");
-  const [pendingEmail, setPendingEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,10 +18,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  const [codeDigits, setCodeDigits] = useState(["", "", "", "", "", ""]);
-  const [isVerifying, setIsVerifying] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const codeRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [referralCode] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -35,13 +28,6 @@ export default function Register() {
   const registerMutation = useRegisterUser({
     mutation: {
       onSuccess: (data: any) => {
-        if (data.requiresVerification) {
-          setPendingEmail(data.email || email);
-          setStep("verify");
-          setErrorMsg("");
-          setTimeout(() => codeRefs.current[0]?.focus(), 100);
-          return;
-        }
         localStorage.setItem("zynum_token", data.token);
         queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
         toast({ title: "Compte créé !", description: "Bienvenue sur ZyNum !" });
@@ -77,56 +63,13 @@ export default function Register() {
     registerMutation.mutate({ data: { name, email, password, confirmPassword } } as any);
   };
 
-  const handleCodeChange = (i: number, val: string) => {
-    if (val.length > 1) val = val.slice(-1);
-    if (val && !/\d/.test(val)) return;
-    const next = [...codeDigits];
-    next[i] = val;
-    setCodeDigits(next);
-    if (val && i < 5) codeRefs.current[i + 1]?.focus();
-  };
-
-  const handleCodeKey = (i: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !codeDigits[i] && i > 0) codeRefs.current[i - 1]?.focus();
-  };
-
-  const handleVerify = async () => {
-    const code = codeDigits.join("");
-    if (code.length !== 6) { setErrorMsg("Entrez les 6 chiffres"); return; }
-    setIsVerifying(true);
-    setErrorMsg("");
-    try {
-      const res = await fetch("/api/v1/auth/verify-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: pendingEmail, code }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Code invalide");
-      localStorage.setItem("zynum_token", data.token);
-      queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
-      toast({ title: "Compte activé !", description: "Bienvenue sur ZyNum !" });
-      setLocation("/dashboard");
-    } catch (err: any) {
-      setErrorMsg(err.message);
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 pt-12 pb-2">
-        {step === "verify" ? (
-          <button onClick={() => { setStep("form"); setCodeDigits(["","","","","",""]); setErrorMsg(""); }} className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
-          </button>
-        ) : (
-          <Link href="/" className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
-          </Link>
-        )}
+        <Link href="/" className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
+          <ChevronLeft className="w-5 h-5 text-gray-600" />
+        </Link>
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
             <span className="text-white font-black text-xs">Z</span>
@@ -138,10 +81,7 @@ export default function Register() {
 
       <div className="flex-1 flex flex-col px-6 pt-6 pb-10 max-w-sm mx-auto w-full overflow-y-auto">
 
-        {/* ── STEP: FORM ─────────────────────────────────── */}
-        {step === "form" && (
-          <>
-            <div className="mb-6">
+        <div className="mb-6">
               <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Créer un compte</h1>
               <p className="text-sm text-gray-500">Rejoignez ZyNum gratuitement</p>
             </div>
@@ -292,59 +232,6 @@ export default function Register() {
                 <Link href="/login" className="text-blue-600 font-bold hover:text-blue-700">Se connecter</Link>
               </p>
             </div>
-          </>
-        )}
-
-        {/* ── STEP: VERIFY EMAIL ─────────────────────────── */}
-        {step === "verify" && (
-          <>
-            <div className="mb-8">
-              <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
-                <Mail className="w-8 h-8 text-blue-600" />
-              </div>
-              <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Vérifiez votre email</h1>
-              <p className="text-sm text-gray-500">
-                Un code à 6 chiffres a été envoyé à{" "}
-                <span className="font-semibold text-gray-700">{pendingEmail}</span>
-              </p>
-            </div>
-
-            <div className="flex gap-2 justify-center mb-6">
-              {codeDigits.map((d, i) => (
-                <input
-                  key={i}
-                  ref={el => { codeRefs.current[i] = el; }}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={d}
-                  onChange={e => handleCodeChange(i, e.target.value)}
-                  onKeyDown={e => handleCodeKey(i, e)}
-                  className="w-12 h-14 rounded-2xl border-2 border-gray-200 bg-gray-50 text-center text-xl font-black text-gray-900 focus:outline-none focus:border-blue-500 focus:bg-white transition-all caret-transparent"
-                />
-              ))}
-            </div>
-
-            {errorMsg && (
-              <div className="bg-red-50 border border-red-200 text-red-600 text-xs font-medium rounded-xl px-3 py-2.5 mb-4">
-                {errorMsg}
-              </div>
-            )}
-
-            <button
-              onClick={handleVerify}
-              disabled={isVerifying || codeDigits.join("").length !== 6}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 disabled:opacity-60"
-            >
-              {isVerifying ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Activer mon compte <ArrowRight className="w-4 h-4" /></>}
-            </button>
-
-            <p className="text-center text-xs text-gray-400 mt-4">
-              Vous n'avez pas reçu le code ?{" "}
-              <button onClick={() => setStep("form")} className="text-blue-600 font-semibold">Ressayer</button>
-            </p>
-          </>
-        )}
       </div>
     </div>
   );

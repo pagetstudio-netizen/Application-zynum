@@ -67,13 +67,13 @@ router.post("/v1/auth/register", async (req, res): Promise<void> => {
     const passwordHash = hashPassword(password);
     const apiKey = generateApiKey();
     [user] = await db.insert(usersTable).values({
-      name, email, passwordHash, apiKey, emailVerified: false,
+      name, email, passwordHash, apiKey, emailVerified: true,
       referralCode: newReferralCode,
       referredBy: referrerId ?? undefined,
     }).returning();
   } else {
     const passwordHash = hashPassword(password);
-    const updateSet: Record<string, unknown> = { name, passwordHash };
+    const updateSet: Record<string, unknown> = { name, passwordHash, emailVerified: true };
     if (!existing.referralCode) updateSet.referralCode = newReferralCode;
     if (!existing.referredBy && referrerId) updateSet.referredBy = referrerId;
     [user] = await db
@@ -83,15 +83,17 @@ router.post("/v1/auth/register", async (req, res): Promise<void> => {
       .returning();
   }
 
-  const { code, token } = await createEmailCode({ email, userId: user.id, type: "verify_email", expiresInMinutes: 15 });
-
   try {
-    await sendVerificationEmail({ to: email, name, code, token });
+    await sendWelcomeEmail({ to: email, name });
   } catch (err) {
-    console.error("Email send error:", err);
+    console.error("Welcome email error:", err);
   }
 
-  res.status(201).json({ requiresVerification: true, email });
+  const sessionToken = await createSession(user.id);
+  res.status(201).json({
+    user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, createdAt: user.createdAt },
+    token: sessionToken,
+  });
 });
 
 // ─── VERIFY EMAIL (code) ─────────────────────────────────────────────────────
@@ -221,17 +223,6 @@ router.post("/v1/auth/login", async (req, res): Promise<void> => {
 
   if (user.isBanned) {
     res.status(403).json({ error: "Forbidden", message: "Votre compte a été suspendu. Contactez le support." });
-    return;
-  }
-
-  if (!user.emailVerified) {
-    const { code, token } = await createEmailCode({ email, userId: user.id, type: "verify_email", expiresInMinutes: 15 });
-    try {
-      await sendVerificationEmail({ to: email, name: user.name, code, token });
-    } catch (err) {
-      console.error("Verification email error:", err);
-    }
-    res.status(403).json({ error: "Email not verified", message: "Vérifiez votre email pour continuer", requiresVerification: true, email });
     return;
   }
 

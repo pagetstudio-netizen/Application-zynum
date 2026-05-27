@@ -5,7 +5,7 @@ import { Loader2, Mail, Lock, Eye, EyeOff, ArrowRight, ChevronLeft } from "lucid
 import { useLoginUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 
-type Step = "credentials" | "verify_2fa" | "verify_email";
+type Step = "credentials" | "verify_2fa";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -31,12 +31,6 @@ export default function Login() {
       onSuccess: (data: any) => {
         if (data.requires2FA) {
           setStep("verify_2fa");
-          setErrorMsg("");
-          setTimeout(() => codeRefs.current[0]?.focus(), 100);
-          return;
-        }
-        if (data.requiresVerification) {
-          setStep("verify_email");
           setErrorMsg("");
           setTimeout(() => codeRefs.current[0]?.focus(), 100);
           return;
@@ -262,15 +256,13 @@ export default function Login() {
           </>
         )}
 
-        {/* ── STEP: CODE VERIFICATION ───────────────────── */}
-        {(step === "verify_2fa" || step === "verify_email") && (
+        {/* ── STEP: CODE VERIFICATION (2FA) ─────────────── */}
+        {step === "verify_2fa" && (
           <>
             <div className="mb-8">
               <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Vérification</h1>
               <p className="text-sm text-gray-500">
-                {step === "verify_2fa"
-                  ? `Un code à 6 chiffres a été envoyé à ${email}`
-                  : `Vérifiez votre email ${email} pour activer votre compte`}
+                Un code à 6 chiffres a été envoyé à {email}
               </p>
             </div>
 
@@ -298,7 +290,7 @@ export default function Login() {
             )}
 
             <button
-              onClick={() => handleVerify(step === "verify_2fa" ? "2fa" : "email")}
+              onClick={() => handleVerify("2fa")}
               disabled={isSubmitting || codeDigits.join("").length !== 6}
               className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 disabled:opacity-60"
             >
