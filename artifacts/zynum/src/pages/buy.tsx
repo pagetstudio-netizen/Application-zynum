@@ -469,18 +469,33 @@ export default function BuyNumber({ isEmbedded = false }: { isEmbedded?: boolean
       <div className="flex flex-col min-h-full">
         {/* Header fixé */}
         <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-3 pb-3 space-y-3">
-          <div className="flex items-center gap-3">
+          {/* Ligne retour */}
+          <div className="flex items-center gap-2">
             <button onClick={() => goBack("service")} className="p-2 -ml-1 rounded-xl hover:bg-gray-100 active:scale-90 transition-all">
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
-            <div className="flex-1 flex items-center gap-2 min-w-0">
-              {selectedServiceInfo && (
-                <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={24} />
-              )}
-              <h1 className="text-base font-extrabold text-gray-900 truncate">{t("buy_s2_title")}</h1>
-            </div>
-            {user && <BalancePill />}
+            <span className="text-sm text-gray-500 font-medium">{t("buy_change_service")}</span>
           </div>
+
+          {/* Carte service sélectionné */}
+          {selectedServiceInfo && (
+            <div className="flex items-center gap-3 p-3 rounded-2xl border border-gray-200 bg-gray-50">
+              <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={38} />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-gray-400">{t("buy_service_selected")}</p>
+                <p className="font-bold text-gray-900 text-sm truncate">{selectedServiceInfo.name}</p>
+              </div>
+              {user && <BalancePill />}
+            </div>
+          )}
+
+          {/* Titre + sous-titre */}
+          <div>
+            <h2 className="text-lg font-extrabold text-gray-900 leading-tight">{t("buy_s2_title")}</h2>
+            <p className="text-xs text-gray-400 mt-0.5">{t("buy_s2_sub")}</p>
+          </div>
+
+          {/* Recherche */}
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
