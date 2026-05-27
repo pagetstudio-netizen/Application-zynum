@@ -22,6 +22,19 @@ const queryClient = new QueryClient({
   },
 });
 
+function ContentProtection() {
+  useEffect(() => {
+    const block = (e: Event) => e.preventDefault();
+    document.addEventListener("contextmenu", block);
+    document.addEventListener("dragstart", block);
+    return () => {
+      document.removeEventListener("contextmenu", block);
+      document.removeEventListener("dragstart", block);
+    };
+  }, []);
+  return null;
+}
+
 function ForceLight() {
   useEffect(() => {
     document.documentElement.classList.remove("dark");
@@ -44,6 +57,7 @@ function Router() {
   return (
     <>
       <ForceLight />
+      <ContentProtection />
       <Switch>
         <Route path="/" component={SmartRoot} />
         <Route path="/login" component={Login} />

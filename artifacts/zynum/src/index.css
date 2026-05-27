@@ -1,5 +1,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+
+/* ── Protection contenu ─────────────────────────────────────────────────── */
+*, *::before, *::after {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Autoriser la sélection uniquement dans les champs de saisie */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
+}
+
+/* Bloquer le clic droit et glisser-déposer sur les images */
+img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-touch-callout: none;
+}
+/* ─────────────────────────────────────────────────────────────────────────── */
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
