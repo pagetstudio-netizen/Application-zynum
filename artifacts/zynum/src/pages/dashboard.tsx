@@ -98,17 +98,17 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
       <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
       <div className="px-4 pt-4 space-y-4">
         {/* Balance card */}
-        <div className="rounded-3xl bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 p-5 text-white shadow-xl shadow-blue-500/25">
-          <div className="flex items-start justify-between mb-1">
-            <p className="text-xs font-semibold text-blue-200 uppercase tracking-wider">Solde Actuel</p>
-            <button onClick={() => setShowBal(s => !s)} className="text-blue-200 hover:text-white transition-colors">
+        <div className="rounded-3xl bg-blue-600 p-5 text-white shadow-lg shadow-blue-600/30">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-semibold text-white/70 uppercase tracking-widest">Solde actuel</p>
+            <button onClick={() => setShowBal(s => !s)} className="text-white/60 hover:text-white transition-colors">
               {showBal ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
             </button>
           </div>
-          <p className="text-3xl font-black mb-4 tracking-tight">{displayBal}</p>
+          <p className="text-4xl font-black tracking-tight mb-5">{displayBal}</p>
           <button
             onClick={() => onNavigate("compte")}
-            className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 backdrop-blur text-white text-sm font-bold px-4 py-2 rounded-xl transition-all active:scale-95"
+            className="inline-flex items-center gap-2 bg-white text-blue-600 text-sm font-bold px-5 py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform"
           >
             <Plus className="w-4 h-4" />
             Recharger
