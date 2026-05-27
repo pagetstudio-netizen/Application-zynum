@@ -467,79 +467,6 @@ function InfosPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }
   );
 }
 
-// ─── KYC PAGE ─────────────────────────────────────────────────────────────────
-function KYCPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }) {
-  const steps = [
-    { label: "Adresse email vérifiée", done: true },
-    { label: "Identité soumise", done: true },
-    { label: "Vérification approuvée", done: true },
-  ];
-
-  return (
-    <SubPage title="Vérification KYC" onBack={onBack}>
-      <div className="px-4 pt-5 space-y-4">
-        {/* Status banner */}
-        <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center shrink-0">
-            <Shield className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-green-800">Compte vérifié</p>
-            <p className="text-xs text-green-600 mt-0.5">Votre identité a été confirmée avec succès</p>
-          </div>
-        </div>
-
-        {/* Steps */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Étapes de vérification</p>
-          <div className="space-y-4">
-            {steps.map((step, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${step.done ? "bg-green-500" : "bg-gray-200"}`}>
-                  {step.done
-                    ? <Check className="w-3.5 h-3.5 text-white" />
-                    : <span className="text-xs font-bold text-gray-400">{i + 1}</span>}
-                </div>
-                {i < steps.length - 1 && (
-                  <div className="absolute ml-3.5 mt-7 w-0.5 h-4 bg-green-200" style={{ position: "absolute" }} />
-                )}
-                <p className={`text-sm font-semibold ${step.done ? "text-gray-900" : "text-gray-400"}`}>{step.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Info box */}
-        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4">
-          <p className="text-xs font-bold text-blue-700 mb-1">Pourquoi la vérification KYC ?</p>
-          <p className="text-xs text-blue-600 leading-relaxed">
-            La vérification KYC (Know Your Customer) nous permet de garantir la sécurité de la plateforme et de vous offrir des limites de transaction plus élevées.
-          </p>
-        </div>
-
-        {/* User details */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Informations vérifiées</p>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">Nom</span>
-              <span className="text-sm font-semibold text-gray-900">{user.name}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">Email</span>
-              <span className="text-sm font-semibold text-gray-900 truncate max-w-[180px]">{user.email}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">Statut</span>
-              <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Vérifié ✓</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </SubPage>
-  );
-}
-
 // ─── SECURITY PAGE ────────────────────────────────────────────────────────────
 function SecurityPage({ onBack }: { onBack: () => void }) {
   const { toast } = useToast();
@@ -1062,7 +989,6 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
 
   const MENU = [
     { id: "infos",    icon: <User className="w-5 h-5" />,      label: "Informations personnelles", color: "text-blue-600 bg-blue-50" },
-    { id: "kyc",      icon: <Shield className="w-5 h-5" />,     label: "Vérification (KYC)",        color: "text-green-600 bg-green-50", badge: "Vérifié" },
     { id: "security", icon: <Lock className="w-5 h-5" />,       label: "Sécurité",                  color: "text-orange-600 bg-orange-50" },
     { id: "referral", icon: <Gift className="w-5 h-5" />,       label: "Parrainage",                color: "text-purple-600 bg-purple-50", badge: "10%" },
     { id: "api",      icon: <Code2 className="w-5 h-5" />,      label: "API & Développeurs",        color: "text-indigo-600 bg-indigo-50" },
@@ -1075,7 +1001,6 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
 
   const content = (() => {
     if (section === "infos")    return <InfosPage    key="infos"    user={user} onBack={back} />;
-    if (section === "kyc")      return <KYCPage      key="kyc"      user={user} onBack={back} />;
     if (section === "security") return <SecurityPage key="security" onBack={back} />;
     if (section === "referral") return <ReferralPage key="referral" user={user} onBack={back} />;
     if (section === "api")      return <APIPage      key="api"      onBack={back} />;
