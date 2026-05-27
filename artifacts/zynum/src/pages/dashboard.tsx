@@ -962,13 +962,14 @@ function HelpPage({ onBack }: { onBack: () => void }) {
         {/* Quick links */}
         <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
           {[
-            { icon: <Globe2 className="w-4 h-4 text-blue-600" />,    label: "Documentation API",    color: "bg-blue-50", href: "/api-docs" },
-            { icon: <Shield className="w-4 h-4 text-green-600" />,   label: "Politique de confidentialité", color: "bg-green-50", href: "/privacy" },
-            { icon: <Star className="w-4 h-4 text-yellow-600" />,    label: "Conditions d'utilisation",   color: "bg-yellow-50", href: "/terms" },
+            { icon: <Shield className="w-4 h-4 text-green-600" />,   label: "Politique de confidentialité", color: "bg-green-50", href: "https://zynum.net/privacy" },
+            { icon: <Star className="w-4 h-4 text-yellow-600" />,    label: "Conditions d'utilisation",   color: "bg-yellow-50", href: "https://zynum.net/terms" },
           ].map((link, i) => (
             <a
               key={link.label}
               href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
               className={`flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition-colors ${i > 0 ? "border-t border-gray-50" : ""}`}
             >
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${link.color}`}>{link.icon}</div>
