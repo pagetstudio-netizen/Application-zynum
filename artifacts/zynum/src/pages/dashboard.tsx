@@ -80,9 +80,9 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
   const orders = historyData?.orders ?? [];
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
+    <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-white px-4 pt-14 pb-4 flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
+      <div className="bg-white px-4 pt-10 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/30">
             <span className="text-white font-black text-sm">Z</span>
@@ -95,7 +95,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
           </button>
         </div>
       </div>
-
+      <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
       <div className="px-4 pt-4 space-y-4">
         {/* Balance card */}
         <div className="rounded-3xl bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 p-5 text-white shadow-xl shadow-blue-500/25">
@@ -216,6 +216,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
           )}
         </div>
       </div>
+      </div>
     </div>
   );
 }
@@ -242,28 +243,30 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
 
   if (view === "recharge") {
     return (
-      <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
-        <div className="bg-white px-4 pt-14 pb-4 flex items-center gap-3 sticky top-0 z-10 border-b border-gray-100">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="bg-white px-4 pt-10 pb-3 flex items-center gap-3 shrink-0 border-b border-gray-100">
           <button onClick={() => setView("main")} className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
             <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
           <h1 className="font-bold text-gray-900 text-base">Recharger</h1>
         </div>
-        <Recharge />
+        <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
+          <Recharge />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
+    <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-white px-4 pt-14 pb-4 flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
+      <div className="bg-white px-4 pt-10 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
         <h1 className="font-extrabold text-gray-900 text-xl">Wallet</h1>
         <button className="relative p-2 rounded-xl bg-gray-100">
           <Bell className="w-5 h-5 text-gray-600" />
         </button>
       </div>
-
+      <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
       <div className="px-4 pt-4 space-y-4">
         {/* Balance card */}
         <div className="rounded-3xl bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 p-5 text-white shadow-xl shadow-blue-500/25">
@@ -343,6 +346,7 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
           </div>
         )}
       </div>
+      </div>
     </div>
   );
 }
@@ -356,15 +360,17 @@ function SubPage({ title, onBack, children }: { title: string; onBack: () => voi
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: "100%", opacity: 0 }}
       transition={{ type: "spring", damping: 28, stiffness: 280 }}
-      className="flex-1 overflow-y-auto bg-gray-50 pb-24"
+      className="flex-1 flex flex-col overflow-hidden"
     >
-      <div className="bg-white px-4 pt-14 pb-4 flex items-center gap-3 sticky top-0 z-10 border-b border-gray-100">
+      <div className="bg-white px-4 pt-10 pb-3 flex items-center gap-3 shrink-0 border-b border-gray-100">
         <button onClick={onBack} className="p-2 -ml-1 rounded-xl hover:bg-gray-100 active:scale-90 transition-all">
           <ChevronLeft className="w-5 h-5 text-gray-700" />
         </button>
         <h1 className="font-bold text-gray-900 text-base">{title}</h1>
       </div>
-      {children}
+      <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
+        {children}
+      </div>
     </motion.div>
   );
 }
@@ -1014,15 +1020,15 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: -30, opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="flex-1 overflow-y-auto bg-gray-50 pb-24"
+        className="flex-1 flex flex-col overflow-hidden"
       >
-        <div className="bg-white px-4 pt-14 pb-4 flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
+        <div className="bg-white px-4 pt-10 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
           <h1 className="font-extrabold text-gray-900 text-xl">Compte</h1>
           <button onClick={() => nav("params")} className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
             <Settings className="w-5 h-5 text-gray-600" />
           </button>
         </div>
-
+        <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
         <div className="px-4 pt-4 space-y-4">
           {/* User card */}
           <button onClick={() => nav("infos")} className="w-full bg-white rounded-3xl p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform">
@@ -1115,6 +1121,7 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
           <div className="text-center pb-2">
             <p className="text-xs text-gray-300 font-medium">ZyNum v1.0.0 · Votre numéro virtuel, votre liberté.</p>
           </div>
+        </div>
         </div>
       </motion.div>
     );
@@ -1272,26 +1279,30 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.18 }}
-          className="flex-1 flex flex-col"
+          className="flex-1 flex flex-col min-h-0 overflow-hidden"
         >
           {activeTab === "accueil" && <HomeTab user={user} onNavigate={navigate} />}
           {activeTab === "numeros" && (
-            <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
-              <div className="bg-white px-4 pt-14 pb-4 sticky top-0 z-10 border-b border-gray-100">
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="bg-white px-4 pt-10 pb-3 shrink-0 border-b border-gray-100">
                 <h1 className="font-extrabold text-gray-900 text-xl">Acheter un numéro</h1>
               </div>
-              <div className="p-4">
-                <BuyNumber isEmbedded={true} />
+              <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
+                <div className="p-4">
+                  <BuyNumber isEmbedded={true} />
+                </div>
               </div>
             </div>
           )}
           {activeTab === "sms" && (
-            <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
-              <div className="bg-white px-4 pt-14 pb-4 sticky top-0 z-10 border-b border-gray-100">
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="bg-white px-4 pt-10 pb-3 shrink-0 border-b border-gray-100">
                 <h1 className="font-extrabold text-gray-900 text-xl">Mes SMS</h1>
               </div>
-              <div className="p-4">
-                <OrderHistory />
+              <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
+                <div className="p-4">
+                  <OrderHistory />
+                </div>
               </div>
             </div>
           )}
