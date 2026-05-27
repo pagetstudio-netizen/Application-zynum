@@ -801,7 +801,7 @@ function ParamsPage({ onBack }: { onBack: () => void }) {
             {(["fr", "en"] as const).map(l => (
               <button
                 key={l}
-                onClick={() => setLang(l)}
+                onClick={() => { setLang(l); setCurrency(l === "fr" ? "FCFA" : "USD"); }}
                 className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 transition-all ${lang === l ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"}`}
               >
                 <span className="text-2xl">{l === "fr" ? "🇫🇷" : "🇬🇧"}</span>
@@ -1066,7 +1066,7 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
               <p className="text-xs text-gray-400 font-medium mb-2">Langue</p>
               <div className="flex bg-gray-100 rounded-xl p-0.5">
                 {(["fr", "en"] as const).map(l => (
-                  <button key={l} onClick={() => setLang(l)} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${lang === l ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"}`}>{l === "fr" ? "FR" : "EN"}</button>
+                  <button key={l} onClick={() => { setLang(l); setCurrency(l === "fr" ? "FCFA" : "USD"); }} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${lang === l ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"}`}>{l === "fr" ? "FR" : "EN"}</button>
                 ))}
               </div>
             </div>
