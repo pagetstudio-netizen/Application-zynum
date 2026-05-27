@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, User, Lock, Eye, EyeOff, ArrowRight, ChevronLeft, Check } from "lucide-react";
+import { Loader2, User, Lock, Eye, EyeOff, ArrowRight, ChevronLeft, Check, Mail } from "lucide-react";
 import { useRegisterUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 
