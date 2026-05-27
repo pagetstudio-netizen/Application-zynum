@@ -466,94 +466,83 @@ export default function BuyNumber({ isEmbedded = false }: { isEmbedded?: boolean
       .filter((c) => c.name.toLowerCase().includes(searchCountry.toLowerCase()));
 
     return (
-      <AnimatePresence mode="wait">
-        <StepPage key="country" dir={dir}>
-          <div className="max-w-3xl mx-auto">
-            <StepIndicator current="country" />
-            <button onClick={() => goBack("service")} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-5 transition-colors">
-              <ArrowLeft className="w-4 h-4" /> {t("buy_change_service")}
+      <div className="flex flex-col min-h-full">
+        {/* Header fixé */}
+        <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-3 pb-3 space-y-3">
+          <div className="flex items-center gap-3">
+            <button onClick={() => goBack("service")} className="p-2 -ml-1 rounded-xl hover:bg-gray-100 active:scale-90 transition-all">
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
-            {selectedServiceInfo && (
-              <div className="flex items-center gap-3 mb-5 p-4 rounded-2xl border border-gray-200 bg-white shadow-sm">
-                <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={40} />
-                <div>
-                  <p className="text-xs text-gray-400">{t("buy_service_selected")}</p>
-                  <p className="font-bold text-gray-900">{selectedServiceInfo.name}</p>
-                </div>
-                {user && <BalancePill />}
-              </div>
-            )}
-            {!user && !isEmbedded && (
-              <div className="flex items-center gap-3 mb-5 p-4 rounded-2xl border border-primary/20 bg-primary/5">
-                <Lock className="w-5 h-5 text-primary shrink-0" />
-                <p className="text-sm text-muted-foreground flex-1">{t("buy_login_nudge")}</p>
-              </div>
-            )}
-            <div className="mb-5">
-              <h2 className="text-2xl font-bold text-gray-900 mb-1">{t("buy_s2_title")}</h2>
-              <p className="text-gray-500 text-sm">{t("buy_s2_sub")}</p>
+            <div className="flex-1 flex items-center gap-2 min-w-0">
+              {selectedServiceInfo && (
+                <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={24} />
+              )}
+              <h1 className="text-base font-extrabold text-gray-900 truncate">{t("buy_s2_title")}</h1>
             </div>
-            <div className="relative mb-5">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder={t("buy_s2_placeholder")}
-                className="pl-11 h-12 bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 rounded-xl focus:border-primary/50"
-                value={searchCountry}
-                onChange={(e) => setSearchCountry(e.target.value)}
-              />
-            </div>
-            {isLoadingCountries ? (
-              <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-            ) : (
-              <div className="space-y-2">
-                {filtered.map((country, i) => {
-                  const priceUsd = country.priceUsd ?? 0;
-                  const priceFcfa = country.priceFcfa ?? Math.round(priceUsd * 620);
-                  return (
-                    <motion.button
-                      key={country.code}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min(i * 0.025, 0.3) }}
-                      onClick={() => {
-                        setSelectedCountry(country.code);
-                        if (isEmbedded) {
-                          goTo("operator");
-                        } else {
-                          sessionStorage.setItem("zynum_buy_intent", JSON.stringify({ service: selectedService, country: country.code }));
-                          if (user) { setLocation("/dashboard"); } else { setLocation("/login"); }
-                        }
-                      }}
-                      className="w-full flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 text-left transition-all group shadow-sm"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{country.flag ?? "🌐"}</span>
-                        <div>
-                          <p className="font-semibold text-gray-900 group-hover:text-primary transition-colors">{country.name}</p>
-                          <p className="text-xs text-gray-400">
-                            {country.available} {country.available > 1 ? t("buy_num_available_plural") : t("buy_num_available_single")}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className="text-right">
-                          <p className="font-bold text-gray-900 text-sm">
-                            {currency === "FCFA" ? `${priceFcfa.toLocaleString("fr-FR")} FCFA` : `$${priceUsd.toFixed(2)}`}
-                          </p>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" />
-                      </div>
-                    </motion.button>
-                  );
-                })}
-                {filtered.length === 0 && (
-                  <div className="py-16 text-center text-muted-foreground">{t("buy_no_country_for")}</div>
-                )}
-              </div>
-            )}
+            {user && <BalancePill />}
           </div>
-        </StepPage>
-      </AnimatePresence>
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              placeholder={t("buy_s2_placeholder")}
+              className="w-full pl-10 pr-4 h-10 bg-gray-100 border-0 text-gray-900 placeholder:text-gray-400 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              value={searchCountry}
+              onChange={(e) => setSearchCountry(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Liste */}
+        <div className="flex-1">
+          {isLoadingCountries ? (
+            <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+          ) : (
+            <div className="divide-y divide-gray-50">
+              {filtered.map((country, i) => {
+                const priceUsd = country.priceUsd ?? 0;
+                const priceFcfa = country.priceFcfa ?? Math.round(priceUsd * 620);
+                return (
+                  <motion.button
+                    key={country.code}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: Math.min(i * 0.025, 0.25) }}
+                    onClick={() => {
+                      setSelectedCountry(country.code);
+                      if (isEmbedded) {
+                        goTo("operator");
+                      } else {
+                        sessionStorage.setItem("zynum_buy_intent", JSON.stringify({ service: selectedService, country: country.code }));
+                        if (user) { setLocation("/dashboard"); } else { setLocation("/login"); }
+                      }
+                    }}
+                    className="w-full flex items-center justify-between gap-4 px-4 py-3.5 bg-white hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{country.flag ?? "🌐"}</span>
+                      <div>
+                        <p className="font-semibold text-gray-900">{country.name}</p>
+                        <p className="text-xs text-gray-400">
+                          {country.available} {country.available > 1 ? t("buy_num_available_plural") : t("buy_num_available_single")}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <p className="font-bold text-gray-900 text-sm">
+                        {currency === "FCFA" ? `${priceFcfa.toLocaleString("fr-FR")} FCFA` : `$${priceUsd.toFixed(2)}`}
+                      </p>
+                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                    </div>
+                  </motion.button>
+                );
+              })}
+              {filtered.length === 0 && (
+                <div className="py-16 text-center text-muted-foreground">{t("buy_no_country_for")}</div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     );
   }
 
