@@ -686,7 +686,7 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.18 }}
-          className="flex-1 flex flex-col overflow-hidden"
+          className="flex-1 flex flex-col"
         >
           {activeTab === "accueil" && <HomeTab user={user} onNavigate={navigate} />}
           {activeTab === "numeros" && (
