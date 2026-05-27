@@ -469,12 +469,13 @@ export default function BuyNumber({ isEmbedded = false }: { isEmbedded?: boolean
       <div className="flex flex-col min-h-full">
         {/* Header fixé */}
         <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-3 pb-3 space-y-3">
-          {/* Ligne retour */}
+          {/* Ligne retour + solde */}
           <div className="flex items-center gap-2">
             <button onClick={() => goBack("service")} className="p-2 -ml-1 rounded-xl hover:bg-gray-100 active:scale-90 transition-all">
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
-            <span className="text-sm text-gray-500 font-medium">{t("buy_change_service")}</span>
+            <span className="text-sm text-gray-500 font-medium flex-1">{t("buy_change_service")}</span>
+            {user && <BalancePill />}
           </div>
 
           {/* Carte service sélectionné */}
@@ -485,7 +486,6 @@ export default function BuyNumber({ isEmbedded = false }: { isEmbedded?: boolean
                 <p className="text-xs text-gray-400">{t("buy_service_selected")}</p>
                 <p className="font-bold text-gray-900 text-sm truncate">{selectedServiceInfo.name}</p>
               </div>
-              {user && <BalancePill />}
             </div>
           )}
 
