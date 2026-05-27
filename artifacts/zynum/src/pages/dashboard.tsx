@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
-  Bell, Eye, EyeOff, Plus, ChevronRight, Home, Smartphone,
+  Eye, EyeOff, Plus, ChevronRight, Home, Smartphone,
   MessageSquare, Wallet as WalletIcon, User, LogOut,
   Copy, Check, Shield, Gift, Code2, HelpCircle, Settings,
   ArrowUpRight, ArrowDownLeft, Tag, History, RefreshCw,
@@ -91,7 +91,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
         </div>
         <div className="flex items-center gap-2">
           <button className="relative p-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
-            <Bell className="w-5 h-5 text-gray-600" />
+            <img src="/bell-icon.png" alt="Notifications" className="w-5 h-5 object-contain" style={{ filter: "brightness(0) opacity(0.45)" }} />
           </button>
         </div>
       </div>
@@ -263,7 +263,7 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
       <div className="bg-white px-4 pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
         <h1 className="font-extrabold text-gray-900 text-xl">Wallet</h1>
         <button className="relative p-2 rounded-xl bg-gray-100">
-          <Bell className="w-5 h-5 text-gray-600" />
+          <img src="/bell-icon.png" alt="Notifications" className="w-5 h-5 object-contain" style={{ filter: "brightness(0) opacity(0.45)" }} />
         </button>
       </div>
       <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
