@@ -135,8 +135,8 @@ export default function Onboarding() {
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 pt-10 pb-2">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-            <span className="text-white font-black text-sm">Z</span>
+          <div className="w-8 h-8 rounded-xl overflow-hidden">
+            <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />
           </div>
           <span className="font-bold text-gray-800 text-lg tracking-tight">ZyNum</span>
         </div>

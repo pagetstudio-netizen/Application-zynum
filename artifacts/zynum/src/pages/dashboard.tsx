@@ -84,8 +84,8 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
       {/* Header */}
       <div className="bg-white px-4 pt-10 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/30">
-            <span className="text-white font-black text-sm">Z</span>
+          <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md shadow-blue-500/30">
+            <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />
           </div>
           <span className="font-extrabold text-gray-900 text-lg tracking-tight">ZyNum</span>
         </div>
