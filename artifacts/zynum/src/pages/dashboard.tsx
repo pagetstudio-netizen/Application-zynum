@@ -98,37 +98,47 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
       <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
       <div className="px-4 pt-4 space-y-4">
         {/* Balance card */}
-        <div className="rounded-3xl bg-blue-600 p-5 text-white shadow-lg shadow-blue-600/30">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold text-white/70 uppercase tracking-widest">Solde actuel</p>
-            <button onClick={() => setShowBal(s => !s)} className="text-white/60 hover:text-white transition-colors">
-              {showBal ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+        <div className="rounded-[32px] p-4 shadow-xl shadow-emerald-400/30" style={{ background: "linear-gradient(135deg, #00D4AA 0%, #00B894 40%, #0099FF 100%)" }}>
+          {/* Top row: logo + solde */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl overflow-hidden bg-white/20 flex items-center justify-center shadow-sm">
+                <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />
+              </div>
+              <span className="font-extrabold text-white text-lg tracking-tight">ZyNum</span>
+            </div>
+            <div className="text-right">
+              <p className="text-xs font-semibold text-white/80 mb-0.5">Solde du compte</p>
+              <div className="flex items-center gap-1.5 justify-end">
+                <p className="text-xl font-black text-white tracking-tight">
+                  {showBal ? displayBal : "••••••"}
+                </p>
+                <button onClick={() => setShowBal(s => !s)} className="text-white/70 hover:text-white transition-colors">
+                  {showBal ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* White inner card with actions */}
+          <div className="bg-white rounded-[24px] overflow-hidden shadow-sm">
+            <button
+              onClick={() => onNavigate("compte")}
+              className="w-full flex items-center justify-between px-5 py-4 active:bg-gray-50 transition-colors"
+            >
+              <span className="font-bold text-[#1a2b8c] text-[15px]">Recharger votre compte</span>
+              <ChevronRight className="w-5 h-5 text-[#1a2b8c] font-black" strokeWidth={3} />
+            </button>
+            <div className="mx-5 h-px" style={{ background: "linear-gradient(90deg, #00D4AA, #0099FF)" }} />
+            <button
+              onClick={() => onNavigate("numeros")}
+              className="w-full flex items-center justify-between px-5 py-4 active:bg-gray-50 transition-colors"
+            >
+              <span className="font-bold text-[#1a2b8c] text-[15px]">Acheter un numéro virtuel</span>
+              <ChevronRight className="w-5 h-5 text-[#1a2b8c]" strokeWidth={3} />
             </button>
           </div>
-          <p className="text-4xl font-black tracking-tight mb-5">{displayBal}</p>
-          <button
-            onClick={() => onNavigate("compte")}
-            className="inline-flex items-center gap-2 bg-white text-blue-600 text-sm font-bold px-5 py-2.5 rounded-2xl shadow-sm active:scale-95 transition-transform"
-          >
-            <Plus className="w-4 h-4" />
-            Recharger
-          </button>
         </div>
-
-        {/* Buy number CTA */}
-        <button
-          onClick={() => onNavigate("numeros")}
-          className="w-full bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-gray-100 hover:shadow-md transition-all active:scale-98"
-        >
-          <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 overflow-hidden">
-            <img src="/buy-icon.png" alt="Acheter" className="w-8 h-8 object-contain" />
-          </div>
-          <div className="flex-1 text-left">
-            <p className="font-bold text-gray-900 text-sm">Acheter un numéro</p>
-            <p className="text-xs text-gray-500 mt-0.5">Obtenez un numéro virtuel</p>
-          </div>
-          <ChevronRight className="w-4 h-4 text-gray-400" />
-        </button>
 
         {/* Services populaires */}
         <div>
