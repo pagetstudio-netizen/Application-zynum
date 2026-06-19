@@ -777,7 +777,13 @@ const POPUP_COLORS = [
   { value: "orange", label: "Orange",  dot: "bg-orange-500" },
 ];
 
-const emptyForm = { type: "popup", target: "all", subject: "", content: "", color: "blue", linkUrl: "", linkLabel: "", imageUrl: "" };
+const NOTIF_TYPES = [
+  { value: "popup", label: "Icône + Message", icon: "🔔", desc: "Notification avec icône colorée et texte" },
+  { value: "image", label: "Image seule",     icon: "🖼️", desc: "Image plein-écran avec lien optionnel" },
+  { value: "text",  label: "Texte simple",    icon: "💬", desc: "Message texte sans icône" },
+];
+
+const emptyForm = { displayType: "popup", target: "all", subject: "", content: "", color: "blue", linkUrl: "", linkLabel: "", imageUrl: "" };
 
 function AdminMessages() {
   const { toast } = useToast();
@@ -787,15 +793,22 @@ function AdminMessages() {
   const [deleting, setDeleting] = useState<number | null>(null);
   const [toggling, setToggling] = useState<number | null>(null);
 
+  const isImage = form.displayType === "image";
+  const isText  = form.displayType === "text";
+  const canCreate = isImage ? !!form.imageUrl.trim() : !!form.content.trim();
+
   const handleCreate = async () => {
-    if (!form.content.trim()) return;
+    if (!canCreate) return;
     setSaving(true);
     const res = await adminPost("/v1/admin/messages", {
-      ...form,
+      type: form.displayType,
+      target: form.target,
+      subject: form.subject || null,
+      content: form.content || null,
+      color: form.color,
       linkUrl: form.linkUrl || null,
       linkLabel: form.linkLabel || null,
       imageUrl: form.imageUrl || null,
-      subject: form.subject || null,
     });
     if (res.success) {
       toast({ title: "Notification créée" });
@@ -822,8 +835,11 @@ function AdminMessages() {
     setDeleting(null);
   };
 
-  const popups = (data?.messages ?? []).filter((m: any) => m.type === "popup");
-  const activeCount = popups.filter((m: any) => m.isActive).length;
+  const allNotifs = data?.messages ?? [];
+  const activeCount = allNotifs.filter((m: any) => m.isActive).length;
+
+  const TYPE_LABELS: Record<string, string> = { popup: "Icône", image: "Image", text: "Texte" };
+  const TYPE_DOTS: Record<string, string> = { popup: "bg-blue-500", image: "bg-purple-500", text: "bg-gray-500" };
 
   const inp = "w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50";
 
@@ -832,7 +848,7 @@ function AdminMessages() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <div className="rounded-xl border border-white/10 bg-card/40 p-4 text-center">
-          <p className="text-2xl font-bold text-white">{popups.length}</p>
+          <p className="text-2xl font-bold text-white">{allNotifs.length}</p>
           <p className="text-xs text-muted-foreground mt-0.5">Notifications</p>
         </div>
         <div className="rounded-xl border border-white/10 bg-card/40 p-4 text-center">
@@ -840,59 +856,87 @@ function AdminMessages() {
           <p className="text-xs text-muted-foreground mt-0.5">Actives</p>
         </div>
         <div className="rounded-xl border border-white/10 bg-card/40 p-4 text-center">
-          <p className="text-2xl font-bold text-muted-foreground">{popups.length - activeCount}</p>
+          <p className="text-2xl font-bold text-muted-foreground">{allNotifs.length - activeCount}</p>
           <p className="text-xs text-muted-foreground mt-0.5">Inactives</p>
         </div>
       </div>
 
       {/* Create form */}
-      <div className="rounded-2xl border border-white/10 bg-card/40 p-6 space-y-4">
+      <div className="rounded-2xl border border-white/10 bg-card/40 p-6 space-y-5">
         <h3 className="font-bold text-white flex items-center gap-2">
-          <Bell className="w-4 h-4 text-primary" /> Créer une notification popup
+          <Bell className="w-4 h-4 text-primary" /> Créer une notification
         </h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Type selector */}
+        <div>
+          <label className="text-xs text-muted-foreground block mb-2">Type de notification</label>
+          <div className="grid grid-cols-3 gap-2">
+            {NOTIF_TYPES.map((t) => (
+              <button
+                key={t.value}
+                onClick={() => setForm({ ...emptyForm, displayType: t.value })}
+                className={`rounded-xl border p-3 text-center transition-all ${form.displayType === t.value ? "border-primary bg-primary/10" : "border-white/10 bg-white/5 hover:bg-white/8"}`}
+              >
+                <div className="text-xl mb-1">{t.icon}</div>
+                <p className={`text-xs font-semibold leading-tight ${form.displayType === t.value ? "text-primary" : "text-white"}`}>{t.label}</p>
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">{NOTIF_TYPES.find(t => t.value === form.displayType)?.desc}</p>
+        </div>
+
+        {/* Image URL — only for image type */}
+        {isImage && (
           <div>
-            <label className="text-xs text-muted-foreground block mb-1">Titre (optionnel)</label>
+            <label className="text-xs text-muted-foreground block mb-1">URL de l'image *</label>
+            <input value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://exemple.com/image.jpg" className={inp} />
+          </div>
+        )}
+
+        {/* Subject — not for text-only */}
+        <div className={isImage ? "grid grid-cols-1 sm:grid-cols-2 gap-4" : "grid grid-cols-1 sm:grid-cols-2 gap-4"}>
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Titre {isImage ? "(optionnel)" : "(optionnel)"}</label>
             <input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} placeholder="Titre de la notification" className={inp} />
           </div>
-          <div>
-            <label className="text-xs text-muted-foreground block mb-1">Couleur</label>
-            <select value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} className={inp}>
-              {POPUP_COLORS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-            </select>
-          </div>
+          {!isImage && (
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Couleur / icône</label>
+              <select value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} className={inp}>
+                {POPUP_COLORS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+          )}
         </div>
 
+        {/* Content — not required for image */}
         <div>
-          <label className="text-xs text-muted-foreground block mb-1">Message *</label>
-          <textarea rows={3} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} placeholder="Contenu de la notification..." className={`${inp} resize-none`} />
+          <label className="text-xs text-muted-foreground block mb-1">Message {isImage ? "(optionnel)" : "*"}</label>
+          <textarea rows={3} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} placeholder={isImage ? "Légende de l'image (optionnel)..." : "Contenu de la notification..."} className={`${inp} resize-none`} />
         </div>
 
+        {/* Link fields */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-xs text-muted-foreground block mb-1">Lien URL (optionnel)</label>
             <input value={form.linkUrl} onChange={(e) => setForm({ ...form, linkUrl: e.target.value })} placeholder="https://..." className={inp} />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground block mb-1">Texte du bouton lien</label>
+            <label className="text-xs text-muted-foreground block mb-1">Texte du bouton</label>
             <input value={form.linkLabel} onChange={(e) => setForm({ ...form, linkLabel: e.target.value })} placeholder="En savoir plus" className={inp} />
           </div>
         </div>
 
-        <div>
-          <label className="text-xs text-muted-foreground block mb-1">URL d'image (optionnel)</label>
-          <input value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://exemple.com/image.jpg" className={inp} />
-        </div>
-
-        <div className="flex items-center justify-between pt-1">
-          <div className="flex items-center gap-2">
-            {POPUP_COLORS.find((c) => c.value === form.color) && (
-              <span className={`w-3 h-3 rounded-full ${POPUP_COLORS.find((c) => c.value === form.color)!.dot}`} />
-            )}
-            <span className="text-xs text-muted-foreground">Aperçu couleur</span>
+        {/* Image URL also for non-image types */}
+        {!isImage && (
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">URL d'image (optionnel)</label>
+            <input value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://exemple.com/image.jpg" className={inp} />
           </div>
-          <Button onClick={handleCreate} disabled={saving || !form.content.trim()} className="bg-primary hover:bg-primary/90 text-white">
+        )}
+
+        <div className="flex justify-end pt-1">
+          <Button onClick={handleCreate} disabled={saving || !canCreate} className="bg-primary hover:bg-primary/90 text-white">
             <Plus className="w-4 h-4 mr-2" /> {saving ? "Création..." : "Créer la notification"}
           </Button>
         </div>
@@ -901,25 +945,24 @@ function AdminMessages() {
       {/* Notification list */}
       <div className="rounded-2xl border border-white/10 bg-card/40 overflow-hidden">
         <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
-          <h3 className="font-semibold text-white">Toutes les notifications popup</h3>
+          <h3 className="font-semibold text-white">Toutes les notifications</h3>
           <button onClick={refetch} className="p-1.5 rounded-lg text-muted-foreground hover:text-white hover:bg-white/5"><RefreshCw className="w-4 h-4" /></button>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-10"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
-        ) : popups.length === 0 ? (
+        ) : allNotifs.length === 0 ? (
           <div className="py-12 text-center">
             <Bell className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">Aucune notification popup</p>
+            <p className="text-sm text-muted-foreground">Aucune notification créée</p>
           </div>
         ) : (
           <div className="divide-y divide-white/5">
-            {popups.map((m: any) => {
-              const colorDot = POPUP_COLORS.find((c) => c.value === m.color)?.dot ?? "bg-blue-500";
+            {allNotifs.map((m: any) => {
+              const colorDot = POPUP_COLORS.find((c) => c.value === m.color)?.dot ?? TYPE_DOTS[m.type] ?? "bg-blue-500";
               return (
                 <div key={m.id} className="px-5 py-4 hover:bg-white/[0.02] transition-colors">
                   <div className="flex items-start gap-3">
-                    {/* Color dot */}
                     <span className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${colorDot}`} />
 
                     {/* Content */}
@@ -928,10 +971,13 @@ function AdminMessages() {
                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold border ${m.isActive ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-white/5 text-muted-foreground border-white/10"}`}>
                           {m.isActive ? "Actif" : "Inactif"}
                         </span>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-semibold border border-white/10 bg-white/5 text-muted-foreground">
+                          {TYPE_LABELS[m.type] ?? m.type}
+                        </span>
                         {m.subject && <span className="text-sm font-semibold text-white">{m.subject}</span>}
                         <span className="text-xs text-muted-foreground">{new Date(m.sentAt).toLocaleString("fr")}</span>
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">{m.content}</p>
+                      <p className="text-sm text-muted-foreground truncate">{m.content ?? (m.imageUrl ? "Image" : "—")}</p>
                       {(m.linkUrl || m.imageUrl) && (
                         <div className="flex items-center gap-3 text-xs text-muted-foreground/70">
                           {m.linkUrl && <span>🔗 {m.linkUrl}</span>}

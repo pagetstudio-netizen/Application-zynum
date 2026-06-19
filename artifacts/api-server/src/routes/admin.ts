@@ -259,9 +259,9 @@ router.post("/v1/admin/transactions", ...auth, async (req: any, res): Promise<vo
 /* ─── PUBLIC: Active popup notifications (no auth) ───────────────────── */
 router.get("/v1/popup-notifications", async (req, res): Promise<void> => {
   const msgs = await db.select().from(adminMessagesTable)
-    .where(and(eq(adminMessagesTable.type, "popup"), eq(adminMessagesTable.isActive, true)))
+    .where(eq(adminMessagesTable.isActive, true))
     .orderBy(desc(adminMessagesTable.sentAt))
-    .limit(5);
+    .limit(10);
   res.json({ notifications: msgs });
 });
 
@@ -273,7 +273,7 @@ router.get("/v1/admin/messages", ...auth, async (req, res): Promise<void> => {
 
 router.post("/v1/admin/messages", ...auth, async (req: any, res): Promise<void> => {
   const { type, target, subject, content, color, linkUrl, linkLabel, imageUrl, isActive } = req.body;
-  if (!content) { res.status(400).json({ error: "Content required" }); return; }
+  if (!content && type !== "image") { res.status(400).json({ error: "Content required" }); return; }
 
   const [msg] = await db.insert(adminMessagesTable).values({
     senderId: req.userId,

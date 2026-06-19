@@ -25,7 +25,7 @@ import OrderHistory from "@/pages/history";
 import Recharge from "@/pages/recharge";
 import { OmnipayModal } from "@/components/omnipay-modal";
 import { PaxityModal } from "@/components/paxity-modal";
-import { NotificationBanner } from "@/components/notification-banner";
+import { NotificationBanner, useNotifications } from "@/components/notification-banner";
 import imgTMoneyOp  from "@assets/images_(1)_1774832430242.png";
 import imgMoovOp    from "@assets/moov_(1)_1763835082986-GKkwwfPK_1774832019539.png";
 import imgAirtelOp  from "@assets/Airtel_logo-01_1774832430216.png";
@@ -371,6 +371,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
   const { data: balanceData } = useGetBalance({ query: { retry: false } });
   const { data: servicesData } = useGetServices(undefined, { query: { retry: false, staleTime: 60000 } });
   const { data: historyData } = useGetOrderHistory({ page: 1, limit: 5 }, { query: { retry: false } });
+  const { notifs: adminNotifs } = useNotifications();
 
   const balance = balanceData?.balance ?? 0;
   const displayBal = showBal ? fmt(balance, currency) : "••••••";
@@ -418,8 +419,10 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
             >
               <div style={{ padding: "24px 20px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
                 <div>
-                  <p style={{ color: "#ffffff", fontWeight: 900, fontSize: "16px", margin: 0 }}>Avantages ZyNum</p>
-                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px", marginTop: "2px" }}>Pourquoi choisir ZyNum ?</p>
+                  <p style={{ color: "#ffffff", fontWeight: 900, fontSize: "16px", margin: 0 }}>Notifications</p>
+                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px", marginTop: "2px" }}>
+                    {adminNotifs.length > 0 ? `${adminNotifs.length} notification${adminNotifs.length > 1 ? "s" : ""}` : "Aucune notification"}
+                  </p>
                 </div>
                 <button
                   onClick={() => setNotifOpen(false)}
@@ -428,16 +431,47 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
                   <X style={{ width: 16, height: 16, color: "#ffffff" }} />
                 </button>
               </div>
-              <div style={{ padding: "12px 16px 24px", display: "flex", flexDirection: "column", gap: 6, maxHeight: "60vh", overflowY: "auto" }}>
-                {AVANTAGES.map((a, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px", borderRadius: "16px", backgroundColor: "rgba(255,255,255,0.07)" }}>
-                    <span style={{ fontSize: "22px", flexShrink: 0, marginTop: 2 }}>{a.emoji}</span>
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{ color: "#ffffff", fontWeight: 700, fontSize: "14px", margin: 0, lineHeight: 1.3 }}>{a.title}</p>
-                      <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "12px", marginTop: 3, lineHeight: 1.4 }}>{a.desc}</p>
+              <div style={{ padding: "12px 16px 24px", display: "flex", flexDirection: "column", gap: 8, maxHeight: "60vh", overflowY: "auto" }}>
+                {adminNotifs.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "32px 0" }}>
+                    <p style={{ fontSize: "32px", marginBottom: 8 }}>🔔</p>
+                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "13px" }}>Aucune notification pour le moment</p>
+                  </div>
+                ) : adminNotifs.map((n) => (
+                  <div
+                    key={n.id}
+                    style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "14px", borderRadius: "16px", backgroundColor: "rgba(255,255,255,0.07)", cursor: n.linkUrl ? "pointer" : "default" }}
+                    onClick={() => { if (n.linkUrl) { if (n.linkUrl.startsWith("http")) window.open(n.linkUrl, "_blank", "noopener,noreferrer"); else window.location.href = n.linkUrl; } }}
+                  >
+                    {n.imageUrl && n.type === "image" ? (
+                      <img src={n.imageUrl} alt="" style={{ width: 44, height: 44, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                    ) : (
+                      <span style={{ fontSize: "22px", flexShrink: 0, marginTop: 2 }}>🔔</span>
+                    )}
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      {n.subject && <p style={{ color: "#ffffff", fontWeight: 700, fontSize: "14px", margin: 0, lineHeight: 1.3 }}>{n.subject}</p>}
+                      {n.content && <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "12px", marginTop: n.subject ? 3 : 0, lineHeight: 1.4 }}>{n.content}</p>}
+                      {!n.content && !n.subject && <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "12px" }}>Notification</p>}
                     </div>
+                    {n.linkUrl && <span style={{ color: "#00C87A", fontSize: "18px", flexShrink: 0 }}>›</span>}
                   </div>
                 ))}
+                {adminNotifs.length === 0 && (
+                  <>
+                    <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", marginTop: 8, paddingTop: 16 }}>
+                      <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "11px", textAlign: "center", marginBottom: 10 }}>Avantages ZyNum</p>
+                    </div>
+                    {AVANTAGES.map((a, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px", borderRadius: "16px", backgroundColor: "rgba(255,255,255,0.07)" }}>
+                        <span style={{ fontSize: "22px", flexShrink: 0, marginTop: 2 }}>{a.emoji}</span>
+                        <div style={{ minWidth: 0 }}>
+                          <p style={{ color: "#ffffff", fontWeight: 700, fontSize: "14px", margin: 0, lineHeight: 1.3 }}>{a.title}</p>
+                          <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "12px", marginTop: 3, lineHeight: 1.4 }}>{a.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
             </motion.div>
           </>
@@ -474,7 +508,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
               <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
             <span style={{ position: "absolute", top: -4, right: -4, width: 18, height: 18, backgroundColor: "#00C87A", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: "#ffffff", fontSize: "9px", fontWeight: 900 }}>{AVANTAGES.length}</span>
+              <span style={{ color: "#ffffff", fontSize: "9px", fontWeight: 900 }}>{adminNotifs.length > 0 ? adminNotifs.length : ""}</span>
             </span>
           </button>
         </div>
