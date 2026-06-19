@@ -227,8 +227,7 @@ router.post("/v1/auth/login", async (req, res): Promise<void> => {
   }
 
   const now = new Date();
-  const canSendEmail = !!process.env.RESEND_API_KEY;
-  const needsLoginVerification = canSendEmail && (!user.lastLoginAt || (now.getTime() - user.lastLoginAt.getTime() > THREE_DAYS_MS));
+  const needsLoginVerification = !user.lastLoginAt || (now.getTime() - user.lastLoginAt.getTime() > THREE_DAYS_MS);
 
   if (needsLoginVerification) {
     const { code } = await createEmailCode({ email, userId: user.id, type: "login_2fa", expiresInMinutes: 10 });
