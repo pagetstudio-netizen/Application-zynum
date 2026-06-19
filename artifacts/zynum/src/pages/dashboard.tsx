@@ -98,22 +98,22 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
       <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
       <div className="px-4 pt-4 space-y-4">
         {/* Balance card */}
-        <div className="rounded-[32px] p-4 shadow-xl shadow-emerald-400/30" style={{ background: "linear-gradient(135deg, #00D4AA 0%, #00B894 40%, #0099FF 100%)" }}>
+        <div className="rounded-[32px] p-4" style={{ backgroundColor: "#00C87A" }}>
           {/* Top row: logo + solde */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl overflow-hidden bg-white/20 flex items-center justify-center shadow-sm">
+              <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center">
                 <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />
               </div>
-              <span className="font-extrabold text-white text-lg tracking-tight">ZyNum</span>
+              <span className="font-extrabold text-[#1a2b8c] text-lg tracking-tight">ZyNum</span>
             </div>
             <div className="text-right">
-              <p className="text-xs font-semibold text-white/80 mb-0.5">Solde du compte</p>
+              <p className="text-xs font-semibold text-white mb-0.5">Solde du compte</p>
               <div className="flex items-center gap-1.5 justify-end">
                 <p className="text-xl font-black text-white tracking-tight">
                   {showBal ? displayBal : "••••••"}
                 </p>
-                <button onClick={() => setShowBal(s => !s)} className="text-white/70 hover:text-white transition-colors">
+                <button onClick={() => setShowBal(s => !s)} className="text-white/80 hover:text-white transition-colors">
                   {showBal ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                 </button>
               </div>
@@ -121,15 +121,15 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
           </div>
 
           {/* White inner card with actions */}
-          <div className="bg-white rounded-[24px] overflow-hidden shadow-sm">
+          <div className="bg-white rounded-[24px] overflow-hidden">
             <button
               onClick={() => onNavigate("compte")}
               className="w-full flex items-center justify-between px-5 py-4 active:bg-gray-50 transition-colors"
             >
               <span className="font-bold text-[#1a2b8c] text-[15px]">Recharger votre compte</span>
-              <ChevronRight className="w-5 h-5 text-[#1a2b8c] font-black" strokeWidth={3} />
+              <ChevronRight className="w-5 h-5 text-[#1a2b8c]" strokeWidth={3} />
             </button>
-            <div className="mx-5 h-px" style={{ background: "linear-gradient(90deg, #00D4AA, #0099FF)" }} />
+            <div className="mx-5 h-[2px]" style={{ backgroundColor: "#00C87A" }} />
             <button
               onClick={() => onNavigate("numeros")}
               className="w-full flex items-center justify-between px-5 py-4 active:bg-gray-50 transition-colors"
