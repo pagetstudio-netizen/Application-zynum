@@ -250,20 +250,20 @@ export default function MobileMoneyPage() {
 
     return (
       <div className="fixed inset-0 bg-white z-50 flex flex-col" style={{ minHeight: "100dvh" }}>
-        <div className="px-5 pt-12 pb-4 shrink-0">
-          <button onClick={() => setStep("phone")} className="p-2 -ml-2 mb-4">
-            <ChevronLeft className="w-6 h-6 text-gray-800" />
+        <div className="px-4 pt-4 pb-4 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+          <button onClick={() => setStep("phone")} className="p-2 -ml-2 mb-3 rounded-xl active:bg-blue-700 transition-colors">
+            <ChevronLeft className="w-6 h-6 text-white" />
           </button>
-          <h1 className="text-3xl font-black text-gray-900 mb-5">Sélectionnez votre pays</h1>
+          <h1 className="text-2xl font-black text-white mb-4">Sélectionnez votre pays</h1>
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-300" />
             <input
               ref={inputRef}
               type="text"
               placeholder="Rechercher"
               value={query}
               onChange={e => setQuery(e.target.value)}
-              className="w-full h-12 pl-12 pr-4 rounded-2xl border-2 border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 text-base focus:outline-none focus:border-gray-500 transition"
+              className="w-full h-12 pl-12 pr-4 rounded-2xl border-2 border-white/30 bg-white/20 text-white placeholder:text-white/60 text-base focus:outline-none focus:border-white/60 transition backdrop-blur-sm"
             />
           </div>
         </div>
@@ -392,28 +392,32 @@ export default function MobileMoneyPage() {
     const balance = balanceData?.balance ?? 0;
 
     return (
-      <div className="flex flex-col min-h-screen bg-white">
-        <div className="px-4 pt-12 pb-6 shrink-0">
-          <button onClick={() => setStep("phone")} className="p-2 -ml-2 mb-6">
-            <ChevronLeft className="w-6 h-6 text-gray-800" />
+      <div className="flex flex-col bg-white" style={{ minHeight: "100dvh" }}>
+        <div className="px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+          <button onClick={() => setStep("phone")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
+            <ChevronLeft className="w-5 h-5 text-white" />
           </button>
-          <h1 className="text-4xl font-black text-gray-900 mb-2">Montant</h1>
-          <p className="text-gray-400 text-sm leading-relaxed">
-            {isFcfa ? "Entrez le montant en FCFA que vous souhaitez recharger." : "Enter the amount in USD you want to top up."}
-          </p>
+          <h1 className="font-extrabold text-white text-base flex-1 text-center pr-8">Montant à recharger</h1>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5">
+        <div className="flex-1 overflow-y-auto px-4">
+          <div className="pt-6 pb-4">
+            <h2 className="text-3xl font-black text-gray-900 mb-1">Montant</h2>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              {isFcfa ? "Entrez le montant en FCFA que vous souhaitez recharger." : "Enter the amount in USD you want to top up."}
+            </p>
+          </div>
+
           {/* Amount input */}
-          <div className="flex items-center gap-3 h-20 bg-gray-50 rounded-2xl border-2 border-gray-200 px-5 mb-4 focus-within:border-gray-500 transition">
-            <span className="text-2xl font-black text-gray-400 shrink-0">{isFcfa ? "FCFA" : "$"}</span>
+          <div className="flex items-center gap-2 h-20 bg-gray-50 rounded-2xl border-2 border-gray-200 px-4 mb-4 focus-within:border-blue-500 transition w-full">
+            <span className="text-xl font-black text-gray-400 shrink-0">{isFcfa ? "FCFA" : "$"}</span>
             <input
               type="number"
               inputMode="decimal"
               placeholder="0"
               value={amountRaw}
               onChange={e => setAmountRaw(e.target.value)}
-              className="flex-1 bg-transparent text-3xl font-black text-gray-900 focus:outline-none placeholder:text-gray-200"
+              className="flex-1 min-w-0 bg-transparent text-3xl font-black text-gray-900 focus:outline-none placeholder:text-gray-200"
               autoFocus
             />
           </div>
@@ -436,7 +440,7 @@ export default function MobileMoneyPage() {
                   key={a}
                   onClick={() => setAmountRaw(isFcfa ? String(a) : String((a / FCFA_PER_USD).toFixed(2)))}
                   className={`py-3 rounded-2xl text-sm font-bold border-2 transition-all ${
-                    isActive ? "border-gray-800 bg-gray-900 text-white" : "border-gray-200 bg-gray-50 text-gray-600"
+                    isActive ? "border-blue-600 bg-blue-600 text-white" : "border-gray-200 bg-gray-50 text-gray-600"
                   }`}
                 >
                   {label}

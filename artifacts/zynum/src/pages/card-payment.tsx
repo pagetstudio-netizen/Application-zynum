@@ -138,14 +138,14 @@ export default function CardPaymentPage() {
           </p>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5">
+        <div className="flex-1 overflow-y-auto px-4">
           {/* Amount input */}
-          <div className="flex items-center gap-3 h-20 bg-gray-50 rounded-2xl border-2 border-gray-200 px-5 mb-4 focus-within:border-gray-500 transition">
-            <span className="text-2xl font-black text-gray-400 shrink-0">{isFcfa ? "FCFA" : "$"}</span>
+          <div className="flex items-center gap-2 h-20 bg-gray-50 rounded-2xl border-2 border-gray-200 px-4 mb-4 focus-within:border-blue-500 transition w-full">
+            <span className="text-xl font-black text-gray-400 shrink-0">{isFcfa ? "FCFA" : "$"}</span>
             <input
               type="number" inputMode="decimal" placeholder="0"
               value={amountRaw} onChange={e => setAmountRaw(e.target.value)}
-              className="flex-1 bg-transparent text-3xl font-black text-gray-900 focus:outline-none placeholder:text-gray-200"
+              className="flex-1 min-w-0 bg-transparent text-3xl font-black text-gray-900 focus:outline-none placeholder:text-gray-200"
               autoFocus
             />
           </div>
@@ -186,7 +186,7 @@ export default function CardPaymentPage() {
           </div>
         </div>
 
-        <div className="px-5 pb-8 pt-4 border-t border-gray-100 bg-white">
+        <div className="px-4 pb-8 pt-4 border-t border-gray-100 bg-white">
           <button
             onClick={() => {
               if (amountFcfa < 500) { toast({ variant: "destructive", title: "Minimum 500 FCFA" }); return; }
