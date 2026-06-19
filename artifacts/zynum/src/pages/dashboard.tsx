@@ -180,97 +180,97 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
         <h1 className="font-extrabold text-gray-900 text-lg flex-1">Recharge de compte</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto pb-6">
-        <div className="px-4 pt-4 space-y-4">
+      {/* Fixed section — balance card + method buttons + history title */}
+      <div className="shrink-0 px-4 pt-4 pb-0 space-y-4 bg-gray-50">
 
-          {/* Balance card — green */}
-          <div className="rounded-[32px] p-4" style={{ backgroundColor: "#00C87A" }}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center">
-                  <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />
-                </div>
-                <span className="font-extrabold text-[#1a2b8c] text-lg tracking-tight">ZyNum</span>
+        {/* Balance card — green */}
+        <div className="rounded-[32px] p-4" style={{ backgroundColor: "#00C87A" }}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center">
+                <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />
               </div>
-              <div className="text-right">
-                <p className="text-xs font-semibold text-white mb-0.5">Solde du compte</p>
-                <div className="flex items-center gap-1.5 justify-end">
-                  <p className="text-xl font-black text-white tracking-tight">{displayBal}</p>
-                  <button onClick={() => setShowBal(s => !s)} className="text-white/80 hover:text-white transition-colors">
-                    {showBal ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                  </button>
-                </div>
+              <span className="font-extrabold text-[#1a2b8c] text-lg tracking-tight">ZyNum</span>
+            </div>
+            <div className="text-right">
+              <p className="text-xs font-semibold text-white mb-0.5">Solde du compte</p>
+              <div className="flex items-center gap-1.5 justify-end">
+                <p className="text-xl font-black text-white tracking-tight">{displayBal}</p>
+                <button onClick={() => setShowBal(s => !s)} className="text-white/80 hover:text-white transition-colors">
+                  {showBal ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                </button>
               </div>
             </div>
           </div>
-
-          {/* Method buttons */}
-          <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
-            <button
-              onClick={() => handleMethodClick("mobile")}
-              className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
-            >
-              <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via mobile Money</span>
-              <div className="flex items-center -space-x-2 shrink-0">
-                <img src={imgTMoneyOp}  className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" alt="TMoney" />
-                <img src={imgMoovOp}    className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" alt="Moov" />
-                <img src={imgAirtelOp}  className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" alt="Airtel" />
-              </div>
-            </button>
-            <div className="mx-5 h-[2px]" style={{ backgroundColor: "#00C87A" }} />
-            <button
-              onClick={() => handleMethodClick("card")}
-              className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
-            >
-              <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via Carte bancaire</span>
-              <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
-                <CreditCard className="w-6 h-6 text-red-500" />
-              </div>
-            </button>
-          </div>
-
-          {/* Transaction history */}
-          <div>
-            <p className="font-bold text-gray-900 text-base mb-3">Historique des transactions</p>
-            {txLoading ? (
-              <div className="text-center py-8 text-gray-400 text-sm">Chargement…</div>
-            ) : transactions.filter(tx => tx.status === "completed").length === 0 ? (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-10 text-center">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                  <History className="w-6 h-6 text-gray-400" />
-                </div>
-                <p className="text-sm font-semibold text-gray-500">Aucune transaction</p>
-                <p className="text-xs text-gray-400 mt-1">Vos recharges apparaîtront ici</p>
-              </div>
-            ) : (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-50">
-                {transactions.filter(tx => tx.status === "completed").map(tx => {
-                  const isRecharge = tx.type === "recharge";
-                  const amountFcfa = tx.amountFcfa ?? Math.round((tx.amountUsd ?? 0) * 620);
-                  const date = tx.createdAt ? new Date(tx.createdAt) : null;
-                  const dateStr = date ? format(date, "dd MMM · HH:mm", { locale: fr }) : "";
-                  return (
-                    <div key={tx.id} className="flex items-center gap-3 px-4 py-3.5">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isRecharge ? "bg-blue-500" : "bg-orange-500"}`}>
-                        {isRecharge ? <Plus className="w-4 h-4 text-white" /> : <ArrowUpRight className="w-4 h-4 text-white" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 text-sm truncate">
-                          {isRecharge ? "Rechargement" : "Retrait"}
-                        </p>
-                        <p className="text-xs text-gray-400">{dateStr}</p>
-                      </div>
-                      <span className={`font-bold text-sm shrink-0 ${isRecharge ? "text-green-600" : "text-red-500"}`}>
-                        {isRecharge ? "+" : "−"}{amountFcfa.toLocaleString("fr-FR")} FCFA
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
         </div>
+
+        {/* Method buttons */}
+        <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
+          <button
+            onClick={() => handleMethodClick("mobile")}
+            className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
+          >
+            <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via mobile Money</span>
+            <div className="flex items-center -space-x-2 shrink-0">
+              <img src={imgTMoneyOp}  className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" alt="TMoney" />
+              <img src={imgMoovOp}    className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" alt="Moov" />
+              <img src={imgAirtelOp}  className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" alt="Airtel" />
+            </div>
+          </button>
+          <div className="mx-5 h-[2px]" style={{ backgroundColor: "#00C87A" }} />
+          <button
+            onClick={() => handleMethodClick("card")}
+            className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
+          >
+            <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via Carte bancaire</span>
+            <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+              <CreditCard className="w-6 h-6 text-red-500" />
+            </div>
+          </button>
+        </div>
+
+        {/* History title — fixed */}
+        <p className="font-bold text-gray-900 text-base pb-2">Historique des transactions</p>
+      </div>
+
+      {/* Scrollable transactions list */}
+      <div className="flex-1 overflow-y-auto px-4 pb-8">
+        {txLoading ? (
+          <div className="text-center py-8 text-gray-400 text-sm">Chargement…</div>
+        ) : transactions.filter(tx => tx.status === "completed").length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-10 text-center">
+            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+              <History className="w-6 h-6 text-gray-400" />
+            </div>
+            <p className="text-sm font-semibold text-gray-500">Aucune transaction</p>
+            <p className="text-xs text-gray-400 mt-1">Vos recharges apparaîtront ici</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-50">
+            {transactions.filter(tx => tx.status === "completed").map(tx => {
+              const isRecharge = tx.type === "recharge";
+              const amountFcfa = tx.amountFcfa ?? Math.round((tx.amountUsd ?? 0) * 620);
+              const date = tx.createdAt ? new Date(tx.createdAt) : null;
+              const dateStr = date ? format(date, "dd MMM · HH:mm", { locale: fr }) : "";
+              return (
+                <div key={tx.id} className="flex items-center gap-3 px-4 py-3.5">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isRecharge ? "bg-blue-500" : "bg-orange-500"}`}>
+                    {isRecharge ? <Plus className="w-4 h-4 text-white" /> : <ArrowUpRight className="w-4 h-4 text-white" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-sm truncate">
+                      {isRecharge ? "Rechargement" : "Retrait"}
+                    </p>
+                    <p className="text-xs text-gray-400">{dateStr}</p>
+                  </div>
+                  <span className={`font-bold text-sm shrink-0 ${isRecharge ? "text-green-600" : "text-red-500"}`}>
+                    {isRecharge ? "+" : "−"}{amountFcfa.toLocaleString("fr-FR")} FCFA
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Amount picker — bottom sheet */}
