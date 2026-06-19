@@ -12,6 +12,8 @@ import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Dashboard from "@/pages/dashboard";
 import Recharge from "@/pages/recharge";
+import MobileMoney from "@/pages/mobile-money";
+import CardPayment from "@/pages/card-payment";
 import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
@@ -66,6 +68,8 @@ function Router() {
         <Route path="/register" component={Register} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/recharge" component={Recharge} />
+        <Route path="/recharge/mobile" component={MobileMoney} />
+        <Route path="/recharge/card" component={CardPayment} />
         <Route path="/admin" component={Admin} />
         <Route path="/history"><Redirect to="/dashboard" /></Route>
         <Route component={NotFound} />

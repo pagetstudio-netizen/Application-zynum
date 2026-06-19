@@ -70,21 +70,8 @@ export default function Recharge() {
   const effectiveAmount = customInput ? Math.round(parseFloat(customInput)) : amount;
 
   const handleMethodClick = (method: "mobile" | "card") => {
-    setPendingMethod(method);
-    setCustomInput("");
-  };
-
-  const handleConfirm = () => {
-    if (effectiveAmount < 300) {
-      toast({ variant: "destructive", title: "Montant trop faible", description: "Minimum 300 FCFA." });
-      return;
-    }
-    setPendingMethod(null);
-    if (pendingMethod === "mobile") {
-      setOmnipayOpen(true);
-    } else {
-      setPaxityOpen(true);
-    }
+    if (method === "mobile") navigate("/recharge/mobile");
+    else navigate("/recharge/card");
   };
 
   const handleSuccess = () => {
