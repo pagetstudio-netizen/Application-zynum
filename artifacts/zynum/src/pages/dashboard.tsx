@@ -974,7 +974,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
     <SubPage title="Parrainage" onBack={onBack}>
       <div className="px-4 pt-5 space-y-4">
         {/* Banner */}
-        <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-3xl p-5 text-white shadow-xl shadow-purple-500/25">
+        <div className="rounded-3xl p-5 text-white" style={{ backgroundColor: "#7C3AED" }}>
           <Gift className="w-8 h-8 mb-2 opacity-80" />
           <p className="font-black text-xl mb-1">Gagnez 10% de commission</p>
           <p className="text-sm text-purple-200">Pour chaque ami qui s'inscrit et recharge son compte via votre lien</p>
@@ -987,7 +987,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
             { label: "Actifs", value: stats?.activeReferrals ?? 0 },
             { label: "Gains", value: stats?.totalEarnings ? `$${Number(stats.totalEarnings).toFixed(2)}` : "$0.00" },
           ].map(s => (
-            <div key={s.label} className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center">
+            <div key={s.label} className="bg-white rounded-2xl p-3 border border-gray-100 text-center">
               <p className="text-lg font-black text-gray-900">{s.value}</p>
               <p className="text-[10px] text-gray-400 font-medium">{s.label}</p>
             </div>
@@ -995,7 +995,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
         </div>
 
         {/* Code */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+        <div className="bg-white rounded-2xl p-4 border border-gray-100 space-y-3">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Votre code de parrainage</p>
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-50 border border-dashed border-gray-300 rounded-xl px-4 py-3 text-center">
@@ -1012,7 +1012,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
         </div>
 
         {/* Link */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-2">
+        <div className="bg-white rounded-2xl p-4 border border-gray-100 space-y-2">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Lien de parrainage</p>
           <div className="flex items-center gap-2">
             <p className="flex-1 text-xs text-gray-500 bg-gray-50 rounded-xl px-3 py-2.5 truncate font-mono border border-gray-200">{refLink}</p>
@@ -1026,7 +1026,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
         </div>
 
         {/* How it works */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+        <div className="bg-white rounded-2xl p-4 border border-gray-100">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Comment ça marche ?</p>
           {[
             { n: "1", title: "Partagez votre code", desc: "Envoyez votre lien ou code à vos amis" },

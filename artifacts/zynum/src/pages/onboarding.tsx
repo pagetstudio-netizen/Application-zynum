@@ -37,9 +37,9 @@ const BG_GRADIENTS = [
   "from-emerald-50 via-white to-teal-50",
 ];
 const BTN_COLORS = [
-  "from-blue-500 to-indigo-600 shadow-blue-500/30",
-  "from-purple-500 to-pink-600 shadow-purple-500/30",
-  "from-emerald-500 to-teal-600 shadow-emerald-500/30",
+  "from-blue-500 to-indigo-600",
+  "from-purple-500 to-pink-600",
+  "from-emerald-500 to-teal-600",
 ];
 
 export default function Onboarding() {
@@ -102,7 +102,7 @@ export default function Onboarding() {
               <img
                 src={slide.image}
                 alt={slide.title}
-                className="w-full h-full object-contain drop-shadow-xl"
+                className="w-full h-full object-contain"
               />
             </motion.div>
           </AnimatePresence>
@@ -147,7 +147,7 @@ export default function Onboarding() {
         <div className="space-y-3 max-w-sm mx-auto w-full">
           <button
             onClick={next}
-            className={`w-full h-14 rounded-2xl bg-gradient-to-r ${BTN_COLORS[current]} text-white font-bold text-base flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95`}
+            className={`w-full h-14 rounded-2xl bg-gradient-to-r ${BTN_COLORS[current]} text-white font-bold text-base flex items-center justify-center gap-2 transition-all active:scale-95`}
           >
             {slide.cta}
             <ArrowRight className="w-5 h-5" />
