@@ -123,8 +123,8 @@ export default function CardPaymentPage() {
   // ── AMOUNT STEP ─────────────────────────────────────────────────────────────
   function AmountStep() {
     return (
-      <div className="flex flex-col min-h-screen bg-white">
-        <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+      <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
+        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
           <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
@@ -208,8 +208,8 @@ export default function CardPaymentPage() {
   // ── CARD FORM STEP ──────────────────────────────────────────────────────────
   function CardStep() {
     return (
-      <div className="flex flex-col min-h-screen bg-white">
-        <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+      <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
+        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
           <button onClick={() => setStep("amount")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
@@ -298,8 +298,8 @@ export default function CardPaymentPage() {
   // ── PROCESSING STEP ─────────────────────────────────────────────────────────
   function ProcessingStep() {
     return (
-      <div className="flex flex-col min-h-screen bg-white">
-        <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+      <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
+        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
           {payState === "error" && (
             <button onClick={() => setStep("card")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
               <ChevronLeft className="w-5 h-5 text-white" />
@@ -402,7 +402,7 @@ export default function CardPaymentPage() {
   }
 
   return (
-    <div className="w-full overflow-x-hidden" style={{ minHeight: "100dvh" }}>
+    <div className="w-full" style={{ height: "100dvh", overflow: "hidden" }}>
       <AnimatePresence mode="wait">
         {step === "amount" && (
           <motion.div key="amount" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>

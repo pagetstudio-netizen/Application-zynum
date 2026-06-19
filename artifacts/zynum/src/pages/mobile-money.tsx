@@ -300,8 +300,8 @@ export default function MobileMoneyPage() {
   // ── PHONE STEP ─────────────────────────────────────────────────────────────
   function PhoneStep() {
     return (
-      <div className="flex flex-col min-h-screen bg-white">
-        <div className="px-4 pt-4 pb-4 flex items-center gap-3 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+      <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
+        <div className="sticky top-0 z-10 px-4 pt-4 pb-4 flex items-center gap-3 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
           <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
@@ -392,8 +392,8 @@ export default function MobileMoneyPage() {
     const balance = balanceData?.balance ?? 0;
 
     return (
-      <div className="flex flex-col bg-white" style={{ minHeight: "100dvh" }}>
-        <div className="px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+      <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
+        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
           <button onClick={() => setStep("phone")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
@@ -484,8 +484,8 @@ export default function MobileMoneyPage() {
   // ── PROCESSING STEP ────────────────────────────────────────────────────────
   function ProcessingStep() {
     return (
-      <div className="flex flex-col min-h-screen bg-white">
-        <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 bg-gradient-to-r from-blue-500 to-indigo-600">
+      <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
+        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 bg-gradient-to-r from-blue-500 to-indigo-600">
           {(payState === "error") && (
             <button onClick={() => setStep("amount")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
               <ChevronLeft className="w-5 h-5 text-white" />
@@ -611,7 +611,7 @@ export default function MobileMoneyPage() {
   }
 
   return (
-    <div className="w-full overflow-x-hidden" style={{ minHeight: "100dvh" }}>
+    <div className="w-full" style={{ height: "100dvh", overflow: "hidden" }}>
       <AnimatePresence mode="wait">
         {step === "country" && (
           <motion.div key="country" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "tween", duration: 0.22 }}>

@@ -96,10 +96,10 @@ export default function Recharge() {
   );
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 relative" style={{ minHeight: "100dvh" }}>
+    <div className="flex flex-col bg-gray-50" style={{ height: "100dvh", overflow: "hidden" }}>
 
       {/* Header */}
-      <div className="bg-white px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 border-b border-gray-100">
+      <div className="sticky top-0 z-10 bg-white px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 border-b border-gray-100">
         <button
           onClick={() => navigate("/dashboard")}
           className="p-2 rounded-xl active:bg-gray-100 transition-colors"
