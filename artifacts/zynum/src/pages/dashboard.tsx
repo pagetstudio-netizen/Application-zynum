@@ -1420,6 +1420,7 @@ function HelpPage({ onBack }: { onBack: () => void }) {
 
 // ─── COMPTE TAB ───────────────────────────────────────────────────────────────
 function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => void }) {
+  const [, setLocation] = useLocation();
   const { settings: publicSettings } = usePublicSettings();
   const { lang, setLang } = useLanguage();
   const { currency, setCurrency } = useCurrency();
@@ -1518,6 +1519,23 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
           </div>
 
 
+
+          {/* Admin panel button — visible admins only */}
+          {user.isAdmin && (
+            <button
+              onClick={() => setLocation("/admin")}
+              className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl bg-gray-900 hover:bg-gray-800 active:scale-95 transition-all shadow-md"
+            >
+              <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                <Shield className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-white font-bold text-sm">Panneau Administrateur</p>
+                <p className="text-gray-400 text-xs">Gérer les utilisateurs, commandes et paramètres</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+            </button>
+          )}
 
           {/* Logout */}
           <button
