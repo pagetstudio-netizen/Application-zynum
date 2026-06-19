@@ -1183,90 +1183,158 @@ function APIPage({ onBack }: { onBack: () => void }) {
   );
 }
 
+// ─── TOGGLE SWITCH ────────────────────────────────────────────────────────────
+function ToggleSwitch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  return (
+    <button
+      onClick={onToggle}
+      className={`w-12 h-6 rounded-full flex items-center px-0.5 transition-all duration-200 shrink-0 ${on ? "bg-[#00C87A] justify-end" : "bg-gray-200 justify-start"}`}
+    >
+      <div className="w-5 h-5 rounded-full bg-white shadow" />
+    </button>
+  );
+}
+
+function loadNotifPrefs() {
+  try {
+    const raw = localStorage.getItem("zynum_notif_prefs");
+    if (raw) return JSON.parse(raw) as Record<string, boolean>;
+  } catch {}
+  return { sms: true, recharge: true, promo: false };
+}
+
+function getDeviceInfo() {
+  const ua = navigator.userAgent;
+  let os = "Inconnu";
+  if (/Android/i.test(ua)) os = "Android";
+  else if (/iPhone|iPad|iPod/i.test(ua)) os = "iOS";
+  else if (/Windows/i.test(ua)) os = "Windows";
+  else if (/Mac OS X/i.test(ua)) os = "macOS";
+  else if (/Linux/i.test(ua)) os = "Linux";
+
+  let browser = "Inconnu";
+  if (/Chrome\//.test(ua) && !/Chromium|Edg/.test(ua)) browser = "Chrome";
+  else if (/Firefox\//.test(ua)) browser = "Firefox";
+  else if (/Edg\//.test(ua)) browser = "Edge";
+  else if (/Safari\//.test(ua) && !/Chrome/.test(ua)) browser = "Safari";
+  else if (/OPR\/|Opera/.test(ua)) browser = "Opera";
+
+  const screen = `${window.screen.width} × ${window.screen.height}`;
+  const lang = navigator.language || "—";
+  return { os, browser, screen, lang };
+}
+
 // ─── PARAMS PAGE ──────────────────────────────────────────────────────────────
 function ParamsPage({ onBack }: { onBack: () => void }) {
   const { lang, setLang } = useLanguage();
   const { currency, setCurrency } = useCurrency();
+  const [notifs, setNotifs] = useState<Record<string, boolean>>(loadNotifPrefs);
+  const device = getDeviceInfo();
+
+  const toggleNotif = (key: string) => {
+    setNotifs(prev => {
+      const next = { ...prev, [key]: !prev[key] };
+      localStorage.setItem("zynum_notif_prefs", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const notifItems = [
+    { key: "sms",      label: lang === "fr" ? "SMS reçus"        : "SMS received",    sub: lang === "fr" ? "Alertes lors de la réception d'un SMS"   : "Alerts on SMS reception" },
+    { key: "recharge", label: lang === "fr" ? "Recharges"         : "Top-up",          sub: lang === "fr" ? "Confirmation de recharge de solde"        : "Balance top-up confirmation" },
+    { key: "promo",    label: lang === "fr" ? "Offres spéciales"  : "Special offers",  sub: lang === "fr" ? "Promotions et remises exclusives"          : "Exclusive promotions & discounts" },
+  ];
 
   return (
-    <SubPage title="Paramètres" onBack={onBack}>
-      <div className="px-4 pt-5 space-y-4">
-        {/* Language */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Langue de l'application</p>
-          <div className="grid grid-cols-2 gap-3">
-            {(["fr", "en"] as const).map(l => (
-              <button
-                key={l}
-                onClick={() => { setLang(l); setCurrency(l === "fr" ? "FCFA" : "USD"); }}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 transition-all ${lang === l ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"}`}
-              >
-                <span className="text-2xl">{l === "fr" ? "🇫🇷" : "🇬🇧"}</span>
-                <div className="text-left">
-                  <p className={`text-sm font-bold ${lang === l ? "text-blue-700" : "text-gray-700"}`}>{l === "fr" ? "Français" : "English"}</p>
-                  <p className="text-[10px] text-gray-400">{l === "fr" ? "France" : "United Kingdom"}</p>
-                </div>
-                {lang === l && <Check className="w-4 h-4 text-blue-500 ml-auto" />}
-              </button>
-            ))}
-          </div>
+    <SubPage title={lang === "fr" ? "Paramètres" : "Settings"} onBack={onBack}>
+      <div className="px-4 pt-5 space-y-4 pb-8">
+
+        {/* ── Langue ── */}
+        <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">
+            {lang === "fr" ? "Langue de l'application" : "App language"}
+          </p>
+          {(["fr", "en"] as const).map((l, i) => (
+            <button
+              key={l}
+              onClick={() => setLang(l)}
+              className={`w-full flex items-center gap-3 px-4 py-3.5 ${i > 0 ? "border-t border-gray-50" : ""} active:bg-gray-50 transition-colors`}
+            >
+              <span className="text-2xl">{l === "fr" ? "🇫🇷" : "🇬🇧"}</span>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-semibold text-gray-900">{l === "fr" ? "Français" : "English"}</p>
+                <p className="text-xs text-gray-400">{l === "fr" ? "Langue française" : "English language"}</p>
+              </div>
+              {lang === l
+                ? <div className="w-5 h-5 rounded-full bg-[#00C87A] flex items-center justify-center"><Check className="w-3 h-3 text-white" /></div>
+                : <div className="w-5 h-5 rounded-full border-2 border-gray-200" />
+              }
+            </button>
+          ))}
         </div>
 
-        {/* Currency */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Devise d'affichage</p>
-          <div className="grid grid-cols-2 gap-3">
-            {(["USD", "FCFA"] as const).map(c => (
-              <button
-                key={c}
-                onClick={() => setCurrency(c)}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 transition-all ${currency === c ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"}`}
-              >
-                <span className="text-2xl">{c === "USD" ? "🇺🇸" : "🌍"}</span>
-                <div className="text-left">
-                  <p className={`text-sm font-bold ${currency === c ? "text-blue-700" : "text-gray-700"}`}>{c}</p>
-                  <p className="text-[10px] text-gray-400">{c === "USD" ? "Dollar américain" : "Franc CFA"}</p>
-                </div>
-                {currency === c && <Check className="w-4 h-4 text-blue-500 ml-auto" />}
-              </button>
-            ))}
-          </div>
+        {/* ── Devise ── */}
+        <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">
+            {lang === "fr" ? "Devise d'affichage" : "Display currency"}
+          </p>
+          {(["FCFA", "USD"] as const).map((c, i) => (
+            <button
+              key={c}
+              onClick={() => setCurrency(c)}
+              className={`w-full flex items-center gap-3 px-4 py-3.5 ${i > 0 ? "border-t border-gray-50" : ""} active:bg-gray-50 transition-colors`}
+            >
+              <span className="text-2xl">{c === "USD" ? "🇺🇸" : "🌍"}</span>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-semibold text-gray-900">{c === "USD" ? "Dollar US" : "Franc CFA"}</p>
+                <p className="text-xs text-gray-400">{c === "USD" ? "USD — Dollar américain" : "FCFA / XAF — Afrique de l'Ouest"}</p>
+              </div>
+              {currency === c
+                ? <div className="w-5 h-5 rounded-full bg-[#00C87A] flex items-center justify-center"><Check className="w-3 h-3 text-white" /></div>
+                : <div className="w-5 h-5 rounded-full border-2 border-gray-200" />
+              }
+            </button>
+          ))}
         </div>
 
-        {/* Notifications */}
-        <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">Notifications</p>
-          {[
-            { label: "SMS reçus",       sub: "Alertes lors de la réception d'un SMS", on: true },
-            { label: "Recharges",       sub: "Confirmation de recharge de solde",     on: true },
-            { label: "Offres spéciales", sub: "Promotions et remises exclusives",     on: false },
-          ].map((n, i) => (
-            <div key={n.label} className={`flex items-center gap-3 px-4 py-3.5 ${i > 0 ? "border-t border-gray-50" : ""}`}>
-              <div className="flex-1">
+        {/* ── Notifications ── */}
+        <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">
+            {lang === "fr" ? "Notifications" : "Notifications"}
+          </p>
+          {notifItems.map((n, i) => (
+            <div
+              key={n.key}
+              className={`flex items-center gap-3 px-4 py-3.5 ${i > 0 ? "border-t border-gray-50" : ""}`}
+            >
+              <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-900">{n.label}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{n.sub}</p>
               </div>
-              <div className={`w-11 h-6 rounded-full flex items-center transition-all px-0.5 ${n.on ? "bg-blue-500 justify-end" : "bg-gray-200 justify-start"}`}>
-                <div className="w-5 h-5 rounded-full bg-white shadow-sm" />
-              </div>
+              <ToggleSwitch on={!!notifs[n.key]} onToggle={() => toggleNotif(n.key)} />
             </div>
           ))}
         </div>
 
-        {/* App info */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">À propos de l'application</p>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-500">Version</span>
-              <span className="text-sm font-semibold text-gray-900">1.0.0</span>
+        {/* ── Informations de l'appareil ── */}
+        <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">
+            {lang === "fr" ? "Informations de l'appareil" : "Device information"}
+          </p>
+          {[
+            { label: lang === "fr" ? "Système"     : "OS",       value: device.os },
+            { label: lang === "fr" ? "Navigateur"  : "Browser",  value: device.browser },
+            { label: lang === "fr" ? "Résolution"  : "Screen",   value: device.screen },
+            { label: lang === "fr" ? "Langue sys."  : "Sys. lang", value: device.lang },
+            { label: "Version app",                               value: "1.0.0" },
+          ].map((row, i) => (
+            <div key={row.label} className={`flex items-center justify-between px-4 py-3 ${i > 0 ? "border-t border-gray-50" : ""}`}>
+              <span className="text-sm text-gray-500">{row.label}</span>
+              <span className="text-sm font-semibold text-gray-900">{row.value}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-500">Plateforme</span>
-              <span className="text-sm font-semibold text-gray-900">Web App</span>
-            </div>
-          </div>
+          ))}
         </div>
+
       </div>
     </SubPage>
   );
