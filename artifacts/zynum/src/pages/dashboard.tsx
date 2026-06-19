@@ -433,7 +433,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
       </AnimatePresence>
 
       {/* Header — black */}
-      <div style={{ backgroundColor: "#111111", padding: "18px 16px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+      <div style={{ backgroundColor: "#111111", padding: "10px 16px 10px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
         {/* Left: avatar + greeting */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
           <button
