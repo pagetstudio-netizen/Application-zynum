@@ -124,7 +124,7 @@ export default function CardPaymentPage() {
   function AmountStep() {
     return (
       <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
-        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-[#1A3FFF]">
           <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
@@ -193,7 +193,7 @@ export default function CardPaymentPage() {
               setStep("card");
             }}
             disabled={amountFcfa < 500}
-            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-blue-500 to-indigo-600"
+            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#1A3FFF]"
           >
             {amountFcfa >= 500
               ? `Continuer · ${isFcfa ? `${amountFcfa.toLocaleString("fr-FR")} FCFA` : `$${(amountFcfa / FCFA_PER_USD).toFixed(2)}`}`
@@ -209,7 +209,7 @@ export default function CardPaymentPage() {
   function CardStep() {
     return (
       <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
-        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-[#1A3FFF]">
           <button onClick={() => setStep("amount")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
@@ -286,7 +286,7 @@ export default function CardPaymentPage() {
         <div className="px-5 pb-8 pt-4 border-t border-gray-100 bg-white">
           <button
             onClick={submitCard}
-            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all bg-gradient-to-r from-blue-500 to-indigo-600"
+            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all bg-[#1A3FFF]"
           >
             Payer {amountFcfa.toLocaleString("fr-FR")} FCFA
           </button>
@@ -299,7 +299,7 @@ export default function CardPaymentPage() {
   function ProcessingStep() {
     return (
       <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
-        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-[#1A3FFF]">
           {payState === "error" && (
             <button onClick={() => setStep("card")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
               <ChevronLeft className="w-5 h-5 text-white" />
@@ -334,7 +334,7 @@ export default function CardPaymentPage() {
               </div>
               {paymentUrl && (
                 <a href={paymentUrl} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold shadow-lg shadow-blue-200">
+                  className="flex items-center gap-2 px-8 py-3 rounded-full bg-[#1A3FFF] text-white font-bold shadow-lg shadow-blue-200">
                   <ExternalLink className="w-4 h-4" /> Payer maintenant
                 </a>
               )}
@@ -391,7 +391,7 @@ export default function CardPaymentPage() {
                 <p className="text-gray-500 text-sm">{payError}</p>
               </div>
               <button onClick={() => setStep("card")}
-                className="w-full py-4 rounded-full font-black text-white text-lg bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
+                className="w-full py-4 rounded-full font-black text-white text-lg bg-[#1A3FFF] shadow-lg shadow-blue-500/30">
                 Réessayer
               </button>
             </>

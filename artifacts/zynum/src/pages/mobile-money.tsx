@@ -249,7 +249,7 @@ export default function MobileMoneyPage() {
 
     return (
       <div className="fixed inset-0 z-50 flex flex-col" style={{ backgroundColor: "#ffffff" }}>
-        <div className="sticky top-0 z-10 px-4 pt-3 pb-3 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+        <div className="sticky top-0 z-10 px-4 pt-3 pb-3 shrink-0 bg-[#1A3FFF]">
           <div className="flex items-center gap-2 mb-2">
             <button onClick={() => setStep("phone")} className="p-2 -ml-2 rounded-xl active:bg-blue-700 transition-colors">
               <ChevronLeft className="w-6 h-6 text-white" />
@@ -289,7 +289,7 @@ export default function MobileMoneyPage() {
         <div className="fixed bottom-0 left-0 right-0 px-4 pb-8 pt-3 border-t border-gray-100" style={{ backgroundColor: "#ffffff" }}>
           <button
             onClick={() => setStep("phone")}
-            className="w-full py-4 rounded-full font-bold text-white text-lg bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30 active:scale-95 transition-all"
+            className="w-full py-4 rounded-full font-bold text-white text-lg bg-[#1A3FFF] shadow-lg shadow-blue-500/30 active:scale-95 transition-all"
           >
             Suivant
           </button>
@@ -302,7 +302,7 @@ export default function MobileMoneyPage() {
   function PhoneStep() {
     return (
       <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
-        <div className="sticky top-0 z-10 px-4 pt-4 pb-4 flex items-center gap-3 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+        <div className="sticky top-0 z-10 px-4 pt-4 pb-4 flex items-center gap-3 shrink-0 bg-[#1A3FFF]">
           <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
@@ -379,7 +379,7 @@ export default function MobileMoneyPage() {
         <div className="px-5 pb-8 pt-4 bg-white border-t border-gray-100">
           <button
             onClick={goToAmount}
-            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-transform bg-gradient-to-r from-blue-500 to-indigo-600"
+            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-transform bg-[#1A3FFF]"
           >
             Suivante
           </button>
@@ -394,7 +394,7 @@ export default function MobileMoneyPage() {
 
     return (
       <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
-        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 bg-[#1A3FFF]">
           <button onClick={() => setStep("phone")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
@@ -470,7 +470,7 @@ export default function MobileMoneyPage() {
           <button
             onClick={submitPayment}
             disabled={amountFcfa < 300}
-            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-blue-500 to-indigo-600"
+            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#1A3FFF]"
           >
             {amountFcfa >= 300
               ? `Payer ${isFcfa ? `${amountFcfa.toLocaleString("fr-FR")} FCFA` : `$${(amountFcfa / FCFA_PER_USD).toFixed(2)}`}`
@@ -486,7 +486,7 @@ export default function MobileMoneyPage() {
   function ProcessingStep() {
     return (
       <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
-        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 bg-gradient-to-r from-blue-500 to-indigo-600">
+        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 bg-[#1A3FFF]">
           {(payState === "error") && (
             <button onClick={() => setStep("amount")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
               <ChevronLeft className="w-5 h-5 text-white" />
@@ -570,7 +570,7 @@ export default function MobileMoneyPage() {
                   className="w-full h-14 px-4 rounded-2xl border-2 border-gray-300 text-center text-xl font-black text-gray-900 focus:outline-none focus:border-blue-500 transition mb-4"
                 />
                 <button onClick={confirmOtp}
-                  className="w-full py-4 rounded-full font-black text-white text-lg bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
+                  className="w-full py-4 rounded-full font-black text-white text-lg bg-[#1A3FFF] shadow-lg shadow-blue-500/30">
                   Confirmer
                 </button>
               </div>
@@ -601,7 +601,7 @@ export default function MobileMoneyPage() {
                 <p className="text-gray-500 text-sm">{payError}</p>
               </div>
               <button onClick={() => setStep("amount")}
-                className="w-full py-4 rounded-full font-black text-white text-lg bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
+                className="w-full py-4 rounded-full font-black text-white text-lg bg-[#1A3FFF] shadow-lg shadow-blue-500/30">
                 Réessayer
               </button>
             </>
