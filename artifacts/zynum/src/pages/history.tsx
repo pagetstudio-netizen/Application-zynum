@@ -123,18 +123,17 @@ export default function OrderHistory() {
 
   return (
     <div className="flex flex-col min-h-full bg-white">
-      <div className="flex items-center justify-center px-4 pt-5 pb-3 relative">
-        <h1 className="text-xl font-bold text-gray-900">historique d'achat</h1>
+      <div className="flex justify-end px-4 pt-3 pb-1">
         <button
           onClick={() => refetch()}
           disabled={isFetching}
-          className="absolute right-4 p-1.5 active:scale-90 transition-transform disabled:opacity-50"
+          className="p-1.5 active:scale-90 transition-transform disabled:opacity-50"
         >
           <RefreshCcw className={`w-4 h-4 text-gray-400 ${isFetching ? "animate-spin" : ""}`} />
         </button>
       </div>
 
-      <div className="h-px bg-gray-100 mx-0" />
+      <div className="h-px bg-gray-100" />
 
       {isLoading && (
         <div className="flex items-center justify-center py-20">

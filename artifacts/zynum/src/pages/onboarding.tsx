@@ -68,10 +68,10 @@ export default function Onboarding() {
 
   return (
     <div
-      className={`h-screen overflow-hidden flex flex-col bg-gradient-to-br ${BG_GRADIENTS[current]} transition-all duration-700`}
+      className={`h-[100dvh] overflow-hidden flex flex-col bg-gradient-to-br ${BG_GRADIENTS[current]} transition-all duration-700`}
     >
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-6 pt-4 pb-2">
+      {/* Top bar — fixed, shrink-0 */}
+      <div className="shrink-0 flex items-center justify-between px-6 pt-safe pt-4 pb-2">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl overflow-hidden">
             <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />
@@ -79,15 +79,15 @@ export default function Onboarding() {
           <span className="font-bold text-gray-800 text-lg tracking-tight">ZyNum</span>
         </div>
         {current < slides.length - 1 && (
-          <button onClick={() => setLocation("/login")} className="text-sm text-gray-400 font-medium hover:text-gray-600 transition-colors">
+          <button onClick={() => setLocation("/login")} className="text-sm text-gray-400 font-medium active:scale-90 transition-all">
             Passer
           </button>
         )}
       </div>
 
-      {/* Illustration */}
-      <div className="flex-1 flex items-center justify-center px-6 py-4">
-        <div className="w-full max-w-sm h-72">
+      {/* Illustration — flex-1, compressible */}
+      <div className="flex-1 min-h-0 flex items-center justify-center px-6 py-2">
+        <div className="w-full max-w-sm" style={{ maxHeight: "100%" }}>
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={current}
@@ -97,7 +97,8 @@ export default function Onboarding() {
               animate="center"
               exit="exit"
               transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="w-full h-full flex items-center justify-center"
+              className="w-full flex items-center justify-center"
+              style={{ height: "min(288px, 100%)" }}
             >
               <img
                 src={slide.image}
@@ -109,8 +110,8 @@ export default function Onboarding() {
         </div>
       </div>
 
-      {/* Text + CTA */}
-      <div className="px-6 pb-12 space-y-6">
+      {/* Text + CTA — fixed at bottom, shrink-0 */}
+      <div className="shrink-0 px-6 pb-10 space-y-5">
         {/* Dots */}
         <div className="flex justify-center gap-2">
           {slides.map((_, i) => (
@@ -132,12 +133,12 @@ export default function Onboarding() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="text-center space-y-3"
+            className="text-center space-y-2"
           >
             <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">
               {slide.title}
             </h1>
-            <p className="text-base text-gray-500 leading-relaxed max-w-xs mx-auto">
+            <p className="text-sm text-gray-500 leading-relaxed max-w-xs mx-auto">
               {slide.subtitle}
             </p>
           </motion.div>
@@ -155,7 +156,7 @@ export default function Onboarding() {
           {slide.secondary && (
             <button
               onClick={skip}
-              className="w-full h-12 rounded-2xl border-2 border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition-all active:scale-95"
+              className="w-full h-12 rounded-2xl border-2 border-gray-200 text-gray-600 font-semibold text-sm active:bg-gray-50 transition-all active:scale-95"
             >
               {slide.secondary}
             </button>

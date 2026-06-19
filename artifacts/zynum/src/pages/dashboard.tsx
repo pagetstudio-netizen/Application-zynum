@@ -1689,8 +1689,13 @@ export default function Dashboard() {
             </div>
           )}
           {activeTab === "sms" && (
-            <div className="flex-1 flex flex-col overflow-hidden bg-white pb-24 overflow-y-auto">
-              <OrderHistory />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="bg-white px-4 pt-4 pb-3 shrink-0 border-b border-gray-100">
+                <h1 className="font-extrabold text-gray-900 text-xl">Historique d'achat</h1>
+              </div>
+              <div className="flex-1 overflow-y-auto bg-white pb-24">
+                <OrderHistory />
+              </div>
             </div>
           )}
           {activeTab === "compte" && <CompteTab user={user} onLogout={() => logoutMutation.mutate({})} />}
