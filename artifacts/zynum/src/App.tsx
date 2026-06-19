@@ -1,7 +1,7 @@
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
+import { ModalToaster } from "@/components/ui/modal-toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { CurrencyProvider } from "@/hooks/use-currency";
@@ -79,7 +79,7 @@ function App() {
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
               <Router />
             </WouterRouter>
-            <Toaster />
+            <ModalToaster />
           </CurrencyProvider>
         </LanguageProvider>
       </TooltipProvider>
