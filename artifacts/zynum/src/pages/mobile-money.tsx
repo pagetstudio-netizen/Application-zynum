@@ -311,7 +311,7 @@ export default function MobileMoneyPage() {
 
         <div className="flex-1 overflow-y-auto px-5 pt-6 pb-8">
           <p className="text-gray-600 text-sm mb-5 leading-relaxed">
-            Saisissez le numéro de téléphone de votre client pour accéder à son compte
+            Saisissez votre numéro de téléphone pour recharger votre compte.
           </p>
 
           {/* Country + phone row */}
