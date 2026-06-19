@@ -393,7 +393,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/40 z-40"
+              style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 40 }}
               onClick={() => setNotifOpen(false)}
             />
             <motion.div
@@ -402,25 +402,27 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
               animate={{ y: 0 }}
               exit={{ y: "-100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="absolute top-0 left-0 right-0 z-50 rounded-b-3xl overflow-hidden"
-              style={{ backgroundColor: "#111111" }}
+              style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 50, backgroundColor: "#111111", borderBottomLeftRadius: "24px", borderBottomRightRadius: "24px", overflow: "hidden" }}
             >
-              <div className="px-5 pt-6 pb-4 flex items-center justify-between border-b border-white/10">
+              <div style={{ padding: "24px 20px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
                 <div>
-                  <p className="text-white font-black text-base">Avantages ZyNum</p>
-                  <p className="text-white/40 text-xs mt-0.5">Pourquoi choisir ZyNum ?</p>
+                  <p style={{ color: "#ffffff", fontWeight: 900, fontSize: "16px", margin: 0 }}>Avantages ZyNum</p>
+                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px", marginTop: "2px" }}>Pourquoi choisir ZyNum ?</p>
                 </div>
-                <button onClick={() => setNotifOpen(false)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center active:scale-90 transition-transform">
-                  <X className="w-4 h-4 text-white" />
+                <button
+                  onClick={() => setNotifOpen(false)}
+                  style={{ width: 32, height: 32, borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.12)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+                >
+                  <X style={{ width: 16, height: 16, color: "#ffffff" }} />
                 </button>
               </div>
-              <div className="px-4 py-3 space-y-1 max-h-[60vh] overflow-y-auto pb-6">
+              <div style={{ padding: "12px 16px 24px", display: "flex", flexDirection: "column", gap: 6, maxHeight: "60vh", overflowY: "auto" }}>
                 {AVANTAGES.map((a, i) => (
-                  <div key={i} className="flex items-start gap-3 px-3 py-3 rounded-2xl bg-white/5">
-                    <span className="text-2xl mt-0.5 shrink-0">{a.emoji}</span>
-                    <div className="min-w-0">
-                      <p className="text-white font-bold text-sm leading-tight">{a.title}</p>
-                      <p className="text-white/50 text-xs mt-0.5 leading-snug">{a.desc}</p>
+                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px", borderRadius: "16px", backgroundColor: "rgba(255,255,255,0.07)" }}>
+                    <span style={{ fontSize: "22px", flexShrink: 0, marginTop: 2 }}>{a.emoji}</span>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ color: "#ffffff", fontWeight: 700, fontSize: "14px", margin: 0, lineHeight: 1.3 }}>{a.title}</p>
+                      <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "12px", marginTop: 3, lineHeight: 1.4 }}>{a.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -431,37 +433,36 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
       </AnimatePresence>
 
       {/* Header — black */}
-      <div className="px-4 pt-5 pb-4 flex items-center justify-between shrink-0" style={{ backgroundColor: "#111111" }}>
+      <div style={{ backgroundColor: "#111111", padding: "18px 16px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
         {/* Left: avatar + greeting */}
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
           <button
             onClick={() => onNavigate("compte")}
-            className="relative shrink-0 active:scale-90 transition-transform"
+            style={{ position: "relative", flexShrink: 0, background: "none", border: "none", padding: 0, cursor: "pointer" }}
           >
             <img
               src="/avatar-user.png"
               alt="profil"
-              className="w-11 h-11 rounded-full object-cover border-2"
-              style={{ borderColor: "#00C87A" }}
+              style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover", border: "2px solid #00C87A", display: "block" }}
             />
-            <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#00C87A] rounded-full border-2 border-[#111111]" />
+            <span style={{ position: "absolute", bottom: 1, right: 1, width: 11, height: 11, backgroundColor: "#00C87A", borderRadius: "50%", border: "2px solid #111111", display: "block" }} />
           </button>
-          <div className="min-w-0">
-            <p className="text-white/50 text-xs font-medium leading-none mb-0.5">Bonjour 👋</p>
-            <p className="text-white font-black text-base leading-tight truncate">{firstName}</p>
+          <div style={{ minWidth: 0 }}>
+            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 500, margin: 0, lineHeight: 1 }}>Bonjour 👋</p>
+            <p style={{ color: "#ffffff", fontSize: "16px", fontWeight: 900, margin: "3px 0 0", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{firstName}</p>
           </div>
         </div>
         {/* Right: bell */}
-        <div className="shrink-0 ml-3">
+        <div style={{ flexShrink: 0, marginLeft: 12 }}>
           <button
             onClick={() => setNotifOpen(o => !o)}
-            className="relative w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center active:scale-90 transition-transform"
+            style={{ position: "relative", width: 40, height: 40, borderRadius: "14px", backgroundColor: "rgba(255,255,255,0.15)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
           >
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#00C87A] rounded-full flex items-center justify-center">
-              <span className="text-white text-[8px] font-black">{AVANTAGES.length}</span>
+            <span style={{ position: "absolute", top: -4, right: -4, width: 18, height: 18, backgroundColor: "#00C87A", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "#ffffff", fontSize: "9px", fontWeight: 900 }}>{AVANTAGES.length}</span>
             </span>
           </button>
         </div>
