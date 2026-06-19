@@ -430,21 +430,23 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
         )}
       </AnimatePresence>
 
-      {/* Header — white */}
-      <div className="px-4 pt-5 pb-4 flex items-center justify-between shrink-0 bg-white border-b border-gray-100">
+      {/* Header — black */}
+      <div className="px-4 pt-5 pb-4 flex items-center justify-between shrink-0" style={{ backgroundColor: "#111111" }}>
         {/* Left: greeting */}
         <div className="flex-1 min-w-0 mr-3">
-          <p className="text-gray-400 text-xs font-medium leading-none mb-0.5">Bonjour 👋</p>
-          <p className="text-gray-900 font-black text-lg leading-tight truncate">{firstName}</p>
+          <p className="text-white/50 text-xs font-medium leading-none mb-0.5">Bonjour 👋</p>
+          <p className="text-white font-black text-lg leading-tight truncate">{firstName}</p>
         </div>
         {/* Right: bell + avatar */}
         <div className="flex items-center gap-2.5 shrink-0">
           <button
             onClick={() => setNotifOpen(o => !o)}
-            className="relative w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center active:scale-90 transition-transform"
+            className="relative w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center active:scale-90 transition-transform"
           >
-            <img src="/bell-icon.png" alt="notifications" className="w-5 h-5 object-contain opacity-70" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#00C87A] rounded-full flex items-center justify-center">
               <span className="text-white text-[8px] font-black">{AVANTAGES.length}</span>
             </span>
           </button>
@@ -454,7 +456,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
             style={{ borderColor: "#00C87A" }}
           >
             <img src="/avatar2.jpg" alt="profil" className="w-full h-full object-cover" />
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#00C87A] rounded-full border-2 border-white" />
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#00C87A] rounded-full border-2 border-[#111111]" />
           </button>
         </div>
       </div>
@@ -1547,10 +1549,11 @@ function BottomNav({ active, onChange }: { active: Tab; onChange: (t: Tab) => vo
     },
     {
       id: "sms",
-      label: "SMS",
+      label: "Historique",
       icon: (a) => (
-        <svg viewBox="0 0 24 24" className="w-5 h-5" fill={a ? "#EFF6FF" : "none"} stroke={a ? "#2563EB" : "#9CA3AF"} strokeWidth={2}>
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/>
+        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke={a ? "#2563EB" : "#9CA3AF"} strokeWidth={2}>
+          <path d="M12 8v4l3 3" strokeLinecap="round" strokeLinejoin="round"/>
+          <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       ),
     },
@@ -1686,15 +1689,8 @@ export default function Dashboard() {
             </div>
           )}
           {activeTab === "sms" && (
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="bg-white px-4 pt-4 pb-3 shrink-0 border-b border-gray-100">
-                <h1 className="font-extrabold text-gray-900 text-xl">Mes SMS</h1>
-              </div>
-              <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
-                <div className="p-4">
-                  <OrderHistory />
-                </div>
-              </div>
+            <div className="flex-1 flex flex-col overflow-hidden bg-white pb-24 overflow-y-auto">
+              <OrderHistory />
             </div>
           )}
           {activeTab === "compte" && <CompteTab user={user} onLogout={() => logoutMutation.mutate({})} />}
