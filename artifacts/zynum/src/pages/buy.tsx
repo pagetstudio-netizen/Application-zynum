@@ -157,7 +157,15 @@ function StepPage({ children, dir = 1 }: { children: React.ReactNode; dir?: numb
   );
 }
 
-export default function BuyNumber({ isEmbedded = false }: { isEmbedded?: boolean }) {
+const STEP_TITLES: Record<BuyStep, string> = {
+  service:  "Choisir un service",
+  country:  "Choisir un pays",
+  operator: "Choisir un opérateur",
+  preview:  "Confirmation",
+  active:   "Code de vérification",
+};
+
+export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbedded?: boolean; onStepChange?: (title: string) => void }) {
   const { t } = useLanguage();
   const { currency } = useCurrency();
   const { toast } = useToast();
@@ -167,6 +175,10 @@ export default function BuyNumber({ isEmbedded = false }: { isEmbedded?: boolean
   const { data: balanceData, refetch: refetchBalance } = useGetBalance({ query: { enabled: !!user, retry: false } });
 
   const [step, setStep] = useState<BuyStep>("service");
+
+  useEffect(() => {
+    onStepChange?.(STEP_TITLES[step]);
+  }, [step, onStepChange]);
   const [dir, setDir] = useState(1);
   const [searchService, setSearchService] = useState("");
   const [searchCountry, setSearchCountry] = useState("");

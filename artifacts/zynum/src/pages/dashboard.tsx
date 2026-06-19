@@ -1458,6 +1458,23 @@ function HelpPage({ onBack }: { onBack: () => void }) {
 }
 
 // ─── COMPTE TAB ───────────────────────────────────────────────────────────────
+// ─── NUMEROS TAB ──────────────────────────────────────────────────────────────
+function NumerosTab() {
+  const [stepTitle, setStepTitle] = useState("Acheter un numéro");
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="bg-white px-4 pt-4 pb-3 shrink-0 border-b border-gray-100">
+        <h1 className="font-extrabold text-gray-900 text-xl">{stepTitle}</h1>
+      </div>
+      <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
+        <div className="p-4">
+          <BuyNumber isEmbedded={true} onStepChange={setStepTitle} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => void }) {
   const [, setLocation] = useLocation();
   const { settings: publicSettings } = usePublicSettings();
@@ -1751,16 +1768,7 @@ export default function Dashboard() {
         >
           {activeTab === "accueil" && <HomeTab user={user} onNavigate={navigate} />}
           {activeTab === "numeros" && (
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="bg-white px-4 pt-4 pb-3 shrink-0 border-b border-gray-100">
-                <h1 className="font-extrabold text-gray-900 text-xl">Acheter un numéro</h1>
-              </div>
-              <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
-                <div className="p-4">
-                  <BuyNumber isEmbedded={true} />
-                </div>
-              </div>
-            </div>
+            <NumerosTab />
           )}
           {activeTab === "sms" && (
             <div className="flex-1 overflow-y-auto bg-white pb-24">
