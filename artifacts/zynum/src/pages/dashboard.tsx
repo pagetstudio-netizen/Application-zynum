@@ -430,33 +430,31 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
         )}
       </AnimatePresence>
 
-      {/* Header — dark */}
-      <div className="px-4 pt-5 pb-4 flex items-center justify-between shrink-0" style={{ backgroundColor: "#111111" }}>
+      {/* Header — white */}
+      <div className="px-4 pt-5 pb-4 flex items-center justify-between shrink-0 bg-white border-b border-gray-100">
         {/* Left: greeting */}
         <div className="flex-1 min-w-0 mr-3">
-          <p className="text-white/50 text-xs font-medium leading-none mb-0.5">Bonjour 👋</p>
-          <p className="text-white font-black text-lg leading-tight truncate">{firstName}</p>
+          <p className="text-gray-400 text-xs font-medium leading-none mb-0.5">Bonjour 👋</p>
+          <p className="text-gray-900 font-black text-lg leading-tight truncate">{firstName}</p>
         </div>
         {/* Right: bell + avatar */}
         <div className="flex items-center gap-2.5 shrink-0">
           <button
             onClick={() => setNotifOpen(o => !o)}
-            className="relative p-2 rounded-2xl bg-white/10 active:scale-90 transition-transform"
+            className="relative w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center active:scale-90 transition-transform"
           >
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
+            <img src="/bell-icon.png" alt="notifications" className="w-5 h-5 object-contain opacity-70" />
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
               <span className="text-white text-[8px] font-black">{AVANTAGES.length}</span>
             </span>
           </button>
           <button
             onClick={() => onNavigate("compte")}
-            className="relative w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white active:scale-90 transition-transform shrink-0"
-            style={{ backgroundColor: "#00C87A" }}
+            className="relative w-10 h-10 rounded-full overflow-hidden border-2 active:scale-90 transition-transform shrink-0"
+            style={{ borderColor: "#00C87A" }}
           >
-            {initials}
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-[#111111]" />
+            <img src="/avatar2.jpg" alt="profil" className="w-full h-full object-cover" />
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#00C87A] rounded-full border-2 border-white" />
           </button>
         </div>
       </div>
