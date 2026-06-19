@@ -365,8 +365,8 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
 // ─── HOME TAB ────────────────────────────────────────────────────────────────
 function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Tab) => void }) {
   const { currency } = useCurrency();
+  const [, navigate] = useLocation();
   const [showBal, setShowBal] = useState(true);
-  const [view, setView] = useState<"home" | "recharge">("home");
   const [notifOpen, setNotifOpen] = useState(false);
   const { data: balanceData } = useGetBalance({ query: { retry: false } });
   const { data: servicesData } = useGetServices(undefined, { query: { retry: false, staleTime: 60000 } });
@@ -390,9 +390,6 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
     { emoji: "📱", title: "Toutes les apps supportées",    desc: "WhatsApp, Telegram, TikTok, Gmail, Facebook et +." },
   ];
 
-  if (view === "recharge") {
-    return <RechargeView user={user} onBack={() => setView("home")} />;
-  }
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative">
@@ -541,7 +538,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
           {/* White inner card with actions */}
           <div className="bg-white rounded-[24px] overflow-hidden">
             <button
-              onClick={() => setView("recharge")}
+              onClick={() => navigate("/recharge")}
               className="w-full flex items-center justify-between px-5 py-4 active:bg-gray-50 transition-colors"
             >
               <span className="font-bold text-[#1a2b8c] text-[15px]">Recharger votre compte</span>
@@ -652,8 +649,8 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
 // ─── WALLET TAB ──────────────────────────────────────────────────────────────
 function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
   const { currency } = useCurrency();
+  const [, navigate] = useLocation();
   const [showBal, setShowBal] = useState(true);
-  const [view, setView] = useState<"main" | "recharge">("main");
   const { data: balanceData } = useGetBalance({ query: { retry: false } });
   const { data: historyData } = useGetOrderHistory({ page: 1, limit: 50 }, { query: { retry: false } });
 
@@ -668,22 +665,6 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
     { name: "Orange Money", commission: "5%", color: "#F97316", letter: "OM" },
     { name: "USDT (TRC20)", commission: "2%", color: "#22C55E", letter: "U" },
   ];
-
-  if (view === "recharge") {
-    return (
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="bg-white px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 border-b border-gray-100">
-          <button onClick={() => setView("main")} className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <h1 className="font-bold text-gray-900 text-base">Recharger</h1>
-        </div>
-        <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
-          <Recharge />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -713,7 +694,7 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
         {/* Quick actions */}
         <div className="grid grid-cols-4 gap-2">
           {[
-            { icon: <Plus className="w-5 h-5" />, label: "Recharger", color: "text-blue-600 bg-blue-50", action: () => setView("recharge") },
+            { icon: <Plus className="w-5 h-5" />, label: "Recharger", color: "text-blue-600 bg-blue-50", action: () => navigate("/recharge") },
             { icon: <ArrowUpRight className="w-5 h-5" />, label: "Retirer", color: "text-purple-600 bg-purple-50", action: () => {} },
             { icon: <ArrowDownLeft className="w-5 h-5" />, label: "Transférer", color: "text-emerald-600 bg-emerald-50", action: () => {} },
             { icon: <Tag className="w-5 h-5" />, label: "Code promo", color: "text-orange-600 bg-orange-50", action: () => {} },
@@ -732,7 +713,7 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
             {METHODS.map((m, i) => (
               <button
                 key={m.name}
-                onClick={() => setView("recharge")}
+                onClick={() => navigate("/recharge")}
                 className={`w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition-colors ${i > 0 ? "border-t border-gray-50" : ""}`}
               >
                 <div style={{ background: m.color }} className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0">

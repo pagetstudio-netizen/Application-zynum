@@ -376,7 +376,7 @@ export default function BuyNumber({ isEmbedded = false }: { isEmbedded?: boolean
     }`}>
       <Wallet className="w-4 h-4 shrink-0" />
       {t("buy_balance_pill")} {formatBalance()}
-      {balance === 0 && <button onClick={() => window.dispatchEvent(new CustomEvent("zynum:tab", { detail: "recharge" }))} className="underline ml-1 hover:text-red-800">{t("buy_top_up_pill")}</button>}
+      {balance === 0 && <button onClick={() => { window.location.href = "/recharge"; }} className="underline ml-1 hover:text-red-800">{t("buy_top_up_pill")}</button>}
     </div>
   );
 
@@ -699,7 +699,7 @@ export default function BuyNumber({ isEmbedded = false }: { isEmbedded?: boolean
             {balance === 0 && (
               <p className="text-center text-xs text-red-400 mt-3">
                 {t("buy_insufficient")}.{" "}
-                <button onClick={() => window.dispatchEvent(new CustomEvent("zynum:tab", { detail: "recharge" }))} className="underline hover:text-red-700">
+                <button onClick={() => { window.location.href = "/recharge"; }} className="underline hover:text-red-700">
                   {t("buy_insufficient_top_up")}
                 </button>
               </p>

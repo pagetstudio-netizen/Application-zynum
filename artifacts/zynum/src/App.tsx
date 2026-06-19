@@ -11,6 +11,7 @@ import Onboarding from "@/pages/onboarding";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Dashboard from "@/pages/dashboard";
+import Recharge from "@/pages/recharge";
 import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
@@ -64,6 +65,7 @@ function Router() {
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
         <Route path="/dashboard" component={Dashboard} />
+        <Route path="/recharge" component={Recharge} />
         <Route path="/admin" component={Admin} />
         <Route path="/history"><Redirect to="/dashboard" /></Route>
         <Route component={NotFound} />
