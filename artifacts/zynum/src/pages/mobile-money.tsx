@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
 import { Search, ChevronLeft, ChevronDown, CheckCircle2, AlertCircle, Loader2, ExternalLink, KeyRound } from "lucide-react";
 import { useGetCurrentUser, useGetBalance, getGetBalanceQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -249,12 +248,14 @@ export default function MobileMoneyPage() {
     }, [query]);
 
     return (
-      <div className="fixed inset-0 bg-white z-50 flex flex-col" style={{ minHeight: "100dvh" }}>
-        <div className="px-4 pt-4 pb-4 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
-          <button onClick={() => setStep("phone")} className="p-2 -ml-2 mb-3 rounded-xl active:bg-blue-700 transition-colors">
-            <ChevronLeft className="w-6 h-6 text-white" />
-          </button>
-          <h1 className="text-2xl font-black text-white mb-4">Sélectionnez votre pays</h1>
+      <div className="fixed inset-0 z-50 flex flex-col" style={{ backgroundColor: "#ffffff" }}>
+        <div className="sticky top-0 z-10 px-4 pt-3 pb-3 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+          <div className="flex items-center gap-2 mb-2">
+            <button onClick={() => setStep("phone")} className="p-2 -ml-2 rounded-xl active:bg-blue-700 transition-colors">
+              <ChevronLeft className="w-6 h-6 text-white" />
+            </button>
+            <h1 className="text-lg font-black text-white">Sélectionnez votre pays</h1>
+          </div>
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-300" />
             <input
@@ -263,32 +264,32 @@ export default function MobileMoneyPage() {
               placeholder="Rechercher"
               value={query}
               onChange={e => setQuery(e.target.value)}
-              className="w-full h-12 pl-12 pr-4 rounded-2xl border-2 border-white/30 bg-white/20 text-white placeholder:text-white/60 text-base focus:outline-none focus:border-white/60 transition backdrop-blur-sm"
+              className="w-full h-11 pl-12 pr-4 rounded-2xl border-2 border-white/30 bg-white/20 text-white placeholder:text-white/60 text-base focus:outline-none focus:border-white/60 transition"
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 pb-28">
+        <div className="flex-1 overflow-y-auto px-4 pb-24" style={{ backgroundColor: "#ffffff" }}>
           {filtered.length === 0 && <p className="text-center text-gray-400 py-10">Aucun pays trouvé</p>}
           {filtered.map(c => (
             <button
               key={c.code}
               onClick={() => selectCountry(c)}
-              className={`w-full flex items-center gap-4 py-4 border-b border-gray-200 text-left transition-colors active:bg-gray-100 ${country.code === c.code ? "bg-blue-50" : ""}`}
+              className={`w-full flex items-center gap-4 py-3 border-b border-gray-100 text-left transition-colors active:bg-blue-50 ${country.code === c.code ? "bg-blue-50" : ""}`}
             >
-              <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-gray-200 bg-gray-100 flex items-center justify-center text-2xl">
+              <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-200 bg-white flex items-center justify-center text-xl">
                 {c.flag}
               </div>
               <span className={`flex-1 font-semibold text-base ${country.code === c.code ? "text-blue-600" : "text-gray-900"}`}>{c.name}</span>
-              <span className="text-gray-500 font-medium">+{c.prefix}</span>
+              <span className="text-gray-400 font-medium text-sm">+{c.prefix}</span>
             </button>
           ))}
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 px-5 pb-8 pt-4 bg-white border-t border-gray-100">
+        <div className="fixed bottom-0 left-0 right-0 px-4 pb-8 pt-3 border-t border-gray-100" style={{ backgroundColor: "#ffffff" }}>
           <button
             onClick={() => setStep("phone")}
-            className="w-full py-4 rounded-full font-bold text-white text-lg bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30"
+            className="w-full py-4 rounded-full font-bold text-white text-lg bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30 active:scale-95 transition-all"
           >
             Suivant
           </button>
@@ -612,28 +613,10 @@ export default function MobileMoneyPage() {
 
   return (
     <div className="w-full" style={{ height: "100dvh", overflow: "hidden" }}>
-      <AnimatePresence mode="wait">
-        {step === "country" && (
-          <motion.div key="country" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "tween", duration: 0.22 }}>
-            {CountryPicker()}
-          </motion.div>
-        )}
-        {step === "phone" && (
-          <motion.div key="phone" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            {PhoneStep()}
-          </motion.div>
-        )}
-        {step === "amount" && (
-          <motion.div key="amount" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "tween", duration: 0.22 }}>
-            {AmountStep()}
-          </motion.div>
-        )}
-        {step === "processing" && (
-          <motion.div key="processing" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "tween", duration: 0.22 }}>
-            {ProcessingStep()}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {step === "country" && CountryPicker()}
+      {step === "phone"   && PhoneStep()}
+      {step === "amount"  && AmountStep()}
+      {step === "processing" && ProcessingStep()}
     </div>
   );
 }
