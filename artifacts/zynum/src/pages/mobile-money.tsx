@@ -249,7 +249,7 @@ export default function MobileMoneyPage() {
     }, [query]);
 
     return (
-      <div className="fixed inset-0 bg-[#F5F0E8] z-50 flex flex-col" style={{ minHeight: "100dvh" }}>
+      <div className="fixed inset-0 bg-white z-50 flex flex-col" style={{ minHeight: "100dvh" }}>
         <div className="px-5 pt-12 pb-4 shrink-0">
           <button onClick={() => setStep("phone")} className="p-2 -ml-2 mb-4">
             <ChevronLeft className="w-6 h-6 text-gray-800" />
@@ -274,22 +274,21 @@ export default function MobileMoneyPage() {
             <button
               key={c.code}
               onClick={() => selectCountry(c)}
-              className={`w-full flex items-center gap-4 py-4 border-b border-gray-200 text-left transition-colors active:bg-gray-100 ${country.code === c.code ? "bg-green-50/60" : ""}`}
+              className={`w-full flex items-center gap-4 py-4 border-b border-gray-200 text-left transition-colors active:bg-gray-100 ${country.code === c.code ? "bg-blue-50" : ""}`}
             >
               <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-gray-200 bg-gray-100 flex items-center justify-center text-2xl">
                 {c.flag}
               </div>
-              <span className={`flex-1 font-semibold text-base ${country.code === c.code ? "text-green-700" : "text-gray-900"}`}>{c.name}</span>
+              <span className={`flex-1 font-semibold text-base ${country.code === c.code ? "text-blue-600" : "text-gray-900"}`}>{c.name}</span>
               <span className="text-gray-500 font-medium">+{c.prefix}</span>
             </button>
           ))}
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 px-5 pb-8 pt-4 bg-[#F5F0E8]">
+        <div className="fixed bottom-0 left-0 right-0 px-5 pb-8 pt-4 bg-white border-t border-gray-100">
           <button
             onClick={() => setStep("phone")}
-            className="w-full py-4 rounded-full font-bold text-white text-lg"
-            style={{ backgroundColor: "#1a3a2a" }}
+            className="w-full py-4 rounded-full font-bold text-white text-lg bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30"
           >
             Suivant
           </button>
@@ -302,12 +301,11 @@ export default function MobileMoneyPage() {
   function PhoneStep() {
     return (
       <div className="flex flex-col min-h-screen bg-white">
-        {/* Yellow header */}
-        <div className="px-4 pt-4 pb-4 flex items-center gap-3 shrink-0" style={{ backgroundColor: "#FFD700" }}>
-          <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-yellow-300 transition-colors">
-            <ChevronLeft className="w-5 h-5 text-gray-900" />
+        <div className="px-4 pt-4 pb-4 flex items-center gap-3 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+          <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
+            <ChevronLeft className="w-5 h-5 text-white" />
           </button>
-          <h1 className="font-extrabold text-gray-900 text-base flex-1 text-center pr-8">recharge mobile money</h1>
+          <h1 className="font-extrabold text-white text-base flex-1 text-center pr-8">Recharge Mobile Money</h1>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 pt-6 pb-8">
@@ -345,7 +343,7 @@ export default function MobileMoneyPage() {
                   onClick={() => setOperator(op)}
                   className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all active:scale-95 ${
                     operator.id === op.id
-                      ? "border-orange-400 bg-orange-50 shadow-md shadow-orange-100"
+                      ? "border-blue-500 bg-blue-50 shadow-md shadow-blue-100"
                       : "border-gray-200 bg-white"
                   }`}
                 >
@@ -353,7 +351,7 @@ export default function MobileMoneyPage() {
                     <img src={op.logo} alt={op.label} className="w-12 h-12 object-contain"
                       onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
                   </div>
-                  <span className={`text-xs font-bold text-center leading-tight ${operator.id === op.id ? "text-orange-600" : "text-gray-700"}`}>
+                  <span className={`text-xs font-bold text-center leading-tight ${operator.id === op.id ? "text-blue-600" : "text-gray-700"}`}>
                     {op.label}
                   </span>
                 </button>
@@ -370,7 +368,7 @@ export default function MobileMoneyPage() {
                 placeholder="Code OTP"
                 value={otp}
                 onChange={e => setOtp(e.target.value)}
-                className="w-full h-12 px-4 rounded-2xl border-2 border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-orange-400 transition"
+                className="w-full h-12 px-4 rounded-2xl border-2 border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-blue-500 transition"
               />
               <p className="text-xs text-gray-400 mt-2">Composez #144*82# ou *144*4*6*montant# pour obtenir votre OTP.</p>
             </div>
@@ -380,8 +378,7 @@ export default function MobileMoneyPage() {
         <div className="px-5 pb-8 pt-4 bg-white border-t border-gray-100">
           <button
             onClick={goToAmount}
-            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg active:scale-95 transition-transform"
-            style={{ backgroundColor: "#FF4500" }}
+            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-transform bg-gradient-to-r from-blue-500 to-indigo-600"
           >
             Suivante
           </button>
@@ -450,24 +447,17 @@ export default function MobileMoneyPage() {
 
           {/* Summary */}
           <div className="bg-gray-50 rounded-2xl p-4 mb-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Pays</span>
-              <span className="font-semibold text-gray-900">{country.flag} {country.name}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Opérateur</span>
-              <span className="font-semibold text-gray-900">{operator.label}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Numéro</span>
-              <span className="font-semibold text-gray-900">+{country.prefix} {phone}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Solde actuel</span>
-              <span className="font-semibold text-gray-900">
-                {isFcfa ? `${Math.round(balance * FCFA_PER_USD).toLocaleString("fr-FR")} FCFA` : `$${balance.toFixed(2)}`}
-              </span>
-            </div>
+            {[
+              { label: "Pays",        value: `${country.flag} ${country.name}` },
+              { label: "Opérateur",   value: operator.label },
+              { label: "Numéro",      value: `+${country.prefix} ${phone}` },
+              { label: "Solde actuel",value: isFcfa ? `${Math.round(balance * FCFA_PER_USD).toLocaleString("fr-FR")} FCFA` : `$${balance.toFixed(2)}` },
+            ].map(row => (
+              <div key={row.label} className="flex justify-between items-center gap-3 text-sm min-w-0">
+                <span className="text-gray-500 shrink-0">{row.label}</span>
+                <span className="font-semibold text-gray-900 truncate text-right">{row.value}</span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -475,8 +465,7 @@ export default function MobileMoneyPage() {
           <button
             onClick={submitPayment}
             disabled={amountFcfa < 300}
-            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ backgroundColor: "#FF4500" }}
+            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-blue-500 to-indigo-600"
           >
             {amountFcfa >= 300
               ? `Payer ${isFcfa ? `${amountFcfa.toLocaleString("fr-FR")} FCFA` : `$${(amountFcfa / FCFA_PER_USD).toFixed(2)}`}`
@@ -492,20 +481,20 @@ export default function MobileMoneyPage() {
   function ProcessingStep() {
     return (
       <div className="flex flex-col min-h-screen bg-white">
-        <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100" style={{ backgroundColor: "#FFD700" }}>
+        <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 bg-gradient-to-r from-blue-500 to-indigo-600">
           {(payState === "error") && (
-            <button onClick={() => setStep("amount")} className="p-2 rounded-xl active:bg-yellow-300 transition-colors">
-              <ChevronLeft className="w-5 h-5 text-gray-900" />
+            <button onClick={() => setStep("amount")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
+              <ChevronLeft className="w-5 h-5 text-white" />
             </button>
           )}
-          <h1 className="font-extrabold text-gray-900 text-base flex-1 text-center pr-8">Paiement en cours</h1>
+          <h1 className="font-extrabold text-white text-base flex-1 text-center pr-8">Paiement en cours</h1>
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center px-8 pb-16 text-center gap-6">
           {payState === "loading" && (
             <>
-              <div className="w-24 h-24 rounded-full bg-orange-50 flex items-center justify-center">
-                <Loader2 className="w-12 h-12 text-orange-500 animate-spin" />
+              <div className="w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center">
+                <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
               </div>
               <div>
                 <p className="font-black text-gray-900 text-xl mb-2">Traitement en cours…</p>
@@ -516,7 +505,7 @@ export default function MobileMoneyPage() {
 
           {payState === "push" && (
             <>
-              <div className="w-24 h-24 rounded-full bg-orange-50 flex items-center justify-center overflow-hidden">
+              <div className="w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center overflow-hidden">
                 <img src={operator.logo} alt={operator.label} className="w-16 h-16 object-contain" />
               </div>
               <div>
@@ -528,7 +517,7 @@ export default function MobileMoneyPage() {
               </div>
               <div className="flex items-center gap-2">
                 {[0,1,2].map(i => (
-                  <span key={i} className="w-2.5 h-2.5 rounded-full bg-orange-400"
+                  <span key={i} className="w-2.5 h-2.5 rounded-full bg-blue-400"
                     style={{ animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }} />
                 ))}
               </div>
@@ -564,8 +553,8 @@ export default function MobileMoneyPage() {
 
           {payState === "otp" && (
             <>
-              <div className="w-24 h-24 rounded-full bg-orange-50 flex items-center justify-center">
-                <KeyRound className="w-12 h-12 text-orange-500" />
+              <div className="w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center">
+                <KeyRound className="w-12 h-12 text-blue-500" />
               </div>
               <div className="w-full">
                 <p className="font-black text-gray-900 text-xl mb-2">Code OTP</p>
@@ -573,10 +562,10 @@ export default function MobileMoneyPage() {
                 <input
                   type="text" inputMode="numeric" placeholder="Code OTP"
                   value={otpValue} onChange={e => setOtpValue(e.target.value)}
-                  className="w-full h-14 px-4 rounded-2xl border-2 border-gray-300 text-center text-xl font-black text-gray-900 focus:outline-none focus:border-orange-400 transition mb-4"
+                  className="w-full h-14 px-4 rounded-2xl border-2 border-gray-300 text-center text-xl font-black text-gray-900 focus:outline-none focus:border-blue-500 transition mb-4"
                 />
                 <button onClick={confirmOtp}
-                  className="w-full py-4 rounded-full font-black text-white text-lg" style={{ backgroundColor: "#FF4500" }}>
+                  className="w-full py-4 rounded-full font-black text-white text-lg bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
                   Confirmer
                 </button>
               </div>
@@ -607,7 +596,7 @@ export default function MobileMoneyPage() {
                 <p className="text-gray-500 text-sm">{payError}</p>
               </div>
               <button onClick={() => setStep("amount")}
-                className="w-full py-4 rounded-full font-black text-white text-lg" style={{ backgroundColor: "#FF4500" }}>
+                className="w-full py-4 rounded-full font-black text-white text-lg bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
                 Réessayer
               </button>
             </>
@@ -618,7 +607,7 @@ export default function MobileMoneyPage() {
   }
 
   return (
-    <div style={{ minHeight: "100dvh" }}>
+    <div className="w-full overflow-x-hidden" style={{ minHeight: "100dvh" }}>
       <AnimatePresence mode="wait">
         {step === "country" && (
           <motion.div key="country" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "tween", duration: 0.22 }}>

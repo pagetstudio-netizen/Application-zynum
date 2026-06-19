@@ -124,11 +124,11 @@ export default function CardPaymentPage() {
   function AmountStep() {
     return (
       <div className="flex flex-col min-h-screen bg-white">
-        <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0" style={{ backgroundColor: "#cc0000" }}>
-          <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-red-700 transition-colors">
+        <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+          <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
-          <h1 className="font-extrabold text-white text-base flex-1 text-center pr-8">recharge carte bancaire</h1>
+          <h1 className="font-extrabold text-white text-base flex-1 text-center pr-8">Recharge Carte Bancaire</h1>
         </div>
 
         <div className="px-5 pt-8 pb-6 shrink-0">
@@ -166,7 +166,7 @@ export default function CardPaymentPage() {
                 <button key={a}
                   onClick={() => setAmountRaw(isFcfa ? String(a) : String((a / FCFA_PER_USD).toFixed(2)))}
                   className={`py-3 rounded-2xl text-sm font-bold border-2 transition-all ${
-                    isActive ? "border-red-600 bg-red-600 text-white" : "border-gray-200 bg-gray-50 text-gray-600"
+                    isActive ? "border-blue-600 bg-blue-600 text-white" : "border-gray-200 bg-gray-50 text-gray-600"
                   }`}
                 >
                   {label}
@@ -193,7 +193,7 @@ export default function CardPaymentPage() {
               setStep("card");
             }}
             disabled={amountFcfa < 500}
-            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-red-600"
+            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-blue-500 to-indigo-600"
           >
             {amountFcfa >= 500
               ? `Continuer · ${isFcfa ? `${amountFcfa.toLocaleString("fr-FR")} FCFA` : `$${(amountFcfa / FCFA_PER_USD).toFixed(2)}`}`
@@ -209,8 +209,8 @@ export default function CardPaymentPage() {
   function CardStep() {
     return (
       <div className="flex flex-col min-h-screen bg-white">
-        <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0" style={{ backgroundColor: "#cc0000" }}>
-          <button onClick={() => setStep("amount")} className="p-2 rounded-xl active:bg-red-700 transition-colors">
+        <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
+          <button onClick={() => setStep("amount")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
           <h1 className="font-extrabold text-white text-base flex-1 text-center pr-8">Informations de carte</h1>
@@ -251,7 +251,7 @@ export default function CardPaymentPage() {
             <input
               type="text" placeholder="JEAN DUPONT"
               value={holderName} onChange={e => setHolderName(e.target.value.toUpperCase())}
-              className="w-full h-14 px-4 rounded-2xl border-2 border-gray-200 text-gray-900 text-sm font-semibold placeholder:text-gray-300 placeholder:font-normal focus:outline-none focus:border-red-400 transition"
+              className="w-full h-14 px-4 rounded-2xl border-2 border-gray-200 text-gray-900 text-sm font-semibold placeholder:text-gray-300 placeholder:font-normal focus:outline-none focus:border-blue-500 transition"
             />
           </div>
           <div>
@@ -259,7 +259,7 @@ export default function CardPaymentPage() {
             <input
               type="text" inputMode="numeric" placeholder="1234 5678 9012 3456" maxLength={19}
               value={cardNumber} onChange={e => setCardNumber(formatCard(e.target.value))}
-              className="w-full h-14 px-4 rounded-2xl border-2 border-gray-200 text-gray-900 text-base font-mono placeholder:font-sans placeholder:text-gray-300 placeholder:text-sm focus:outline-none focus:border-red-400 transition"
+              className="w-full h-14 px-4 rounded-2xl border-2 border-gray-200 text-gray-900 text-base font-mono placeholder:font-sans placeholder:text-gray-300 placeholder:text-sm focus:outline-none focus:border-blue-500 transition"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -268,7 +268,7 @@ export default function CardPaymentPage() {
               <input
                 type="text" inputMode="numeric" placeholder="MM/AA" maxLength={5}
                 value={expiry} onChange={e => setExpiry(formatExpiry(e.target.value))}
-                className="w-full h-14 px-4 rounded-2xl border-2 border-gray-200 text-gray-900 text-base font-semibold placeholder:text-gray-300 placeholder:font-normal focus:outline-none focus:border-red-400 transition"
+                className="w-full h-14 px-4 rounded-2xl border-2 border-gray-200 text-gray-900 text-base font-semibold placeholder:text-gray-300 placeholder:font-normal focus:outline-none focus:border-blue-500 transition"
               />
             </div>
             <div>
@@ -276,7 +276,7 @@ export default function CardPaymentPage() {
               <input
                 type="password" inputMode="numeric" placeholder="•••" maxLength={4}
                 value={cvv} onChange={e => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                className="w-full h-14 px-4 rounded-2xl border-2 border-gray-200 text-gray-900 text-base font-semibold placeholder:text-gray-300 placeholder:font-normal focus:outline-none focus:border-red-400 transition"
+                className="w-full h-14 px-4 rounded-2xl border-2 border-gray-200 text-gray-900 text-base font-semibold placeholder:text-gray-300 placeholder:font-normal focus:outline-none focus:border-blue-500 transition"
               />
             </div>
           </div>
@@ -286,7 +286,7 @@ export default function CardPaymentPage() {
         <div className="px-5 pb-8 pt-4 border-t border-gray-100 bg-white">
           <button
             onClick={submitCard}
-            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg active:scale-95 transition-all bg-red-600"
+            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all bg-gradient-to-r from-blue-500 to-indigo-600"
           >
             Payer {amountFcfa.toLocaleString("fr-FR")} FCFA
           </button>
@@ -299,9 +299,9 @@ export default function CardPaymentPage() {
   function ProcessingStep() {
     return (
       <div className="flex flex-col min-h-screen bg-white">
-        <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0" style={{ backgroundColor: "#cc0000" }}>
+        <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600">
           {payState === "error" && (
-            <button onClick={() => setStep("card")} className="p-2 rounded-xl active:bg-red-700 transition-colors">
+            <button onClick={() => setStep("card")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
               <ChevronLeft className="w-5 h-5 text-white" />
             </button>
           )}
@@ -311,8 +311,8 @@ export default function CardPaymentPage() {
         <div className="flex-1 flex flex-col items-center justify-center px-8 pb-16 text-center gap-6">
           {payState === "loading" && (
             <>
-              <div className="w-24 h-24 rounded-full bg-red-50 flex items-center justify-center">
-                <Loader2 className="w-12 h-12 text-red-500 animate-spin" />
+              <div className="w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center">
+                <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
               </div>
               <div>
                 <p className="font-black text-gray-900 text-xl mb-2">Traitement en cours…</p>
@@ -323,8 +323,8 @@ export default function CardPaymentPage() {
 
           {(payState === "qr") && (
             <>
-              <div className="w-24 h-24 rounded-full bg-red-50 flex items-center justify-center">
-                <QrCode className="w-12 h-12 text-red-500" />
+              <div className="w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center">
+                <QrCode className="w-12 h-12 text-blue-500" />
               </div>
               <div>
                 <p className="font-black text-gray-900 text-xl mb-2">Finalisez le paiement</p>
@@ -334,14 +334,14 @@ export default function CardPaymentPage() {
               </div>
               {paymentUrl && (
                 <a href={paymentUrl} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-8 py-3 rounded-full bg-red-600 text-white font-bold shadow-lg shadow-red-200">
+                  className="flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold shadow-lg shadow-blue-200">
                   <ExternalLink className="w-4 h-4" /> Payer maintenant
                 </a>
               )}
               {qrCode && <img src={qrCode} alt="QR Code" className="w-48 h-48 rounded-2xl border border-gray-200" />}
               <div className="flex items-center gap-2">
                 {[0,1,2].map(i => (
-                  <span key={i} className="w-2.5 h-2.5 rounded-full bg-red-400"
+                  <span key={i} className="w-2.5 h-2.5 rounded-full bg-blue-400"
                     style={{ animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }} />
                 ))}
               </div>
@@ -351,8 +351,8 @@ export default function CardPaymentPage() {
 
           {payState === "push" && (
             <>
-              <div className="w-24 h-24 rounded-full bg-red-50 flex items-center justify-center">
-                <CreditCard className="w-12 h-12 text-red-500" />
+              <div className="w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center">
+                <CreditCard className="w-12 h-12 text-blue-500" />
               </div>
               <div>
                 <p className="font-black text-gray-900 text-xl mb-2">En attente de confirmation</p>
@@ -360,7 +360,7 @@ export default function CardPaymentPage() {
               </div>
               <div className="flex items-center gap-2">
                 {[0,1,2].map(i => (
-                  <span key={i} className="w-2.5 h-2.5 rounded-full bg-red-400"
+                  <span key={i} className="w-2.5 h-2.5 rounded-full bg-blue-400"
                     style={{ animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }} />
                 ))}
               </div>
@@ -391,7 +391,7 @@ export default function CardPaymentPage() {
                 <p className="text-gray-500 text-sm">{payError}</p>
               </div>
               <button onClick={() => setStep("card")}
-                className="w-full py-4 rounded-full font-black text-white text-lg bg-red-600">
+                className="w-full py-4 rounded-full font-black text-white text-lg bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
                 Réessayer
               </button>
             </>
@@ -402,7 +402,7 @@ export default function CardPaymentPage() {
   }
 
   return (
-    <div style={{ minHeight: "100dvh" }}>
+    <div className="w-full overflow-x-hidden" style={{ minHeight: "100dvh" }}>
       <AnimatePresence mode="wait">
         {step === "amount" && (
           <motion.div key="amount" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
