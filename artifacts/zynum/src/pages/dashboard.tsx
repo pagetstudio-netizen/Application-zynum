@@ -14,6 +14,7 @@ import {
 import {
   useGetCurrentUser, useLogoutUser, useGetBalance,
   useGetOrderHistory, useGetServices, useGetCurrentUserQueryKey,
+  getGetBalanceQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrency } from "@/hooks/use-currency";
@@ -22,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import BuyNumber from "@/pages/buy";
 import OrderHistory from "@/pages/history";
 import Recharge from "@/pages/recharge";
+import { OmnipayModal } from "@/components/omnipay-modal";
 import { NotificationBanner } from "@/components/notification-banner";
 import { usePublicSettings, openTelegramSupport } from "@/hooks/use-public-settings";
 
@@ -66,11 +68,294 @@ const STATUS_MAP: Record<string, { label: string; cls: string }> = {
   BANNED:   { label: "Banni",      cls: "bg-red-50 text-red-600 border-red-200" },
 };
 
+// ─── RECHARGE VIEW ───────────────────────────────────────────────────────────
+const COUNTRIES = [
+  { flag: "🇹🇬", name: "Togo", code: "TG", currency: "XOF" },
+  { flag: "🇨🇮", name: "Côte d'Ivoire", code: "CI", currency: "XOF" },
+  { flag: "🇸🇳", name: "Sénégal", code: "SN", currency: "XOF" },
+  { flag: "🇨🇲", name: "Cameroun", code: "CM", currency: "XAF" },
+  { flag: "🇧🇯", name: "Bénin", code: "BJ", currency: "XOF" },
+  { flag: "🇧🇫", name: "Burkina Faso", code: "BF", currency: "XOF" },
+  { flag: "🇲🇱", name: "Mali", code: "ML", currency: "XOF" },
+  { flag: "🇬🇳", name: "Guinée", code: "GN", currency: "GNF" },
+];
+
+const METHODS_BY_COUNTRY: Record<string, { id: string; name: string; color: string }[]> = {
+  TG: [{ id: "tmoney", name: "TMoney", color: "#F59E0B" }, { id: "moov", name: "Moov Money", color: "#3B82F6" }],
+  CI: [{ id: "orange", name: "Orange Money", color: "#F97316" }, { id: "moov", name: "Moov Money", color: "#3B82F6" }, { id: "wave", name: "Wave", color: "#06B6D4" }],
+  SN: [{ id: "orange", name: "Orange Money", color: "#F97316" }, { id: "wave", name: "Wave", color: "#06B6D4" }, { id: "free", name: "Free Money", color: "#8B5CF6" }],
+  CM: [{ id: "orange", name: "Orange Money", color: "#F97316" }, { id: "mtn", name: "MTN Mobile Money", color: "#FBBF24" }],
+  BJ: [{ id: "moov", name: "Moov Money", color: "#3B82F6" }, { id: "mtn", name: "MTN Mobile Money", color: "#FBBF24" }],
+  BF: [{ id: "orange", name: "Orange Money", color: "#F97316" }, { id: "moov", name: "Moov Money", color: "#3B82F6" }],
+  ML: [{ id: "orange", name: "Orange Money", color: "#F97316" }, { id: "moov", name: "Moov Money", color: "#3B82F6" }],
+  GN: [{ id: "orange", name: "Orange Money", color: "#F97316" }, { id: "mtn", name: "MTN Mobile Money", color: "#FBBF24" }],
+};
+
+const PRESET_AMOUNTS = [500, 1000, 2000, 5000, 10000, 20000];
+const FEES: Record<string, number> = { tmoney: 5, moov: 5, orange: 5, wave: 2, mtn: 5, free: 3 };
+
+function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => void }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { data: balanceData, refetch: refetchBalance } = useGetBalance({ query: { retry: false } });
+  const [phone, setPhone] = useState("");
+  const [amount, setAmount] = useState("1000");
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState<{ id: string; name: string; color: string } | null>(null);
+  const [showMethodPicker, setShowMethodPicker] = useState(false);
+  const [omnipayOpen, setOmnipayOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const methods = METHODS_BY_COUNTRY[selectedCountry.code] ?? [];
+  const amountNum = parseInt(amount) || 0;
+  const feeRate = selectedMethod ? (FEES[selectedMethod.id] ?? 5) : 0;
+  const feeXof = selectedMethod ? Math.round(amountNum * feeRate / 100) : 0;
+  const totalXof = amountNum + feeXof;
+  const amountUsd = amountNum / 620;
+
+  const handleConfirm = () => {
+    if (!phone.trim()) {
+      toast({ variant: "destructive", title: "Numéro requis", description: "Entrez votre numéro Mobile Money." });
+      return;
+    }
+    if (amountNum < 300) {
+      toast({ variant: "destructive", title: "Montant trop faible", description: "Minimum 300 FCFA." });
+      return;
+    }
+    if (!selectedMethod) {
+      toast({ variant: "destructive", title: "Méthode requise", description: "Sélectionnez une méthode de paiement." });
+      return;
+    }
+    setOmnipayOpen(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    toast({ title: "Paiement initié !", description: "Votre solde sera mis à jour dans quelques instants." });
+    setLoading(true);
+    setTimeout(() => {
+      refetchBalance();
+      queryClient.invalidateQueries({ queryKey: getGetBalanceQueryKey() });
+      setLoading(false);
+      onBack();
+    }, 3000);
+  };
+
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+      {/* Header */}
+      <div className="px-4 pt-4 pb-3 flex items-center justify-between shrink-0" style={{ backgroundColor: "#111111" }}>
+        <button onClick={onBack} className="p-2 rounded-xl active:scale-90 transition-transform">
+          <ChevronLeft className="w-5 h-5 text-white" />
+        </button>
+        <span className="text-white font-bold text-base">Recharger</span>
+        <div className="p-2">
+          <svg className="w-6 h-6 text-white/60" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto pb-6">
+        <div className="px-4 pt-5 space-y-3">
+
+          {/* Phone number */}
+          <div className="bg-white rounded-2xl border-2 border-gray-200 px-4 py-3">
+            <p className="text-xs text-gray-400 font-semibold mb-1">Numéro de téléphone</p>
+            <input
+              type="tel"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              placeholder="ex: 90 00 00 00"
+              className="w-full text-lg font-semibold text-gray-900 placeholder:text-gray-300 focus:outline-none bg-transparent"
+            />
+          </div>
+
+          {/* Amount + Country */}
+          <div className="bg-white rounded-2xl border-2 border-gray-200 flex overflow-hidden">
+            {/* Amount */}
+            <div className="flex-1 px-4 py-3 border-r border-gray-100">
+              <p className="text-xs text-gray-400 font-semibold mb-1">Montant</p>
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={e => setAmount(e.target.value)}
+                  className="w-full text-xl font-black text-gray-900 focus:outline-none bg-transparent"
+                />
+                <span className="text-sm font-bold text-gray-400 shrink-0">{selectedCountry.currency}</span>
+              </div>
+            </div>
+            {/* Country picker */}
+            <button
+              onClick={() => setShowCountryPicker(true)}
+              className="px-4 py-3 flex flex-col items-end gap-1 active:bg-gray-50 transition-colors"
+            >
+              <p className="text-xs text-gray-400 font-semibold">Pays d'envoi</p>
+              <div className="flex items-center gap-1">
+                <span className="text-lg">{selectedCountry.flag}</span>
+                <span className="text-sm font-black text-gray-900">{selectedCountry.name}</span>
+                <ChevronRight className="w-4 h-4 text-gray-400 rotate-90" />
+              </div>
+            </button>
+          </div>
+
+          {/* Preset amounts */}
+          <div className="grid grid-cols-3 gap-2">
+            {PRESET_AMOUNTS.map(a => (
+              <button
+                key={a}
+                onClick={() => setAmount(String(a))}
+                className={`py-2.5 rounded-xl text-sm font-bold border transition-all ${
+                  parseInt(amount) === a
+                    ? "border-blue-500 bg-blue-50 text-blue-600"
+                    : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                {a.toLocaleString("fr-FR")}
+              </button>
+            ))}
+          </div>
+
+          {/* Select method */}
+          <button
+            onClick={() => setShowMethodPicker(true)}
+            className="w-full bg-white rounded-2xl border-2 border-gray-200 px-4 py-4 flex items-center gap-3 active:bg-gray-50 transition-colors"
+          >
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: selectedMethod?.color ?? "#6B7280" }}>
+              <WalletIcon className="w-5 h-5 text-white" />
+            </div>
+            <span className={`flex-1 text-left font-semibold text-sm ${selectedMethod ? "text-gray-900" : "text-gray-400"}`}>
+              {selectedMethod ? selectedMethod.name : "Sélectionner une méthode"}
+            </span>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+          </button>
+
+        </div>
+
+        {/* Summary */}
+        <div className="mx-4 mt-5 bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="px-4 pt-4 pb-2">
+            <p className="text-sm font-bold text-blue-600">◈ Récapitulatif</p>
+          </div>
+          <div className="px-4 pb-4 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">Montant envoyé</span>
+              <span className="text-sm font-semibold text-gray-900">{amountNum > 0 ? `${amountNum.toLocaleString("fr-FR")} ${selectedCountry.currency}` : "—"}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">Transfer fee</span>
+              <span className="text-sm font-semibold text-gray-500">{selectedMethod && amountNum > 0 ? `${feeXof.toLocaleString("fr-FR")} ${selectedCountry.currency} (${feeRate}%)` : "—"}</span>
+            </div>
+            <div className="h-px bg-gray-100" />
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-black text-gray-900">Total to pay</span>
+              <span className="text-sm font-black text-blue-600">{amountNum > 0 ? `${totalXof.toLocaleString("fr-FR")} ${selectedCountry.currency}` : "—"}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Confirm button */}
+        <div className="px-4 mt-4">
+          <button
+            onClick={handleConfirm}
+            disabled={loading || !phone || amountNum < 300 || !selectedMethod}
+            className="w-full h-14 rounded-2xl bg-blue-600 text-white font-black text-base disabled:opacity-40 active:scale-95 transition-all shadow-lg shadow-blue-500/30"
+          >
+            {loading ? "Traitement..." : "Confirmé le paiement"}
+          </button>
+          <p className="text-center text-xs text-gray-400 mt-3">🔒 Paiement 100% sécurisé</p>
+        </div>
+      </div>
+
+      {/* Country picker modal */}
+      <AnimatePresence>
+        {showCountryPicker && (
+          <>
+            <motion.div key="cp-bg" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/40 z-40" onClick={() => setShowCountryPicker(false)} />
+            <motion.div key="cp" initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 280 }}
+              className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl z-50 max-h-[70%] overflow-y-auto"
+            >
+              <div className="px-4 pt-4 pb-2 border-b border-gray-100">
+                <p className="font-bold text-gray-900 text-base">Pays d'envoi</p>
+              </div>
+              {COUNTRIES.map(c => (
+                <button key={c.code} onClick={() => { setSelectedCountry(c); setSelectedMethod(null); setShowCountryPicker(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 border-b border-gray-50 active:bg-gray-50 ${selectedCountry.code === c.code ? "bg-blue-50" : ""}`}
+                >
+                  <span className="text-2xl">{c.flag}</span>
+                  <span className="font-semibold text-gray-900 flex-1 text-left">{c.name}</span>
+                  <span className="text-xs text-gray-400">{c.currency}</span>
+                  {selectedCountry.code === c.code && <Check className="w-4 h-4 text-blue-600" />}
+                </button>
+              ))}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Method picker modal */}
+      <AnimatePresence>
+        {showMethodPicker && (
+          <>
+            <motion.div key="mp-bg" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/40 z-40" onClick={() => setShowMethodPicker(false)} />
+            <motion.div key="mp" initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 280 }}
+              className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl z-50"
+            >
+              <div className="px-4 pt-4 pb-2 border-b border-gray-100">
+                <p className="font-bold text-gray-900 text-base">Méthode de paiement</p>
+                <p className="text-xs text-gray-400 mt-0.5">{selectedCountry.flag} {selectedCountry.name}</p>
+              </div>
+              {methods.length === 0 ? (
+                <p className="text-center text-gray-400 text-sm py-8">Aucune méthode disponible pour ce pays.</p>
+              ) : (
+                methods.map(m => (
+                  <button key={m.id} onClick={() => { setSelectedMethod(m); setShowMethodPicker(false); }}
+                    className={`w-full flex items-center gap-3 px-4 py-4 border-b border-gray-50 active:bg-gray-50 ${selectedMethod?.id === m.id ? "bg-blue-50" : ""}`}
+                  >
+                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0" style={{ backgroundColor: m.color }}>
+                      <span className="text-white text-xs font-black">{m.name.slice(0, 2)}</span>
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="font-semibold text-gray-900 text-sm">{m.name}</p>
+                      <p className="text-xs text-gray-400">Commission {FEES[m.id] ?? 5}%</p>
+                    </div>
+                    {selectedMethod?.id === m.id && <Check className="w-4 h-4 text-blue-600 shrink-0" />}
+                  </button>
+                ))
+              )}
+              <div className="h-6" />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Omnipay Modal */}
+      {user && (
+        <OmnipayModal
+          open={omnipayOpen}
+          onClose={() => setOmnipayOpen(false)}
+          amountXof={amountNum}
+          userId={user.id}
+          onSuccess={handlePaymentSuccess}
+          userFirstName={user.name?.split(" ")[0] ?? "ZyNum"}
+          userLastName={user.name?.split(" ").slice(1).join(" ") || `User${user.id}`}
+        />
+      )}
+    </div>
+  );
+}
+
 // ─── HOME TAB ────────────────────────────────────────────────────────────────
 function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Tab) => void }) {
   const { currency } = useCurrency();
   const [showBal, setShowBal] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [view, setView] = useState<"home" | "recharge">("home");
   const [notifCount] = useState(3);
   const { data: balanceData } = useGetBalance({ query: { retry: false } });
   const { data: servicesData } = useGetServices(undefined, { query: { retry: false, staleTime: 60000 } });
@@ -82,6 +367,10 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
   const orders = historyData?.orders ?? [];
 
   const initials = user.name?.charAt(0).toUpperCase() ?? "Z";
+
+  if (view === "recharge") {
+    return <RechargeView user={user} onBack={() => setView("home")} />;
+  }
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative">
@@ -221,7 +510,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
           {/* White inner card with actions */}
           <div className="bg-white rounded-[24px] overflow-hidden">
             <button
-              onClick={() => onNavigate("compte")}
+              onClick={() => setView("recharge")}
               className="w-full flex items-center justify-between px-5 py-4 active:bg-gray-50 transition-colors"
             >
               <span className="font-bold text-[#1a2b8c] text-[15px]">Recharger votre compte</span>
