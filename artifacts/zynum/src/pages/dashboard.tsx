@@ -250,6 +250,10 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
             {transactions.filter(tx => tx.status === "completed").map(tx => {
               const isRecharge = tx.type === "recharge";
               const amountFcfa = tx.amountFcfa ?? Math.round((tx.amountUsd ?? 0) * 620);
+              const amountUsd = tx.amountUsd ?? amountFcfa / 620;
+              const displayAmt = currency === "FCFA"
+                ? `${amountFcfa.toLocaleString("fr-FR")} FCFA`
+                : `$${amountUsd.toFixed(2)}`;
               const date = tx.createdAt ? new Date(tx.createdAt) : null;
               const dateStr = date ? format(date, "dd MMM · HH:mm", { locale: fr }) : "";
               return (
@@ -264,7 +268,7 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
                     <p className="text-xs text-gray-400">{dateStr}</p>
                   </div>
                   <span className={`font-bold text-sm shrink-0 ${isRecharge ? "text-green-600" : "text-red-500"}`}>
-                    {isRecharge ? "+" : "−"}{amountFcfa.toLocaleString("fr-FR")} FCFA
+                    {isRecharge ? "+" : "−"}{displayAmt}
                   </span>
                 </div>
               );
@@ -567,7 +571,13 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
                 <button key={svc.service} onClick={() => onNavigate("numeros")} className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform">
                   <ServiceIcon icon={svc.icon} color={svc.color} name={svc.name} size={56} />
                   <p className="text-[10px] text-gray-600 font-semibold text-center leading-tight line-clamp-1">{svc.name}</p>
-                  <p className="text-[10px] text-blue-600 font-bold">{Math.round((svc.price ?? 0.8) * FCFA_RATE)} FCFA</p>
+                  {svc.price != null && (
+                    <p className="text-[10px] text-blue-600 font-bold">
+                      {currency === "FCFA"
+                        ? `${Math.round(svc.price * FCFA_RATE).toLocaleString("fr-FR")} FCFA`
+                        : `$${svc.price.toFixed(2)}`}
+                    </p>
+                  )}
                 </button>
               ))}
             </div>
@@ -747,7 +757,9 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
                     <p className="text-xs text-gray-400 truncate">{order.serviceName}</p>
                   </div>
                   <span className="text-sm font-bold text-red-500 shrink-0">
-                    -{Math.round(order.priceUsd * FCFA_RATE)} FCFA
+                    -{currency === "FCFA"
+                        ? `${Math.round(order.priceUsd * FCFA_RATE).toLocaleString("fr-FR")} FCFA`
+                        : `$${Number(order.priceUsd).toFixed(2)}`}
                   </span>
                 </div>
               ))}
