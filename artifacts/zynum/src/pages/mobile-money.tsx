@@ -342,10 +342,10 @@ export default function MobileMoneyPage() {
                 <button
                   key={op.id}
                   onClick={() => setOperator(op)}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all active:scale-95 ${
+                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl transition-all active:scale-95 ${
                     operator.id === op.id
-                      ? "border-blue-500 bg-blue-50 shadow-md shadow-blue-100"
-                      : "border-gray-200 bg-white"
+                      ? "bg-blue-50 shadow-md shadow-blue-100"
+                      : "bg-white"
                   }`}
                 >
                   <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden">

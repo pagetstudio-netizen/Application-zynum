@@ -165,8 +165,8 @@ export default function CardPaymentPage() {
               return (
                 <button key={a}
                   onClick={() => setAmountRaw(isFcfa ? String(a) : String((a / FCFA_PER_USD).toFixed(2)))}
-                  className={`py-3 rounded-2xl text-sm font-bold border-2 transition-all ${
-                    isActive ? "border-blue-600 bg-blue-600 text-white" : "border-gray-200 bg-gray-50 text-gray-600"
+                  className={`py-3 rounded-2xl text-sm font-bold transition-all ${
+                    isActive ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600"
                   }`}
                 >
                   {label}

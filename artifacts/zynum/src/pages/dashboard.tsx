@@ -306,10 +306,10 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
                     <button
                       key={a}
                       onClick={() => setAmount(a)}
-                      className={`py-3 rounded-2xl text-sm font-bold border transition-all ${
+                      className={`py-3 rounded-2xl text-sm font-bold transition-all ${
                         amount === a
-                          ? "border-[#00C87A] bg-green-50 text-green-700 shadow-sm"
-                          : "border-gray-200 bg-gray-50 text-gray-600"
+                          ? "bg-green-100 text-green-700 shadow-sm"
+                          : "bg-gray-100 text-gray-600"
                       }`}
                     >
                       {a.toLocaleString("fr-FR")} F
