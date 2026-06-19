@@ -1,29 +1,12 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Globe2, MessageSquare, ShieldCheck, Zap, Smartphone } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const slides = [
   {
     id: 0,
-    icon: (
-      <div className="relative flex items-center justify-center w-full h-full">
-        <div className="absolute w-56 h-56 rounded-full bg-blue-100/80" />
-        <div className="absolute w-40 h-40 rounded-full bg-blue-200/60" />
-        <div className="relative w-32 h-32 rounded-3xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-blue-500/30">
-          <Smartphone className="w-16 h-16 text-white" strokeWidth={1.5} />
-        </div>
-        <div className="absolute top-8 right-12 w-14 h-14 rounded-2xl bg-white shadow-lg flex items-center justify-center">
-          <Globe2 className="w-7 h-7 text-blue-500" />
-        </div>
-        <div className="absolute bottom-10 left-10 w-14 h-14 rounded-2xl bg-white shadow-lg flex items-center justify-center">
-          <MessageSquare className="w-7 h-7 text-indigo-500" />
-        </div>
-        <div className="absolute top-16 left-8 w-10 h-10 rounded-xl bg-green-400 shadow-md flex items-center justify-center">
-          <ShieldCheck className="w-5 h-5 text-white" />
-        </div>
-      </div>
-    ),
+    image: "/onboarding1.png",
     title: "Bienvenue sur ZyNum",
     subtitle: "Votre numéro virtuel dans 180+ pays, livré en quelques secondes.",
     cta: "Démarrer",
@@ -31,36 +14,7 @@ const slides = [
   },
   {
     id: 1,
-    icon: (
-      <div className="relative flex items-center justify-center w-full h-full">
-        <div className="absolute w-56 h-56 rounded-full bg-purple-100/80" />
-        <div className="absolute w-40 h-40 rounded-full bg-purple-200/60" />
-        <div className="relative flex flex-col gap-3">
-          {[
-            { label: "Telegram", color: "from-blue-400 to-blue-600", letter: "TG" },
-            { label: "WhatsApp", color: "from-green-400 to-green-600", letter: "WA" },
-            { label: "Google", color: "from-red-400 to-orange-500", letter: "G" },
-          ].map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ x: -40, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: i * 0.15, duration: 0.5, ease: "easeOut" }}
-              className="flex items-center gap-3 bg-white rounded-2xl px-4 py-3 shadow-lg"
-            >
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center shrink-0`}>
-                <span className="text-white text-xs font-bold">{s.letter}</span>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-800">{s.label}</p>
-                <p className="text-xs text-green-600 font-medium">Code reçu ✓</p>
-              </div>
-              <Zap className="w-4 h-4 text-yellow-400 ml-auto" />
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    ),
+    image: "/onboarding2.png",
     title: "Recevez vos SMS instantanément",
     subtitle: "Telegram, WhatsApp, Google, TikTok et 200+ services disponibles.",
     cta: "Suivant",
@@ -68,23 +22,7 @@ const slides = [
   },
   {
     id: 2,
-    icon: (
-      <div className="relative flex items-center justify-center w-full h-full">
-        <div className="absolute w-56 h-56 rounded-full bg-emerald-100/80" />
-        <div className="absolute w-40 h-40 rounded-full bg-emerald-200/60" />
-        <div className="relative w-32 h-32 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-2xl shadow-emerald-500/30">
-          <span className="text-4xl font-black text-white">Z</span>
-        </div>
-        <div className="absolute top-8 right-10 bg-white rounded-2xl px-3 py-2 shadow-lg">
-          <p className="text-xs text-gray-500 font-medium">Solde</p>
-          <p className="text-sm font-bold text-gray-800">25 500 FCFA</p>
-        </div>
-        <div className="absolute bottom-8 left-6 bg-white rounded-2xl px-3 py-2 shadow-lg">
-          <p className="text-xs text-gray-500 font-medium">Paiement</p>
-          <p className="text-sm font-bold text-emerald-600">TMoney ✓</p>
-        </div>
-      </div>
-    ),
+    image: "/onboarding3.png",
     title: "Payez facilement en FCFA",
     subtitle: "Rechargez via TMoney, Moov Money, Orange Money ou USDT.",
     cta: "Créer un compte",
@@ -148,7 +86,7 @@ export default function Onboarding() {
       </div>
 
       {/* Illustration */}
-      <div className="flex-1 flex items-center justify-center px-8 py-6">
+      <div className="flex-1 flex items-center justify-center px-6 py-4">
         <div className="w-full max-w-sm h-72">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
@@ -159,9 +97,13 @@ export default function Onboarding() {
               animate="center"
               exit="exit"
               transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="w-full h-full"
+              className="w-full h-full flex items-center justify-center"
             >
-              {slide.icon}
+              <img
+                src={slide.image}
+                alt={slide.title}
+                className="w-full h-full object-contain drop-shadow-xl"
+              />
             </motion.div>
           </AnimatePresence>
         </div>
