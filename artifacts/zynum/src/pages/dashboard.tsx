@@ -432,13 +432,27 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
 
       {/* Header — black */}
       <div className="px-4 pt-5 pb-4 flex items-center justify-between shrink-0" style={{ backgroundColor: "#111111" }}>
-        {/* Left: greeting */}
-        <div className="flex-1 min-w-0 mr-3">
-          <p className="text-white/50 text-xs font-medium leading-none mb-0.5">Bonjour 👋</p>
-          <p className="text-white font-black text-lg leading-tight truncate">{firstName}</p>
+        {/* Left: avatar + greeting */}
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <button
+            onClick={() => onNavigate("compte")}
+            className="relative shrink-0 active:scale-90 transition-transform"
+          >
+            <img
+              src="/avatar-user.png"
+              alt="profil"
+              className="w-11 h-11 rounded-full object-cover border-2"
+              style={{ borderColor: "#00C87A" }}
+            />
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#00C87A] rounded-full border-2 border-[#111111]" />
+          </button>
+          <div className="min-w-0">
+            <p className="text-white/50 text-xs font-medium leading-none mb-0.5">Bonjour 👋</p>
+            <p className="text-white font-black text-base leading-tight truncate">{firstName}</p>
+          </div>
         </div>
-        {/* Right: bell + avatar */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        {/* Right: bell */}
+        <div className="shrink-0 ml-3">
           <button
             onClick={() => setNotifOpen(o => !o)}
             className="relative w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center active:scale-90 transition-transform"
@@ -449,14 +463,6 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#00C87A] rounded-full flex items-center justify-center">
               <span className="text-white text-[8px] font-black">{AVANTAGES.length}</span>
             </span>
-          </button>
-          <button
-            onClick={() => onNavigate("compte")}
-            className="relative w-10 h-10 rounded-full overflow-hidden border-2 active:scale-90 transition-transform shrink-0"
-            style={{ borderColor: "#00C87A" }}
-          >
-            <img src="/avatar2.jpg" alt="profil" className="w-full h-full object-cover" />
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#00C87A] rounded-full border-2 border-[#111111]" />
           </button>
         </div>
       </div>
@@ -1423,11 +1429,11 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
     : "";
 
   const MENU = [
-    { id: "infos",    icon: <User className="w-5 h-5" />,      label: "Informations personnelles", color: "text-blue-600 bg-blue-50" },
-    { id: "security", icon: <Lock className="w-5 h-5" />,       label: "Sécurité",                  color: "text-orange-600 bg-orange-50" },
-    { id: "referral", icon: <Gift className="w-5 h-5" />,       label: "Parrainage",                color: "text-purple-600 bg-purple-50", badge: "10%" },
-    { id: "params",   icon: <Settings className="w-5 h-5" />,   label: "Paramètres",                color: "text-gray-600 bg-gray-100" },
-    { id: "help",     icon: <HelpCircle className="w-5 h-5" />, label: "Centre d'aide",             color: "text-teal-600 bg-teal-50" },
+    { id: "infos",    iconSrc: "/icon-profile.png",  iconBg: "#EFF6FF", label: "Informations personnelles", accent: "#3B82F6" },
+    { id: "security", iconSrc: "/icon-password.png", iconBg: "#111827", label: "Sécurité",                  accent: "#F97316" },
+    { id: "referral", iconSrc: "/icon-records.png",  iconBg: "#111827", label: "Parrainage",                accent: "#8B5CF6", badge: "10%" },
+    { id: "params",   iconSrc: "/icon-params.png",   iconBg: "#111827", label: "Paramètres",                accent: "#6B7280" },
+    { id: "help",     iconSrc: "/icon-support.png",  iconBg: "#111827", label: "Centre d'aide",             accent: "#14B8A6" },
   ];
 
   const nav = (s: string) => setSection(s);
@@ -1461,8 +1467,9 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
           {/* User card */}
           <button onClick={() => nav("infos")} className="w-full bg-white rounded-3xl p-5 shadow-sm border border-gray-100 text-left active:scale-[0.98] transition-transform">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-2xl font-black text-white shadow-lg shadow-blue-500/30">
-                {user.name.charAt(0).toUpperCase()}
+              <div className="relative shrink-0">
+                <img src="/avatar-user.png" alt="profil" className="w-16 h-16 rounded-2xl object-cover" />
+                <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 bg-[#00C87A] rounded-full border-2 border-white" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -1486,16 +1493,25 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
               <button
                 key={item.id}
                 onClick={() => nav(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left ${i > 0 ? "border-t border-gray-50" : ""}`}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 active:bg-gray-50 transition-colors text-left ${i > 0 ? "border-t border-gray-50" : ""}`}
               >
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${item.color}`}>{item.icon}</div>
-                <div className="flex-1">
+                <div
+                  className="w-10 h-10 rounded-xl overflow-hidden shrink-0 flex items-center justify-center"
+                  style={{ backgroundColor: item.iconBg }}
+                >
+                  <img
+                    src={item.iconSrc}
+                    className="w-8 h-8 object-contain"
+                    style={item.iconBg === "#EFF6FF" ? { filter: "saturate(0) brightness(0.4)" } : {}}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900">{item.label}</p>
                 </div>
                 {item.badge && (
                   <span className="text-[10px] font-bold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full shrink-0">{item.badge}</span>
                 )}
-                <ChevronRight className="w-4 h-4 text-gray-300" />
+                <ChevronRight className="w-4 h-4 shrink-0" style={{ color: item.accent }} />
               </button>
             ))}
           </div>
