@@ -406,17 +406,17 @@ export default function CardPaymentPage() {
       <AnimatePresence mode="wait">
         {step === "amount" && (
           <motion.div key="amount" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <AmountStep />
+            {AmountStep()}
           </motion.div>
         )}
         {step === "card" && (
           <motion.div key="card" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "tween", duration: 0.22 }}>
-            <CardStep />
+            {CardStep()}
           </motion.div>
         )}
         {step === "processing" && (
           <motion.div key="processing" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "tween", duration: 0.22 }}>
-            <ProcessingStep />
+            {ProcessingStep()}
           </motion.div>
         )}
       </AnimatePresence>

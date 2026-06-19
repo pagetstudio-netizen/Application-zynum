@@ -615,22 +615,22 @@ export default function MobileMoneyPage() {
       <AnimatePresence mode="wait">
         {step === "country" && (
           <motion.div key="country" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "tween", duration: 0.22 }}>
-            <CountryPicker />
+            {CountryPicker()}
           </motion.div>
         )}
         {step === "phone" && (
           <motion.div key="phone" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <PhoneStep />
+            {PhoneStep()}
           </motion.div>
         )}
         {step === "amount" && (
           <motion.div key="amount" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "tween", duration: 0.22 }}>
-            <AmountStep />
+            {AmountStep()}
           </motion.div>
         )}
         {step === "processing" && (
           <motion.div key="processing" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "tween", duration: 0.22 }}>
-            <ProcessingStep />
+            {ProcessingStep()}
           </motion.div>
         )}
       </AnimatePresence>
