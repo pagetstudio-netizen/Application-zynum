@@ -70,6 +70,8 @@ const STATUS_MAP: Record<string, { label: string; cls: string }> = {
 function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Tab) => void }) {
   const { currency } = useCurrency();
   const [showBal, setShowBal] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [notifCount] = useState(3);
   const { data: balanceData } = useGetBalance({ query: { retry: false } });
   const { data: servicesData } = useGetServices(undefined, { query: { retry: false, staleTime: 60000 } });
   const { data: historyData } = useGetOrderHistory({ page: 1, limit: 5 }, { query: { retry: false } });
@@ -79,19 +81,115 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
   const services = (servicesData?.services ?? []).slice(0, 4);
   const orders = historyData?.orders ?? [];
 
+  const initials = user.name?.charAt(0).toUpperCase() ?? "Z";
+
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="bg-white px-4 pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md shadow-blue-500/30">
-            <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />
+    <div className="flex-1 flex flex-col overflow-hidden relative">
+      {/* Slide-out Menu Drawer */}
+      <AnimatePresence>
+        {menuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 bg-black/50 z-40"
+              onClick={() => setMenuOpen(false)}
+            />
+            {/* Drawer */}
+            <motion.div
+              key="drawer"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 280 }}
+              className="absolute left-0 top-0 bottom-0 w-72 z-50 flex flex-col"
+              style={{ backgroundColor: "#111111" }}
+            >
+              {/* Drawer header */}
+              <div className="px-5 pt-10 pb-6 border-b border-white/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-[#00C87A] flex items-center justify-center text-white font-black text-xl">
+                    {initials}
+                  </div>
+                  <div>
+                    <p className="text-white font-bold text-sm">{user.name}</p>
+                    <p className="text-white/50 text-xs truncate max-w-[160px]">{user.email}</p>
+                  </div>
+                </div>
+              </div>
+              {/* Drawer links */}
+              <div className="flex-1 overflow-y-auto py-4 space-y-1 px-3">
+                {[
+                  { icon: <Home className="w-5 h-5" />, label: "Accueil", tab: "accueil" as Tab },
+                  { icon: <Smartphone className="w-5 h-5" />, label: "Acheter un numéro", tab: "numeros" as Tab },
+                  { icon: <MessageSquare className="w-5 h-5" />, label: "Mes SMS", tab: "sms" as Tab },
+                  { icon: <WalletIcon className="w-5 h-5" />, label: "Wallet", tab: "compte" as Tab },
+                  { icon: <User className="w-5 h-5" />, label: "Mon Compte", tab: "compte" as Tab },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => { onNavigate(item.tab); setMenuOpen(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-white/70 hover:text-white hover:bg-white/10 transition-all active:scale-95"
+                  >
+                    <span className="text-[#00C87A]">{item.icon}</span>
+                    <span className="font-semibold text-sm">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+              {/* Close button at bottom */}
+              <div className="p-5 border-t border-white/10">
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/10 text-white/60 hover:text-white transition-colors text-sm font-semibold"
+                >
+                  <X className="w-4 h-4" /> Fermer
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Header — dark */}
+      <div className="px-4 pt-4 pb-3 flex items-center justify-between shrink-0" style={{ backgroundColor: "#111111" }}>
+        {/* Left: menu + branding */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="flex flex-col gap-[5px] p-1 active:scale-90 transition-transform"
+          >
+            <span className="block w-5 h-[2px] bg-white rounded-full" />
+            <span className="block w-5 h-[2px] bg-white rounded-full" />
+            <span className="block w-5 h-[2px] bg-white rounded-full" />
+          </button>
+          <div>
+            <p className="text-white font-extrabold text-base leading-tight tracking-tight">ZyNum</p>
+            <p className="text-white/40 text-[10px] leading-tight">Numéros virtuels</p>
           </div>
-          <span className="font-extrabold text-gray-900 text-lg tracking-tight">ZyNum</span>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="relative p-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
-            <img src="/bell-icon.png" alt="Notifications" className="w-5 h-5 object-contain" style={{ filter: "brightness(0) opacity(0.45)" }} />
+        {/* Right: bell + avatar */}
+        <div className="flex items-center gap-3">
+          <button className="relative p-1 active:scale-90 transition-transform">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            {notifCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-[9px] font-black">{notifCount}</span>
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => onNavigate("compte")}
+            className="relative w-9 h-9 rounded-full flex items-center justify-center font-black text-sm text-white active:scale-90 transition-transform"
+            style={{ backgroundColor: "#00C87A" }}
+          >
+            {initials}
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-[#111111]" />
           </button>
         </div>
       </div>
