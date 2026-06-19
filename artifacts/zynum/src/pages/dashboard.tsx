@@ -9,7 +9,7 @@ import {
   Copy, Check, Shield, Gift, Code2, HelpCircle, Settings,
   ArrowUpRight, ArrowDownLeft, Tag, History, RefreshCw,
   Phone, Globe2, Star, Lock, KeyRound, X, Menu,
-  ChevronLeft, Clock, XCircle, Package,
+  ChevronLeft, Clock, XCircle, Package, CreditCard,
 } from "lucide-react";
 import {
   useGetCurrentUser, useLogoutUser, useGetBalance,
@@ -24,7 +24,11 @@ import BuyNumber from "@/pages/buy";
 import OrderHistory from "@/pages/history";
 import Recharge from "@/pages/recharge";
 import { OmnipayModal } from "@/components/omnipay-modal";
+import { PaxityModal } from "@/components/paxity-modal";
 import { NotificationBanner } from "@/components/notification-banner";
+import imgTMoneyOp  from "@assets/images_(1)_1774832430242.png";
+import imgMoovOp    from "@assets/moov_(1)_1763835082986-GKkwwfPK_1774832019539.png";
+import imgAirtelOp  from "@assets/Airtel_logo-01_1774832430216.png";
 import { usePublicSettings, openTelegramSupport } from "@/hooks/use-public-settings";
 
 type Tab = "accueil" | "numeros" | "sms" | "compte";
@@ -94,256 +98,264 @@ const METHODS_BY_COUNTRY: Record<string, { id: string; name: string; color: stri
 const PRESET_AMOUNTS = [500, 1000, 2000, 5000, 10000, 20000];
 const FEES: Record<string, number> = { tmoney: 5, moov: 5, orange: 5, wave: 2, mtn: 5, free: 3 };
 
+const RECHARGE_PRESETS = [1000, 2000, 5000, 10000, 20000, 50000];
+
 function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => void }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currency } = useCurrency();
   const { data: balanceData, refetch: refetchBalance } = useGetBalance({ query: { retry: false } });
-  const [phone, setPhone] = useState("");
-  const [amount, setAmount] = useState("1000");
-  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
-  const [showCountryPicker, setShowCountryPicker] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<{ id: string; name: string; color: string } | null>(null);
-  const [showMethodPicker, setShowMethodPicker] = useState(false);
+
+  const [showBal, setShowBal] = useState(true);
+  const [amount, setAmount] = useState(5000);
+  const [pendingMethod, setPendingMethod] = useState<"mobile" | "card" | null>(null);
   const [omnipayOpen, setOmnipayOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [paxityOpen, setPaxityOpen] = useState(false);
+  const [transactions, setTransactions] = useState<{
+    id: number; type: string; amountUsd: number | null;
+    amountFcfa: number | null; status: string; createdAt: string | null;
+  }[]>([]);
+  const [txLoading, setTxLoading] = useState(true);
 
-  const methods = METHODS_BY_COUNTRY[selectedCountry.code] ?? [];
-  const amountNum = parseInt(amount) || 0;
-  const feeRate = selectedMethod ? (FEES[selectedMethod.id] ?? 5) : 0;
-  const feeXof = selectedMethod ? Math.round(amountNum * feeRate / 100) : 0;
-  const totalXof = amountNum + feeXof;
-  const amountUsd = amountNum / 620;
+  const FCFA_PER_USD = 620;
+  const balance = balanceData?.balance ?? 0;
+  const displayBal = showBal
+    ? currency === "FCFA"
+      ? `${Math.round(balance * FCFA_PER_USD).toLocaleString("fr-FR")} FCFA`
+      : `$${balance.toFixed(2)}`
+    : "••••••";
 
-  const handleConfirm = () => {
-    if (!phone.trim()) {
-      toast({ variant: "destructive", title: "Numéro requis", description: "Entrez votre numéro Mobile Money." });
-      return;
-    }
-    if (amountNum < 300) {
+  useEffect(() => {
+    const token = localStorage.getItem("zynum_token");
+    fetch("/api/v1/transactions", {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: "include",
+    })
+      .then(r => r.ok ? r.json() : { transactions: [] })
+      .then(d => { setTransactions(d.transactions ?? []); setTxLoading(false); })
+      .catch(() => setTxLoading(false));
+  }, []);
+
+  const handleMethodClick = (method: "mobile" | "card") => {
+    setPendingMethod(method);
+  };
+
+  const handleConfirmAmount = () => {
+    if (amount < 300) {
       toast({ variant: "destructive", title: "Montant trop faible", description: "Minimum 300 FCFA." });
       return;
     }
-    if (!selectedMethod) {
-      toast({ variant: "destructive", title: "Méthode requise", description: "Sélectionnez une méthode de paiement." });
-      return;
+    if (pendingMethod === "mobile") {
+      setPendingMethod(null);
+      setOmnipayOpen(true);
+    } else {
+      setPendingMethod(null);
+      setPaxityOpen(true);
     }
-    setOmnipayOpen(true);
   };
 
   const handlePaymentSuccess = () => {
     toast({ title: "Paiement initié !", description: "Votre solde sera mis à jour dans quelques instants." });
-    setLoading(true);
     setTimeout(() => {
       refetchBalance();
       queryClient.invalidateQueries({ queryKey: getGetBalanceQueryKey() });
-      setLoading(false);
-      onBack();
+      const token = localStorage.getItem("zynum_token");
+      fetch("/api/v1/transactions", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: "include",
+      })
+        .then(r => r.ok ? r.json() : { transactions: [] })
+        .then(d => setTransactions(d.transactions ?? []))
+        .catch(() => {});
     }, 3000);
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+    <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 relative">
       {/* Header */}
-      <div className="px-4 pt-4 pb-3 flex items-center justify-between shrink-0" style={{ backgroundColor: "#111111" }}>
-        <button onClick={onBack} className="p-2 rounded-xl active:scale-90 transition-transform">
-          <ChevronLeft className="w-5 h-5 text-white" />
+      <div className="bg-white px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 border-b border-gray-100">
+        <button onClick={onBack} className="p-2 rounded-xl active:bg-gray-100 transition-colors">
+          <ChevronLeft className="w-5 h-5 text-gray-700" />
         </button>
-        <span className="text-white font-bold text-base">Recharger</span>
-        <div className="p-2">
-          <svg className="w-6 h-6 text-white/60" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
-        </div>
+        <h1 className="font-extrabold text-gray-900 text-lg flex-1">Recharge de compte</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto pb-6">
-        <div className="px-4 pt-5 space-y-3">
+        <div className="px-4 pt-4 space-y-4">
 
-          {/* Phone number */}
-          <div className="bg-white rounded-2xl border-2 border-gray-200 px-4 py-3">
-            <p className="text-xs text-gray-400 font-semibold mb-1">Numéro de téléphone</p>
-            <input
-              type="tel"
-              value={phone}
-              onChange={e => setPhone(e.target.value)}
-              placeholder="ex: 90 00 00 00"
-              className="w-full text-lg font-semibold text-gray-900 placeholder:text-gray-300 focus:outline-none bg-transparent"
-            />
-          </div>
-
-          {/* Amount + Country */}
-          <div className="bg-white rounded-2xl border-2 border-gray-200 flex overflow-hidden">
-            {/* Amount */}
-            <div className="flex-1 px-4 py-3 border-r border-gray-100">
-              <p className="text-xs text-gray-400 font-semibold mb-1">Montant</p>
-              <div className="flex items-center gap-1">
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={e => setAmount(e.target.value)}
-                  className="w-full text-xl font-black text-gray-900 focus:outline-none bg-transparent"
-                />
-                <span className="text-sm font-bold text-gray-400 shrink-0">{selectedCountry.currency}</span>
+          {/* Balance card — green */}
+          <div className="rounded-[32px] p-4" style={{ backgroundColor: "#00C87A" }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center">
+                  <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />
+                </div>
+                <span className="font-extrabold text-[#1a2b8c] text-lg tracking-tight">ZyNum</span>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-semibold text-white mb-0.5">Solde du compte</p>
+                <div className="flex items-center gap-1.5 justify-end">
+                  <p className="text-xl font-black text-white tracking-tight">{displayBal}</p>
+                  <button onClick={() => setShowBal(s => !s)} className="text-white/80 hover:text-white transition-colors">
+                    {showBal ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
               </div>
             </div>
-            {/* Country picker */}
+          </div>
+
+          {/* Method buttons */}
+          <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
             <button
-              onClick={() => setShowCountryPicker(true)}
-              className="px-4 py-3 flex flex-col items-end gap-1 active:bg-gray-50 transition-colors"
+              onClick={() => handleMethodClick("mobile")}
+              className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
             >
-              <p className="text-xs text-gray-400 font-semibold">Pays d'envoi</p>
-              <div className="flex items-center gap-1">
-                <span className="text-lg">{selectedCountry.flag}</span>
-                <span className="text-sm font-black text-gray-900">{selectedCountry.name}</span>
-                <ChevronRight className="w-4 h-4 text-gray-400 rotate-90" />
+              <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via mobile Money</span>
+              <div className="flex items-center -space-x-2 shrink-0">
+                <img src={imgTMoneyOp}  className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" alt="TMoney" />
+                <img src={imgMoovOp}    className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" alt="Moov" />
+                <img src={imgAirtelOp}  className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" alt="Airtel" />
+              </div>
+            </button>
+            <div className="mx-5 h-[2px]" style={{ backgroundColor: "#00C87A" }} />
+            <button
+              onClick={() => handleMethodClick("card")}
+              className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
+            >
+              <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via Carte bancaire</span>
+              <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                <CreditCard className="w-6 h-6 text-red-500" />
               </div>
             </button>
           </div>
 
-          {/* Preset amounts */}
-          <div className="grid grid-cols-3 gap-2">
-            {PRESET_AMOUNTS.map(a => (
-              <button
-                key={a}
-                onClick={() => setAmount(String(a))}
-                className={`py-2.5 rounded-xl text-sm font-bold border transition-all ${
-                  parseInt(amount) === a
-                    ? "border-blue-500 bg-blue-50 text-blue-600"
-                    : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-                }`}
-              >
-                {a.toLocaleString("fr-FR")}
-              </button>
-            ))}
+          {/* Transaction history */}
+          <div>
+            <p className="font-bold text-gray-900 text-base mb-3">Historique des transactions</p>
+            {txLoading ? (
+              <div className="text-center py-8 text-gray-400 text-sm">Chargement…</div>
+            ) : transactions.filter(tx => tx.status === "completed").length === 0 ? (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-10 text-center">
+                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                  <History className="w-6 h-6 text-gray-400" />
+                </div>
+                <p className="text-sm font-semibold text-gray-500">Aucune transaction</p>
+                <p className="text-xs text-gray-400 mt-1">Vos recharges apparaîtront ici</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-50">
+                {transactions.filter(tx => tx.status === "completed").map(tx => {
+                  const isRecharge = tx.type === "recharge";
+                  const amountFcfa = tx.amountFcfa ?? Math.round((tx.amountUsd ?? 0) * 620);
+                  const date = tx.createdAt ? new Date(tx.createdAt) : null;
+                  const dateStr = date ? format(date, "dd MMM · HH:mm", { locale: fr }) : "";
+                  return (
+                    <div key={tx.id} className="flex items-center gap-3 px-4 py-3.5">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isRecharge ? "bg-blue-500" : "bg-orange-500"}`}>
+                        {isRecharge ? <Plus className="w-4 h-4 text-white" /> : <ArrowUpRight className="w-4 h-4 text-white" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-gray-900 text-sm truncate">
+                          {isRecharge ? "Rechargement" : "Retrait"}
+                        </p>
+                        <p className="text-xs text-gray-400">{dateStr}</p>
+                      </div>
+                      <span className={`font-bold text-sm shrink-0 ${isRecharge ? "text-green-600" : "text-red-500"}`}>
+                        {isRecharge ? "+" : "−"}{amountFcfa.toLocaleString("fr-FR")} FCFA
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Select method */}
-          <button
-            onClick={() => setShowMethodPicker(true)}
-            className="w-full bg-white rounded-2xl border-2 border-gray-200 px-4 py-4 flex items-center gap-3 active:bg-gray-50 transition-colors"
-          >
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: selectedMethod?.color ?? "#6B7280" }}>
-              <WalletIcon className="w-5 h-5 text-white" />
-            </div>
-            <span className={`flex-1 text-left font-semibold text-sm ${selectedMethod ? "text-gray-900" : "text-gray-400"}`}>
-              {selectedMethod ? selectedMethod.name : "Sélectionner une méthode"}
-            </span>
-            <ChevronRight className="w-4 h-4 text-gray-400" />
-          </button>
-
-        </div>
-
-        {/* Summary */}
-        <div className="mx-4 mt-5 bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <div className="px-4 pt-4 pb-2">
-            <p className="text-sm font-bold text-blue-600">◈ Récapitulatif</p>
-          </div>
-          <div className="px-4 pb-4 space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">Montant envoyé</span>
-              <span className="text-sm font-semibold text-gray-900">{amountNum > 0 ? `${amountNum.toLocaleString("fr-FR")} ${selectedCountry.currency}` : "—"}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">Transfer fee</span>
-              <span className="text-sm font-semibold text-gray-500">{selectedMethod && amountNum > 0 ? `${feeXof.toLocaleString("fr-FR")} ${selectedCountry.currency} (${feeRate}%)` : "—"}</span>
-            </div>
-            <div className="h-px bg-gray-100" />
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-black text-gray-900">Total to pay</span>
-              <span className="text-sm font-black text-blue-600">{amountNum > 0 ? `${totalXof.toLocaleString("fr-FR")} ${selectedCountry.currency}` : "—"}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Confirm button */}
-        <div className="px-4 mt-4">
-          <button
-            onClick={handleConfirm}
-            disabled={loading || !phone || amountNum < 300 || !selectedMethod}
-            className="w-full h-14 rounded-2xl bg-blue-600 text-white font-black text-base disabled:opacity-40 active:scale-95 transition-all shadow-lg shadow-blue-500/30"
-          >
-            {loading ? "Traitement..." : "Confirmé le paiement"}
-          </button>
-          <p className="text-center text-xs text-gray-400 mt-3">🔒 Paiement 100% sécurisé</p>
         </div>
       </div>
 
-      {/* Country picker modal */}
+      {/* Amount picker — bottom sheet */}
       <AnimatePresence>
-        {showCountryPicker && (
+        {pendingMethod && (
           <>
-            <motion.div key="cp-bg" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/40 z-40" onClick={() => setShowCountryPicker(false)} />
-            <motion.div key="cp" initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+            <motion.div
+              key="amount-bg"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/40 z-40"
+              onClick={() => setPendingMethod(null)}
+            />
+            <motion.div
+              key="amount-sheet"
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 280 }}
-              className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl z-50 max-h-[70%] overflow-y-auto"
+              className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl z-50 pb-8"
             >
-              <div className="px-4 pt-4 pb-2 border-b border-gray-100">
-                <p className="font-bold text-gray-900 text-base">Pays d'envoi</p>
+              <div className="px-5 pt-5 pb-4 border-b border-gray-100">
+                <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+                <p className="font-bold text-gray-900 text-base">
+                  {pendingMethod === "mobile" ? "💳 Montant à recharger (Mobile Money)" : "💳 Montant à recharger (Carte bancaire)"}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">Minimum 300 FCFA</p>
               </div>
-              {COUNTRIES.map(c => (
-                <button key={c.code} onClick={() => { setSelectedCountry(c); setSelectedMethod(null); setShowCountryPicker(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-3.5 border-b border-gray-50 active:bg-gray-50 ${selectedCountry.code === c.code ? "bg-blue-50" : ""}`}
+              <div className="px-5 pt-4 space-y-4">
+                <div className="grid grid-cols-3 gap-2">
+                  {RECHARGE_PRESETS.map(a => (
+                    <button
+                      key={a}
+                      onClick={() => setAmount(a)}
+                      className={`py-3 rounded-2xl text-sm font-bold border transition-all ${
+                        amount === a
+                          ? "border-[#00C87A] bg-green-50 text-green-700 shadow-sm"
+                          : "border-gray-200 bg-gray-50 text-gray-600"
+                      }`}
+                    >
+                      {a.toLocaleString("fr-FR")} F
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-3 border border-gray-200">
+                  <span className="text-sm font-semibold text-gray-400 shrink-0">FCFA</span>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={e => setAmount(Math.max(0, Number(e.target.value)))}
+                    className="flex-1 bg-transparent text-gray-900 font-bold text-lg focus:outline-none"
+                  />
+                </div>
+                <button
+                  onClick={handleConfirmAmount}
+                  className="w-full py-4 rounded-2xl font-bold text-white text-base active:scale-95 transition-transform shadow-lg"
+                  style={{ backgroundColor: "#00C87A" }}
                 >
-                  <span className="text-2xl">{c.flag}</span>
-                  <span className="font-semibold text-gray-900 flex-1 text-left">{c.name}</span>
-                  <span className="text-xs text-gray-400">{c.currency}</span>
-                  {selectedCountry.code === c.code && <Check className="w-4 h-4 text-blue-600" />}
+                  Continuer →
                 </button>
-              ))}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Method picker modal */}
-      <AnimatePresence>
-        {showMethodPicker && (
-          <>
-            <motion.div key="mp-bg" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/40 z-40" onClick={() => setShowMethodPicker(false)} />
-            <motion.div key="mp" initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 28, stiffness: 280 }}
-              className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl z-50"
-            >
-              <div className="px-4 pt-4 pb-2 border-b border-gray-100">
-                <p className="font-bold text-gray-900 text-base">Méthode de paiement</p>
-                <p className="text-xs text-gray-400 mt-0.5">{selectedCountry.flag} {selectedCountry.name}</p>
               </div>
-              {methods.length === 0 ? (
-                <p className="text-center text-gray-400 text-sm py-8">Aucune méthode disponible pour ce pays.</p>
-              ) : (
-                methods.map(m => (
-                  <button key={m.id} onClick={() => { setSelectedMethod(m); setShowMethodPicker(false); }}
-                    className={`w-full flex items-center gap-3 px-4 py-4 border-b border-gray-50 active:bg-gray-50 ${selectedMethod?.id === m.id ? "bg-blue-50" : ""}`}
-                  >
-                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0" style={{ backgroundColor: m.color }}>
-                      <span className="text-white text-xs font-black">{m.name.slice(0, 2)}</span>
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-semibold text-gray-900 text-sm">{m.name}</p>
-                      <p className="text-xs text-gray-400">Commission {FEES[m.id] ?? 5}%</p>
-                    </div>
-                    {selectedMethod?.id === m.id && <Check className="w-4 h-4 text-blue-600 shrink-0" />}
-                  </button>
-                ))
-              )}
-              <div className="h-6" />
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Omnipay Modal */}
+      {/* OmnipayModal */}
       {user && (
         <OmnipayModal
           open={omnipayOpen}
           onClose={() => setOmnipayOpen(false)}
-          amountXof={amountNum}
+          amountXof={amount}
           userId={user.id}
           onSuccess={handlePaymentSuccess}
           userFirstName={user.name?.split(" ")[0] ?? "ZyNum"}
           userLastName={user.name?.split(" ").slice(1).join(" ") || `User${user.id}`}
+        />
+      )}
+
+      {/* PaxityModal — carte bancaire */}
+      {user && (
+        <PaxityModal
+          open={paxityOpen}
+          onClose={() => setPaxityOpen(false)}
+          amountXof={amount}
+          userId={user.id}
+          onSuccess={handlePaymentSuccess}
+          initialTab="card"
         />
       )}
     </div>
