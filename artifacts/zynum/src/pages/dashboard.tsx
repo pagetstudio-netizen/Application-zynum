@@ -354,9 +354,8 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
 function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Tab) => void }) {
   const { currency } = useCurrency();
   const [showBal, setShowBal] = useState(true);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [view, setView] = useState<"home" | "recharge">("home");
-  const [notifCount] = useState(3);
+  const [notifOpen, setNotifOpen] = useState(false);
   const { data: balanceData } = useGetBalance({ query: { retry: false } });
   const { data: servicesData } = useGetServices(undefined, { query: { retry: false, staleTime: 60000 } });
   const { data: historyData } = useGetOrderHistory({ page: 1, limit: 5 }, { query: { retry: false } });
@@ -367,6 +366,16 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
   const orders = historyData?.orders ?? [];
 
   const initials = user.name?.charAt(0).toUpperCase() ?? "Z";
+  const firstName = user.name?.split(" ")[0] ?? "là";
+
+  const AVANTAGES = [
+    { emoji: "🌍", title: "180+ pays disponibles",         desc: "Recevez des SMS depuis n'importe quel pays du monde." },
+    { emoji: "⚡", title: "Réception instantanée",          desc: "Votre SMS arrive en quelques secondes après l'achat." },
+    { emoji: "💰", title: "Paiement Mobile Money",         desc: "TMoney, Flooz, Orange Money, Wave et plus encore." },
+    { emoji: "🔒", title: "100% anonyme et sécurisé",      desc: "Aucune donnée personnelle requise pour acheter." },
+    { emoji: "🎁", title: "Programme de parrainage",        desc: "Invitez vos amis et gagnez des FCFA à chaque achat." },
+    { emoji: "📱", title: "Toutes les apps supportées",    desc: "WhatsApp, Telegram, TikTok, Gmail, Facebook et +." },
+  ];
 
   if (view === "recharge") {
     return <RechargeView user={user} onBack={() => setView("home")} />;
@@ -374,69 +383,47 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative">
-      {/* Slide-out Menu Drawer */}
+
+      {/* Notification panel */}
       <AnimatePresence>
-        {menuOpen && (
+        {notifOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
-              key="backdrop"
+              key="notif-bg"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute inset-0 bg-black/50 z-40"
-              onClick={() => setMenuOpen(false)}
+              className="absolute inset-0 bg-black/40 z-40"
+              onClick={() => setNotifOpen(false)}
             />
-            {/* Drawer */}
             <motion.div
-              key="drawer"
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 28, stiffness: 280 }}
-              className="absolute left-0 top-0 bottom-0 w-72 z-50 flex flex-col"
+              key="notif-panel"
+              initial={{ y: "-100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="absolute top-0 left-0 right-0 z-50 rounded-b-3xl overflow-hidden"
               style={{ backgroundColor: "#111111" }}
             >
-              {/* Drawer header */}
-              <div className="px-5 pt-10 pb-6 border-b border-white/10">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-[#00C87A] flex items-center justify-center text-white font-black text-xl">
-                    {initials}
-                  </div>
-                  <div>
-                    <p className="text-white font-bold text-sm">{user.name}</p>
-                    <p className="text-white/50 text-xs truncate max-w-[160px]">{user.email}</p>
-                  </div>
+              <div className="px-5 pt-6 pb-4 flex items-center justify-between border-b border-white/10">
+                <div>
+                  <p className="text-white font-black text-base">Avantages ZyNum</p>
+                  <p className="text-white/40 text-xs mt-0.5">Pourquoi choisir ZyNum ?</p>
                 </div>
-              </div>
-              {/* Drawer links */}
-              <div className="flex-1 overflow-y-auto py-4 space-y-1 px-3">
-                {[
-                  { icon: <Home className="w-5 h-5" />, label: "Accueil", tab: "accueil" as Tab },
-                  { icon: <Smartphone className="w-5 h-5" />, label: "Acheter un numéro", tab: "numeros" as Tab },
-                  { icon: <MessageSquare className="w-5 h-5" />, label: "Mes SMS", tab: "sms" as Tab },
-                  { icon: <WalletIcon className="w-5 h-5" />, label: "Wallet", tab: "compte" as Tab },
-                  { icon: <User className="w-5 h-5" />, label: "Mon Compte", tab: "compte" as Tab },
-                ].map((item) => (
-                  <button
-                    key={item.label}
-                    onClick={() => { onNavigate(item.tab); setMenuOpen(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-white/70 hover:text-white hover:bg-white/10 transition-all active:scale-95"
-                  >
-                    <span className="text-[#00C87A]">{item.icon}</span>
-                    <span className="font-semibold text-sm">{item.label}</span>
-                  </button>
-                ))}
-              </div>
-              {/* Close button at bottom */}
-              <div className="p-5 border-t border-white/10">
-                <button
-                  onClick={() => setMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/10 text-white/60 hover:text-white transition-colors text-sm font-semibold"
-                >
-                  <X className="w-4 h-4" /> Fermer
+                <button onClick={() => setNotifOpen(false)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center active:scale-90 transition-transform">
+                  <X className="w-4 h-4 text-white" />
                 </button>
+              </div>
+              <div className="px-4 py-3 space-y-1 max-h-[60vh] overflow-y-auto pb-6">
+                {AVANTAGES.map((a, i) => (
+                  <div key={i} className="flex items-start gap-3 px-3 py-3 rounded-2xl bg-white/5">
+                    <span className="text-2xl mt-0.5 shrink-0">{a.emoji}</span>
+                    <div className="min-w-0">
+                      <p className="text-white font-bold text-sm leading-tight">{a.title}</p>
+                      <p className="text-white/50 text-xs mt-0.5 leading-snug">{a.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </motion.div>
           </>
@@ -444,37 +431,28 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
       </AnimatePresence>
 
       {/* Header — dark */}
-      <div className="px-4 pt-4 pb-3 flex items-center justify-between shrink-0" style={{ backgroundColor: "#111111" }}>
-        {/* Left: menu + branding */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setMenuOpen(true)}
-            className="flex flex-col gap-[5px] p-1 active:scale-90 transition-transform"
-          >
-            <span className="block w-5 h-[2px] bg-white rounded-full" />
-            <span className="block w-5 h-[2px] bg-white rounded-full" />
-            <span className="block w-5 h-[2px] bg-white rounded-full" />
-          </button>
-          <div>
-            <p className="text-white font-extrabold text-base leading-tight tracking-tight">ZyNum</p>
-            <p className="text-white/40 text-[10px] leading-tight">Numéros virtuels</p>
-          </div>
+      <div className="px-4 pt-5 pb-4 flex items-center justify-between shrink-0" style={{ backgroundColor: "#111111" }}>
+        {/* Left: greeting */}
+        <div className="flex-1 min-w-0 mr-3">
+          <p className="text-white/50 text-xs font-medium leading-none mb-0.5">Bonjour 👋</p>
+          <p className="text-white font-black text-lg leading-tight truncate">{firstName}</p>
         </div>
         {/* Right: bell + avatar */}
-        <div className="flex items-center gap-3">
-          <button className="relative p-1 active:scale-90 transition-transform">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={() => setNotifOpen(o => !o)}
+            className="relative p-2 rounded-2xl bg-white/10 active:scale-90 transition-transform"
+          >
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
-            {notifCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-[9px] font-black">{notifCount}</span>
-              </span>
-            )}
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-[8px] font-black">{AVANTAGES.length}</span>
+            </span>
           </button>
           <button
             onClick={() => onNavigate("compte")}
-            className="relative w-9 h-9 rounded-full flex items-center justify-center font-black text-sm text-white active:scale-90 transition-transform"
+            className="relative w-10 h-10 rounded-full flex items-center justify-center font-black text-sm text-white active:scale-90 transition-transform shrink-0"
             style={{ backgroundColor: "#00C87A" }}
           >
             {initials}
