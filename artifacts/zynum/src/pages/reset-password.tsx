@@ -1,233 +1,231 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useLocation } from "wouter";
-import { Loader2, Lock, Eye, EyeOff, ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-
-const API = "/api";
+import { Link, useLocation } from "wouter";
+import { ChevronLeft, Lock, Eye, EyeOff, Loader2, CheckCircle2, ArrowRight } from "lucide-react";
 
 export default function ResetPassword() {
-  const [, setLocation] = useLocation();
-  const { toast } = useToast();
+  const [, navigate] = useLocation();
 
-  const params = new URLSearchParams(window.location.search);
-  const emailFromLink = params.get("email") || "";
-  const verifiedFromLink = params.get("verified") === "1";
+  const params    = new URLSearchParams(window.location.search);
+  const emailInit = params.get("email") ?? "";
 
-  const [email, setEmail] = useState(emailFromLink);
-  const [code, setCode] = useState("");
-  const [codeDigits, setCodeDigits] = useState(["", "", "", "", "", ""]);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [email, setEmail]         = useState(emailInit);
+  const [codeDigits, setCode]     = useState(["","","","","",""]);
+  const [newPwd, setNewPwd]       = useState("");
+  const [confirmPwd, setConfirm]  = useState("");
+  const [showPwd, setShowPwd]     = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [done, setDone]           = useState(false);
+  const [error, setError]         = useState("");
   const codeRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const pwdMatch = confirmPassword ? newPassword === confirmPassword : true;
+  const apiBase = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
-  const handleCodeChange = (idx: number, value: string) => {
-    const digit = value.replace(/\D/g, "").slice(-1);
-    const next = [...codeDigits];
-    next[idx] = digit;
-    setCodeDigits(next);
-    if (digit && idx < 5) codeRefs.current[idx + 1]?.focus();
+  useEffect(() => { setTimeout(() => codeRefs.current[0]?.focus(), 100); }, []);
+
+  const handleDigit = (i: number, val: string) => {
+    if (val.length > 1) val = val.slice(-1);
+    if (val && !/\d/.test(val)) return;
+    const next = [...codeDigits]; next[i] = val; setCode(next);
+    if (val && i < 5) codeRefs.current[i + 1]?.focus();
   };
 
-  const handleCodeKeyDown = (idx: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !codeDigits[idx] && idx > 0) codeRefs.current[idx - 1]?.focus();
-  };
-
-  const handleCodePaste = (e: React.ClipboardEvent) => {
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (pasted.length === 6) {
-      setCodeDigits(pasted.split(""));
-      codeRefs.current[5]?.focus();
-    }
+  const handleKey = (i: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !codeDigits[i] && i > 0) codeRefs.current[i - 1]?.focus();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !newPassword) return;
-    if (newPassword !== confirmPassword) { setErrorMsg("Les mots de passe ne correspondent pas."); return; }
-    if (newPassword.length < 8) { setErrorMsg("Le mot de passe doit contenir au moins 8 caractères."); return; }
-
-    const finalCode = verifiedFromLink ? undefined : codeDigits.join("");
-    if (!verifiedFromLink && finalCode!.length < 6) { setErrorMsg("Entrez le code à 6 chiffres."); return; }
-
-    setIsLoading(true);
-    setErrorMsg("");
+    const code = codeDigits.join("");
+    if (code.length !== 6) { setError("Entrez les 6 chiffres du code"); return; }
+    if (!newPwd || newPwd.length < 8) { setError("Le mot de passe doit contenir au moins 8 caractères"); return; }
+    if (newPwd !== confirmPwd) { setError("Les mots de passe ne correspondent pas"); return; }
+    setLoading(true); setError("");
     try {
-      const r = await fetch(`${API}/v1/auth/reset-password`, {
-        method: "POST",
+      const res  = await fetch(`${apiBase}/api/v1/auth/reset-password`, {
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code: finalCode, newPassword }),
+        body:    JSON.stringify({ email, code, newPassword: newPwd }),
       });
-      const data = await r.json();
-      if (!r.ok) { setErrorMsg(data.message || "Erreur lors de la réinitialisation."); return; }
-      setSuccess(true);
+      const json = await res.json();
+      if (!res.ok) { setError(json.message ?? "Code invalide ou expiré."); return; }
+      setDone(true);
+    } catch {
+      setError("Erreur de connexion. Veuillez réessayer.");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const inputClass =
-    "w-full pl-12 pr-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 text-[15px] outline-none transition-all focus:border-red-400 focus:ring-2 focus:ring-red-500/15 focus:bg-white placeholder:text-gray-400";
+  const pwdStrength = (() => {
+    if (!newPwd) return 0;
+    let s = 0;
+    if (newPwd.length >= 8) s++;
+    if (/[A-Z]/.test(newPwd)) s++;
+    if (/[0-9]/.test(newPwd)) s++;
+    if (/[^A-Za-z0-9]/.test(newPwd)) s++;
+    return s;
+  })();
+  const strengthColor = ["bg-gray-200","bg-red-400","bg-orange-400","bg-yellow-400","bg-green-500"][pwdStrength];
+  const strengthLabel = ["","Faible","Moyen","Bien","Fort"][pwdStrength];
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row">
-      <div className="hidden lg:flex lg:w-[42%] bg-gradient-to-br from-red-500 to-primary flex-col justify-between p-12 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundImage: "radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-        </div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-16">
-            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-black/20">
-              <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />
-            </div>
-            <span className="font-bold text-xl text-white tracking-tight">ZyNum</span>
+    <div className="min-h-screen bg-white flex flex-col">
+      <div className="flex items-center justify-between px-4 pt-12 pb-2">
+        <Link href="/forgot-password" className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
+          <ChevronLeft className="w-5 h-5 text-gray-600" />
+        </Link>
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+            <span className="text-white font-black text-xs">Z</span>
           </div>
-          <h2 className="text-4xl font-extrabold text-white leading-tight mb-4">Sécurité<br />renforcée</h2>
-          <p className="text-white/70 text-lg leading-relaxed max-w-sm">Créez un nouveau mot de passe fort pour protéger votre compte.</p>
+          <span className="font-extrabold text-gray-900 text-base">ZyNum</span>
         </div>
-        <div className="relative z-10 text-white/50 text-xs">© 2025 ZyNum. Tous droits réservés.</div>
+        <div className="w-9" />
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-white">
-        <div className="w-full max-w-md">
-          <div className="flex items-center gap-2.5 mb-10 lg:hidden">
-            <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md">
-              <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />
+      <div className="flex-1 flex flex-col px-6 pt-8 pb-10 max-w-sm mx-auto w-full overflow-y-auto">
+
+        {done ? (
+          <div className="flex flex-col items-center text-center gap-5 pt-8">
+            <div className="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center">
+              <CheckCircle2 className="w-10 h-10 text-green-500" />
             </div>
-            <span className="font-bold text-lg text-gray-900 tracking-tight">ZyNum</span>
+            <div>
+              <h2 className="text-xl font-extrabold text-gray-900 mb-2">Mot de passe modifié !</h2>
+              <p className="text-sm text-gray-500 leading-relaxed">
+                Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.
+              </p>
+            </div>
+            <button
+              onClick={() => navigate("/login")}
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
+            >
+              Se connecter <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
-
-          {success ? (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 rounded-full bg-green-50 border-2 border-green-200 flex items-center justify-center mx-auto mb-5">
-                <CheckCircle2 className="w-8 h-8 text-green-500" />
+        ) : (
+          <>
+            <div className="mb-8">
+              <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-5">
+                <Lock className="w-7 h-7 text-blue-500" />
               </div>
-              <h2 className="text-2xl font-extrabold text-gray-900 mb-3">Mot de passe modifié !</h2>
-              <p className="text-[15px] text-gray-500 mb-6">Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.</p>
-              <button
-                onClick={() => setLocation("/login")}
-                className="w-full py-4 rounded-xl font-bold text-white text-[16px] transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-primary hover:from-red-600 hover:to-primary/90 shadow-lg shadow-red-500/30"
-              >
-                Se connecter <ArrowRight className="w-4 h-4" />
-              </button>
+              <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Nouveau mot de passe</h1>
+              <p className="text-sm text-gray-500 leading-relaxed">
+                Entrez le code à 6 chiffres reçu par email et choisissez un nouveau mot de passe.
+              </p>
             </div>
-          ) : (
-            <>
-              <div className="mb-8">
-                <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-5">
-                  <ShieldCheck className="w-7 h-7 text-red-500" />
-                </div>
-                <h1 className="text-3xl font-extrabold text-gray-900 leading-tight mb-2">Nouveau mot de passe 🔐</h1>
-                <p className="text-[15px] text-gray-500">
-                  {verifiedFromLink ? "Votre identité a été confirmée. Créez votre nouveau mot de passe." : "Entrez le code reçu par email et créez votre nouveau mot de passe."}
-                </p>
-                {!verifiedFromLink && (
-                  <p className="mt-3 text-[13px] text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                    📩 Si vous ne trouvez pas l'email, vérifiez votre dossier <strong>spam / courrier indésirable</strong>.
-                  </p>
-                )}
-              </div>
 
-              {errorMsg && (
-                <div className="mb-5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-medium flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
-                  {errorMsg}
+            <form onSubmit={handleSubmit} className="space-y-5">
+
+              {!emailInit && (
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Email</label>
+                  <input
+                    type="email" value={email} onChange={e => setEmail(e.target.value)}
+                    placeholder="votre@email.com"
+                    className="w-full h-12 px-4 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
+                  />
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {!emailFromLink && (
-                  <div>
-                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Adresse email <span className="text-red-500">*</span></label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400" />
-                      <input type="email" placeholder="votre@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} style={{ paddingTop: "0.875rem", paddingBottom: "0.875rem" }} />
-                    </div>
-                  </div>
-                )}
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 block">
+                  Code de vérification
+                </label>
+                <div className="flex gap-2 justify-between">
+                  {codeDigits.map((d, i) => (
+                    <input
+                      key={i}
+                      ref={el => { codeRefs.current[i] = el; }}
+                      type="text" inputMode="numeric" maxLength={1}
+                      value={d}
+                      onChange={e => handleDigit(i, e.target.value)}
+                      onKeyDown={e => handleKey(i, e)}
+                      className="w-12 h-14 rounded-2xl border-2 border-gray-200 bg-gray-50 text-center text-xl font-black text-gray-900 focus:outline-none focus:border-blue-500 focus:bg-white transition-all caret-transparent"
+                    />
+                  ))}
+                </div>
+              </div>
 
-                {!verifiedFromLink && (
-                  <div>
-                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Code de vérification <span className="text-red-500">*</span></label>
-                    <div className="flex gap-2 justify-center" onPaste={handleCodePaste}>
-                      {codeDigits.map((d, i) => (
-                        <input
-                          key={i}
-                          ref={(el) => { codeRefs.current[i] = el; }}
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={1}
-                          value={d}
-                          onChange={(e) => handleCodeChange(i, e.target.value)}
-                          onKeyDown={(e) => handleCodeKeyDown(i, e)}
-                          className="w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 bg-gray-50 text-gray-900 outline-none transition-all focus:border-red-400 focus:ring-2 focus:ring-red-500/15 focus:bg-white"
-                          style={{ borderColor: d ? "#f87171" : undefined }}
-                        />
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
+                  Nouveau mot de passe
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type={showPwd ? "text" : "password"}
+                    value={newPwd} onChange={e => setNewPwd(e.target.value)}
+                    placeholder="Min. 8 caractères"
+                    autoComplete="new-password"
+                    className="w-full h-12 pl-10 pr-12 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
+                  />
+                  <button type="button" onClick={() => setShowPwd(s => !s)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                    {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {newPwd && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="flex gap-1 flex-1">
+                      {[1,2,3,4].map(n => (
+                        <div key={n} className={`h-1 rounded-full flex-1 transition-colors ${pwdStrength >= n ? strengthColor : "bg-gray-200"}`} />
                       ))}
                     </div>
+                    <span className={`text-xs font-bold ${pwdStrength >= 3 ? "text-green-600" : pwdStrength >= 2 ? "text-yellow-600" : "text-red-500"}`}>
+                      {strengthLabel}
+                    </span>
                   </div>
                 )}
+              </div>
 
-                <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Nouveau mot de passe <span className="text-red-500">*</span></label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400" />
-                    <input
-                      type={showNew ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      required
-                      minLength={8}
-                      className="w-full pl-12 pr-12 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 text-[15px] outline-none transition-all focus:border-red-400 focus:ring-2 focus:ring-red-500/15 focus:bg-white placeholder:text-gray-400"
-                      style={{ paddingTop: "0.875rem", paddingBottom: "0.875rem" }}
-                    />
-                    <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                      {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
+                  Confirmer le mot de passe
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type={showPwd ? "text" : "password"}
+                    value={confirmPwd} onChange={e => setConfirm(e.target.value)}
+                    placeholder="Répéter le mot de passe"
+                    autoComplete="new-password"
+                    className={`w-full h-12 pl-10 pr-4 rounded-2xl border bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:bg-white transition-all ${
+                      confirmPwd && confirmPwd !== newPwd
+                        ? "border-red-300 focus:border-red-400 focus:ring-red-500/20"
+                        : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                    }`}
+                  />
                 </div>
+                {confirmPwd && confirmPwd !== newPwd && (
+                  <p className="text-xs text-red-500 mt-1.5">Les mots de passe ne correspondent pas</p>
+                )}
+              </div>
 
-                <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Confirmer <span className="text-red-500">*</span></label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400" />
-                    <input
-                      type={showConfirm ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      className={`w-full pl-12 pr-12 rounded-xl text-gray-900 text-[15px] outline-none transition-all placeholder:text-gray-400 ${
-                        !pwdMatch ? "bg-red-50 border border-red-300 focus:border-red-400 focus:ring-2 focus:ring-red-500/15"
-                          : "bg-gray-50 border border-gray-200 focus:border-red-400 focus:ring-2 focus:ring-red-500/15 focus:bg-white"
-                      }`}
-                      style={{ paddingTop: "0.875rem", paddingBottom: "0.875rem" }}
-                    />
-                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                      {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {!pwdMatch && <p className="text-xs text-red-600 mt-1.5 font-medium">Les mots de passe ne correspondent pas.</p>}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 text-xs font-medium rounded-xl px-3 py-2.5">
+                  {error}
                 </div>
+              )}
 
-                <button
-                  type="submit"
-                  disabled={isLoading || !email || !newPassword || !confirmPassword || newPassword !== confirmPassword}
-                  className="w-full py-4 rounded-xl font-bold text-white text-[16px] transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98] bg-gradient-to-r from-red-500 to-primary hover:from-red-600 hover:to-primary/90 shadow-lg shadow-red-500/30"
-                >
-                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Enregistrer le nouveau mot de passe <ArrowRight className="w-4 h-4" /></>}
-                </button>
-              </form>
-            </>
-          )}
-        </div>
+              <button
+                type="submit"
+                disabled={loading || codeDigits.join("").length !== 6 || !newPwd || !confirmPwd}
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 disabled:opacity-60 transition-all"
+              >
+                {loading
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <>Réinitialiser <ArrowRight className="w-4 h-4" /></>}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <Link href="/forgot-password" className="text-sm text-blue-600 font-semibold hover:text-blue-700">
+                ← Renvoyer un code
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

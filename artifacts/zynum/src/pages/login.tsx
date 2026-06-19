@@ -184,9 +184,9 @@ export default function Login() {
 
               {/* Forgot */}
               <div className="flex justify-end">
-                <button type="button" onClick={() => { setShowForgot(true); setForgotEmail(email); setErrorMsg(""); }} className="text-xs text-blue-600 font-semibold hover:text-blue-700">
+                <Link href="/forgot-password" className="text-xs text-blue-600 font-semibold hover:text-blue-700">
                   Mot de passe oublié ?
-                </button>
+                </Link>
               </div>
 
               {/* Error */}
