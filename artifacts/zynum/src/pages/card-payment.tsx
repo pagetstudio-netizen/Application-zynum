@@ -131,8 +131,8 @@ export default function CardPaymentPage() {
           <h1 className="font-extrabold text-white text-base flex-1 text-center pr-8">Recharge Carte Bancaire</h1>
         </div>
 
-        <div className="px-5 pt-8 pb-6 shrink-0">
-          <h2 className="text-3xl font-black text-gray-900 mb-2">Montant</h2>
+        <div className="px-5 pt-4 pb-3 shrink-0">
+          <h2 className="text-2xl font-black text-gray-900 mb-1">Montant</h2>
           <p className="text-gray-400 text-sm">
             {isFcfa ? "Choisissez le montant en FCFA à recharger." : "Choose the amount in USD to top up."}
           </p>
@@ -218,28 +218,28 @@ export default function CardPaymentPage() {
 
         {/* Card preview */}
         <div className="px-5 pt-6 pb-4">
-          <div className="w-full h-44 rounded-3xl p-6 text-white relative overflow-hidden"
-            style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)" }}>
-            <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-white/5 -translate-y-16 translate-x-16" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-white/5 translate-y-12 -translate-x-8" />
-            <div className="flex justify-between items-start mb-6 relative">
-              <CreditCard className="w-8 h-8 text-white/60" />
+          <div className="w-full h-44 rounded-3xl p-5 text-white relative overflow-hidden"
+            style={{ background: "linear-gradient(135deg, #1A3FFF 0%, #0033DD 100%)" }}>
+            <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-white/10 -translate-y-16 translate-x-16" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-white/10 translate-y-12 -translate-x-8" />
+            <div className="flex justify-between items-start mb-4 relative">
+              <CreditCard className="w-7 h-7 text-white" />
               <div className="text-right">
-                <p className="text-xs text-white/50 uppercase tracking-wider">Montant</p>
-                <p className="font-black text-lg">{amountFcfa.toLocaleString("fr-FR")} FCFA</p>
+                <p className="text-[10px] text-white/70 uppercase tracking-wider">Montant</p>
+                <p className="font-black text-base text-white">{amountFcfa.toLocaleString("fr-FR")} FCFA</p>
               </div>
             </div>
-            <p className="font-mono text-lg tracking-[0.2em] text-white/90 mb-3 relative">
+            <p className="font-mono text-base tracking-[0.2em] text-white mb-4 relative">
               {cardNumber || "•••• •••• •••• ••••"}
             </p>
             <div className="flex justify-between items-end relative">
               <div>
-                <p className="text-xs text-white/40 uppercase tracking-wider mb-0.5">Titulaire</p>
-                <p className="font-bold text-sm uppercase">{holderName || "VOTRE NOM"}</p>
+                <p className="text-[10px] text-white/70 uppercase tracking-wider mb-0.5">Titulaire</p>
+                <p className="font-bold text-sm text-white uppercase">{holderName || "VOTRE NOM"}</p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-white/40 uppercase tracking-wider mb-0.5">Expire</p>
-                <p className="font-bold text-sm">{expiry || "MM/AA"}</p>
+                <p className="text-[10px] text-white/70 uppercase tracking-wider mb-0.5">Expire</p>
+                <p className="font-bold text-sm text-white">{expiry || "MM/AA"}</p>
               </div>
             </div>
           </div>

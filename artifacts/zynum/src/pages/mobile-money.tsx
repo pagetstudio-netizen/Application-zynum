@@ -309,13 +309,13 @@ export default function MobileMoneyPage() {
           <h1 className="font-extrabold text-white text-base flex-1 text-center pr-8">Recharge Mobile Money</h1>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 pt-6 pb-8">
-          <p className="text-gray-600 text-sm mb-5 leading-relaxed">
+        <div className="flex-1 overflow-y-auto px-5 pt-4 pb-4">
+          <p className="text-gray-600 text-sm mb-3 leading-relaxed">
             Saisissez votre numéro de téléphone pour recharger votre compte.
           </p>
 
           {/* Country + phone row */}
-          <div className="flex gap-2 mb-6">
+          <div className="flex gap-2 mb-4">
             <button
               onClick={() => setStep("country")}
               className="flex items-center gap-2 px-3 py-3 rounded-2xl border-2 border-gray-300 bg-white shrink-0 active:bg-gray-50 transition-colors"
