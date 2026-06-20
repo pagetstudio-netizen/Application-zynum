@@ -192,14 +192,12 @@ export default function CardPaymentPage() {
               if (amountFcfa < 500) { toast({ variant: "destructive", title: "Minimum 500 FCFA" }); return; }
               setStep("card");
             }}
-            disabled={amountFcfa < 500}
-            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#1A3FFF]"
+            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all bg-[#1A3FFF]"
           >
-            {amountFcfa >= 500
+            {amountFcfa > 0
               ? `Continuer · ${isFcfa ? `${amountFcfa.toLocaleString("fr-FR")} FCFA` : `$${(amountFcfa / FCFA_PER_USD).toFixed(2)}`}`
               : "Continuer"}
           </button>
-          <p className="text-center text-xs text-gray-400 mt-2">Minimum : 500 FCFA</p>
         </div>
       </div>
     );
@@ -209,11 +207,11 @@ export default function CardPaymentPage() {
   function CardStep() {
     return (
       <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
-        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-[#1A3FFF]">
+        <div className="sticky top-0 z-10 px-4 pt-3 pb-3 flex items-center gap-3 shrink-0 bg-[#1A3FFF]">
           <button onClick={() => setStep("amount")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
-            <ChevronLeft className="w-5 h-5 text-white" />
+            <ChevronLeft className="w-5 h-5" style={{ color: "white" }} />
           </button>
-          <h1 className="font-extrabold text-white text-base flex-1 text-center pr-8">Informations de carte</h1>
+          <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: "white" }}>Informations de carte</h1>
         </div>
 
         {/* Card preview */}
@@ -223,23 +221,23 @@ export default function CardPaymentPage() {
             <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-white/10 -translate-y-16 translate-x-16" />
             <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-white/10 translate-y-12 -translate-x-8" />
             <div className="flex justify-between items-start mb-4 relative">
-              <CreditCard className="w-7 h-7 text-white" />
+              <CreditCard className="w-7 h-7" style={{ color: "white" }} />
               <div className="text-right">
-                <p className="text-[10px] text-white/70 uppercase tracking-wider">Montant</p>
-                <p className="font-black text-base text-white">{amountFcfa.toLocaleString("fr-FR")} FCFA</p>
+                <p className="text-[10px] uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.8)" }}>Montant</p>
+                <p className="font-black text-base" style={{ color: "white" }}>{amountFcfa.toLocaleString("fr-FR")} FCFA</p>
               </div>
             </div>
-            <p className="font-mono text-base tracking-[0.2em] text-white mb-4 relative">
+            <p className="font-mono text-base tracking-[0.2em] mb-4 relative" style={{ color: "white" }}>
               {cardNumber || "•••• •••• •••• ••••"}
             </p>
             <div className="flex justify-between items-end relative">
               <div>
-                <p className="text-[10px] text-white/70 uppercase tracking-wider mb-0.5">Titulaire</p>
-                <p className="font-bold text-sm text-white uppercase">{holderName || "VOTRE NOM"}</p>
+                <p className="text-[10px] uppercase tracking-wider mb-0.5" style={{ color: "rgba(255,255,255,0.8)" }}>Titulaire</p>
+                <p className="font-bold text-sm uppercase" style={{ color: "white" }}>{holderName || "VOTRE NOM"}</p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] text-white/70 uppercase tracking-wider mb-0.5">Expire</p>
-                <p className="font-bold text-sm text-white">{expiry || "MM/AA"}</p>
+                <p className="text-[10px] uppercase tracking-wider mb-0.5" style={{ color: "rgba(255,255,255,0.8)" }}>Expire</p>
+                <p className="font-bold text-sm" style={{ color: "white" }}>{expiry || "MM/AA"}</p>
               </div>
             </div>
           </div>
@@ -299,13 +297,13 @@ export default function CardPaymentPage() {
   function ProcessingStep() {
     return (
       <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
-        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-[#1A3FFF]">
+        <div className="sticky top-0 z-10 px-4 pt-3 pb-3 flex items-center gap-3 shrink-0 bg-[#1A3FFF]">
           {payState === "error" && (
             <button onClick={() => setStep("card")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
-              <ChevronLeft className="w-5 h-5 text-white" />
+              <ChevronLeft className="w-5 h-5" style={{ color: "white" }} />
             </button>
           )}
-          <h1 className="font-extrabold text-white text-base flex-1 text-center pr-8">Paiement</h1>
+          <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: "white" }}>Paiement</h1>
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center px-8 pb-16 text-center gap-6">
