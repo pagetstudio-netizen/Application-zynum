@@ -392,6 +392,13 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
     </div>
   );
 
+  const BalancePillWhite = () => (
+    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold" style={{ backgroundColor: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.35)" }}>
+      <Wallet className="w-3.5 h-3.5 shrink-0" style={{ color: "white" }} />
+      <span style={{ color: "white" }}>{t("buy_balance_pill")} {formatBalance()}</span>
+    </div>
+  );
+
   const Breadcrumb = () => (
     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-6 flex-wrap">
       {selectedServiceInfo && (
@@ -416,17 +423,18 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
     );
     return (
       <div className="flex flex-col min-h-full">
-        {/* Sticky header */}
-        <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-3 pb-3 space-y-3">
+        {/* Sticky header bleu */}
+        <div className="sticky top-0 z-20 px-4 pt-3 pb-3 space-y-2" style={{ backgroundColor: "#1A3FFF" }}>
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-extrabold text-gray-900">Choisir un service</h1>
-            {user && <BalancePill />}
+            <h1 className="text-lg font-extrabold" style={{ color: "white" }}>Choisir un service</h1>
+            {user && <BalancePillWhite />}
           </div>
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "rgba(255,255,255,0.6)" }} />
             <input
               placeholder="Rechercher un service…"
-              className="w-full pl-10 pr-4 h-10 bg-gray-100 border-0 text-gray-900 placeholder:text-gray-400 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              style={{ backgroundColor: "rgba(255,255,255,0.18)", color: "white", border: "none" }}
+              className="w-full pl-10 pr-4 h-10 rounded-xl text-sm focus:outline-none placeholder:text-white/50"
               value={searchService}
               onChange={(e) => setSearchService(e.target.value)}
             />
@@ -479,40 +487,35 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
 
     return (
       <div className="flex flex-col min-h-full">
-        {/* Header fixé */}
-        <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-3 pb-3 space-y-3">
-          {/* Ligne retour + solde */}
+        {/* Header fixé bleu */}
+        <div className="sticky top-0 z-20 px-4 pt-3 pb-3 space-y-2" style={{ backgroundColor: "#1A3FFF" }}>
+          {/* Ligne retour + titre + solde */}
           <div className="flex items-center gap-2">
-            <button onClick={() => goBack("service")} className="p-2 -ml-1 rounded-xl hover:bg-gray-100 active:scale-90 transition-all">
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            <button onClick={() => goBack("service")} className="p-2 -ml-2 rounded-xl active:bg-blue-700 transition-colors">
+              <ArrowLeft className="w-5 h-5" style={{ color: "white" }} />
             </button>
-            <span className="text-sm text-gray-500 font-medium flex-1">{t("buy_change_service")}</span>
-            {user && <BalancePill />}
+            <h1 className="text-base font-extrabold flex-1" style={{ color: "white" }}>Choisir un pays</h1>
+            {user && <BalancePillWhite />}
           </div>
 
           {/* Carte service sélectionné */}
           {selectedServiceInfo && (
-            <div className="flex items-center gap-3 p-3 rounded-2xl border border-gray-200 bg-gray-50">
+            <div className="flex items-center gap-3 p-3 rounded-2xl" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
               <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={38} />
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-400">{t("buy_service_selected")}</p>
-                <p className="font-bold text-gray-900 text-sm truncate">{selectedServiceInfo.name}</p>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>{t("buy_service_selected")}</p>
+                <p className="font-bold text-sm truncate" style={{ color: "white" }}>{selectedServiceInfo.name}</p>
               </div>
             </div>
           )}
 
-          {/* Titre + sous-titre */}
-          <div>
-            <h2 className="text-lg font-extrabold text-gray-900 leading-tight">{t("buy_s2_title")}</h2>
-            <p className="text-xs text-gray-400 mt-0.5">{t("buy_s2_sub")}</p>
-          </div>
-
           {/* Recherche */}
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "rgba(255,255,255,0.6)" }} />
             <input
               placeholder={t("buy_s2_placeholder")}
-              className="w-full pl-10 pr-4 h-10 bg-gray-100 border-0 text-gray-900 placeholder:text-gray-400 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              style={{ backgroundColor: "rgba(255,255,255,0.18)", color: "white", border: "none" }}
+              className="w-full pl-10 pr-4 h-10 rounded-xl text-sm focus:outline-none placeholder:text-white/50"
               value={searchCountry}
               onChange={(e) => setSearchCountry(e.target.value)}
             />
