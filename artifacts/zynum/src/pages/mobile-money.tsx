@@ -112,6 +112,17 @@ export default function MobileMoneyPage() {
   const pollCount = useRef(0);
   const gwRef     = useRef<string>("omnipay");
 
+  // ── CountryPicker hooks (hoisted to avoid conditional hook violation) ─────
+  const [cpQuery, setCpQuery] = useState("");
+  const cpInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (step === "country") setTimeout(() => cpInputRef.current?.focus(), 100);
+  }, [step]);
+  const cpFiltered = useMemo(() => {
+    const q = cpQuery.toLowerCase().trim();
+    return q ? ALL_COUNTRIES.filter(c => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)) : ALL_COUNTRIES;
+  }, [cpQuery]);
+
   const apiBase   = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
   const stopPolling = useCallback(() => {
@@ -136,7 +147,9 @@ export default function MobileMoneyPage() {
   }
 
   function goToAmount() {
-    if (!phone.trim()) { toast({ variant: "destructive", title: "Entrez votre numéro de téléphone" }); return; }
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length < 5) { toast({ variant: "destructive", title: "Numéro invalide", description: "Entrez un numéro de téléphone valide." }); return; }
+    if (operator.needsOtp && !otp.trim()) { toast({ variant: "destructive", title: "Code OTP requis", description: `Composez le code USSD pour obtenir votre OTP ${operator.label}.` }); return; }
     setStep("amount");
   }
 
@@ -239,39 +252,32 @@ export default function MobileMoneyPage() {
 
   // ── COUNTRY PICKER ─────────────────────────────────────────────────────────
   function CountryPicker() {
-    const [query, setQuery] = useState("");
-    const inputRef = useRef<HTMLInputElement>(null);
-    useEffect(() => { setTimeout(() => inputRef.current?.focus(), 100); }, []);
-    const filtered = useMemo(() => {
-      const q = query.toLowerCase().trim();
-      return q ? ALL_COUNTRIES.filter(c => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)) : ALL_COUNTRIES;
-    }, [query]);
-
     return (
       <div className="fixed inset-0 z-50 flex flex-col" style={{ backgroundColor: "#ffffff" }}>
         <div className="sticky top-0 z-10 px-4 pt-3 pb-3 shrink-0 bg-[#1A3FFF]">
           <div className="flex items-center gap-2 mb-2">
             <button onClick={() => setStep("phone")} className="p-2 -ml-2 rounded-xl active:bg-blue-700 transition-colors">
-              <ChevronLeft className="w-6 h-6 text-white" />
+              <ChevronLeft className="w-6 h-6" style={{ color: "white" }} />
             </button>
-            <h1 className="text-lg font-black text-white">Sélectionnez votre pays</h1>
+            <h1 className="text-lg font-black" style={{ color: "white" }}>Sélectionnez votre pays</h1>
           </div>
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-300" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "rgba(255,255,255,0.7)" }} />
             <input
-              ref={inputRef}
+              ref={cpInputRef}
               type="text"
               placeholder="Rechercher"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              className="w-full h-11 pl-12 pr-4 rounded-2xl border-2 border-white/30 bg-white/20 text-white placeholder:text-white/60 text-base focus:outline-none focus:border-white/60 transition"
+              value={cpQuery}
+              onChange={e => setCpQuery(e.target.value)}
+              style={{ color: "white", backgroundColor: "rgba(255,255,255,0.2)", borderColor: "rgba(255,255,255,0.3)" }}
+              className="w-full h-11 pl-12 pr-4 rounded-2xl border-2 text-base focus:outline-none transition placeholder:text-white/60"
             />
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-24" style={{ backgroundColor: "#ffffff" }}>
-          {filtered.length === 0 && <p className="text-center text-gray-400 py-10">Aucun pays trouvé</p>}
-          {filtered.map(c => (
+          {cpFiltered.length === 0 && <p className="text-center text-gray-400 py-10">Aucun pays trouvé</p>}
+          {cpFiltered.map(c => (
             <button
               key={c.code}
               onClick={() => selectCountry(c)}
@@ -302,11 +308,11 @@ export default function MobileMoneyPage() {
   function PhoneStep() {
     return (
       <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
-        <div className="sticky top-0 z-10 px-4 pt-4 pb-4 flex items-center gap-3 shrink-0 bg-[#1A3FFF]">
+        <div className="sticky top-0 z-10 px-4 pt-3 pb-3 flex items-center gap-3 shrink-0 bg-[#1A3FFF]">
           <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
-            <ChevronLeft className="w-5 h-5 text-white" />
+            <ChevronLeft className="w-5 h-5" style={{ color: "white" }} />
           </button>
-          <h1 className="font-extrabold text-white text-base flex-1 text-center pr-8">Recharge Mobile Money</h1>
+          <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: "white" }}>Recharge Mobile Money</h1>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 pt-4 pb-4">
@@ -394,11 +400,11 @@ export default function MobileMoneyPage() {
 
     return (
       <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
-        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 bg-[#1A3FFF]">
+        <div className="sticky top-0 z-10 px-4 pt-3 pb-3 flex items-center gap-3 shrink-0 bg-[#1A3FFF]">
           <button onClick={() => setStep("phone")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
-            <ChevronLeft className="w-5 h-5 text-white" />
+            <ChevronLeft className="w-5 h-5" style={{ color: "white" }} />
           </button>
-          <h1 className="font-extrabold text-white text-base flex-1 text-center pr-8">Montant à recharger</h1>
+          <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: "white" }}>Montant à recharger</h1>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4">
@@ -440,8 +446,8 @@ export default function MobileMoneyPage() {
                 <button
                   key={a}
                   onClick={() => setAmountRaw(isFcfa ? String(a) : String((a / FCFA_PER_USD).toFixed(2)))}
-                  className={`py-3 rounded-2xl text-sm font-bold border-2 transition-all ${
-                    isActive ? "border-blue-600 bg-blue-600 text-white" : "border-gray-200 bg-gray-50 text-gray-600"
+                  className={`py-3 rounded-2xl text-sm font-bold transition-all ${
+                    isActive ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600"
                   }`}
                 >
                   {label}
@@ -469,14 +475,12 @@ export default function MobileMoneyPage() {
         <div className="px-5 pb-8 pt-4 border-t border-gray-100 bg-white">
           <button
             onClick={submitPayment}
-            disabled={amountFcfa < 300}
-            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#1A3FFF]"
+            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all bg-[#1A3FFF]"
           >
-            {amountFcfa >= 300
+            {amountFcfa > 0
               ? `Payer ${isFcfa ? `${amountFcfa.toLocaleString("fr-FR")} FCFA` : `$${(amountFcfa / FCFA_PER_USD).toFixed(2)}`}`
-              : "Suivant"}
+              : "Payer"}
           </button>
-          <p className="text-center text-xs text-gray-400 mt-2">Minimum : 300 FCFA</p>
         </div>
       </div>
     );

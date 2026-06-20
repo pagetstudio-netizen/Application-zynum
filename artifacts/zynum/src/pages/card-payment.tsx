@@ -124,11 +124,11 @@ export default function CardPaymentPage() {
   function AmountStep() {
     return (
       <div className="flex flex-col bg-white" style={{ height: "100dvh" }}>
-        <div className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 shrink-0 bg-[#1A3FFF]">
+        <div className="sticky top-0 z-10 px-4 pt-3 pb-3 flex items-center gap-3 shrink-0 bg-[#1A3FFF]">
           <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
-            <ChevronLeft className="w-5 h-5 text-white" />
+            <ChevronLeft className="w-5 h-5" style={{ color: "white" }} />
           </button>
-          <h1 className="font-extrabold text-white text-base flex-1 text-center pr-8">Recharge Carte Bancaire</h1>
+          <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: "white" }}>Recharge Carte Bancaire</h1>
         </div>
 
         <div className="px-5 pt-4 pb-3 shrink-0">
