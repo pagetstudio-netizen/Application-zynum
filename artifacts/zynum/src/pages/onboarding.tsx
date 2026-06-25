@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -36,6 +36,32 @@ export default function Onboarding() {
 
   const slide = slides[current];
 
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    const prevBodyPosition = body.style.position;
+    const prevBodyTop = body.style.top;
+    const prevBodyWidth = body.style.width;
+    html.style.overflow = "hidden";
+    html.style.overscrollBehavior = "none";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+    body.style.position = "fixed";
+    body.style.top = "0px";
+    body.style.width = "100%";
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      html.style.overscrollBehavior = "";
+      body.style.overflow = prevBodyOverflow;
+      body.style.overscrollBehavior = "";
+      body.style.position = prevBodyPosition;
+      body.style.top = prevBodyTop;
+      body.style.width = prevBodyWidth;
+    };
+  }, []);
+
   const goTo = (idx: number) => {
     if (idx < 0 || idx >= slides.length || idx === current) return;
     setAnimDir(idx > current ? 1 : -1);
@@ -72,12 +98,14 @@ export default function Onboarding() {
   return (
     <div
       style={{
-        height: "100dvh",
+        position: "fixed",
+        inset: 0,
         overflow: "hidden",
+        overscrollBehavior: "none",
+        touchAction: "none",
         display: "flex",
         flexDirection: "column",
         background: "#F8F9FF",
-        position: "relative",
         userSelect: "none",
         WebkitUserSelect: "none",
         transition: "background 0.5s",
