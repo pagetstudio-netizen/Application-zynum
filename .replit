@@ -3,6 +3,8 @@ modules = ["nodejs-20", "web", "bash"]
 [deployment]
 router = "application"
 deploymentTarget = "autoscale"
+run = ["node", "artifacts/api-server/dist/index.mjs"]
+build = ["bash", "-c", "pnpm install && pnpm --filter @workspace/api-server run build"]
 
 [deployment.postBuild]
 args = ["pnpm", "store", "prune"]
@@ -98,3 +100,4 @@ SENDAVAPAY_SDK_KEY = "sdk_UdliGtXwaCzvJw4m93K2Ik6OK9D56n0H"
 SENDAVAPAY_WEBHOOK_SECRET = "whsec_fe77118b598a921732fc64b563c9073d9538cb1eeb2b90de"
 ADMIN_EMAIL = "pagetstudio@gmail.com"
 ADMIN_PASSWORD = "AAbb11##"
+PORT = "8080"
