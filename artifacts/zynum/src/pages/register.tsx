@@ -109,7 +109,7 @@ export default function Register() {
   };
 
   return (
-    <div style={{ minHeight: "100dvh", position: "relative" }}>
+    <div style={{ height: "100dvh", position: "relative", overflow: "hidden" }}>
       {/* Background */}
       <div style={{
         position: "fixed", inset: 0, zIndex: 0,
@@ -118,11 +118,11 @@ export default function Register() {
       }} />
       <div style={{ position: "fixed", inset: 0, zIndex: 1, background: "rgba(8,12,40,0.62)" }} />
 
-      {/* Scrollable content */}
-      <div style={{ position: "relative", zIndex: 2, minHeight: "100dvh", display: "flex", flexDirection: "column", overflowY: "auto" }}>
+      {/* Fixed layout — top bar + scrollable form */}
+      <div style={{ position: "relative", zIndex: 2, height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
-        {/* Top bar */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "52px 20px 16px", flexShrink: 0 }}>
+        {/* Top bar — fixed, no scroll */}
+        <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "52px 20px 16px" }}>
           <Link href="/">
             <button style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 12, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -147,8 +147,8 @@ export default function Register() {
           </button>
         </div>
 
-        {/* Form */}
-        <div style={{ flex: 1, padding: "8px 24px 48px" }}>
+        {/* Form — seule zone scrollable */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "8px 24px 48px", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
           <div style={{ marginBottom: 24 }}>
             <h1 style={{ color: "#ffffff", fontSize: 28, fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.5px" }}>{T.title}</h1>
             <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, margin: 0 }}>{T.subtitle}</p>

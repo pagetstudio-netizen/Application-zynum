@@ -419,6 +419,8 @@ html.light .bg-clip-text.from-white {
   background: rgba(255,255,255,0.15);
   border: 1.5px solid rgba(255,255,255,0.3);
   color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
   font-size: 15px;
   padding: 0 16px;
   outline: none;
@@ -429,10 +431,20 @@ html.light .bg-clip-text.from-white {
 }
 .glass-input::placeholder {
   color: rgba(255,255,255,0.5);
+  -webkit-text-fill-color: rgba(255,255,255,0.5);
 }
 .glass-input:focus {
   border-color: rgba(255,255,255,0.7);
   background: rgba(255,255,255,0.22);
+}
+.glass-input:-webkit-autofill,
+.glass-input:-webkit-autofill:hover,
+.glass-input:-webkit-autofill:focus,
+.glass-input:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px rgba(10,14,50,0.85) inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+  caret-color: #ffffff;
 }
 .glass-input-icon {
   position: relative;

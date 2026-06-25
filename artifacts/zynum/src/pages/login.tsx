@@ -133,7 +133,7 @@ export default function Login() {
   };
 
   return (
-    <div style={{ minHeight: "100dvh", position: "relative", overflow: "hidden" }}>
+    <div style={{ height: "100dvh", position: "relative", overflow: "hidden" }}>
       {/* Background */}
       <div style={{
         position: "fixed", inset: 0, zIndex: 0,
@@ -143,10 +143,10 @@ export default function Login() {
       <div style={{ position: "fixed", inset: 0, zIndex: 1, background: "rgba(8,12,40,0.62)" }} />
 
       {/* Content */}
-      <div style={{ position: "relative", zIndex: 2, minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
+      <div style={{ position: "relative", zIndex: 2, height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
         {/* Top bar */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "52px 20px 16px" }}>
+        <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "52px 20px 16px" }}>
           {step !== "credentials" ? (
             <button
               onClick={() => { setStep("credentials"); setCodeDigits(["","","","","",""]); setErrorMsg(""); }}
@@ -180,8 +180,8 @@ export default function Login() {
           </button>
         </div>
 
-        {/* Scrollable form area */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "0 24px 48px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+        {/* Form area — fixed, no scroll */}
+        <div style={{ flex: 1, overflow: "hidden", padding: "0 24px 40px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
 
           {step === "credentials" && (
             <>

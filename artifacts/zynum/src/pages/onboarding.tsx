@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -32,9 +32,6 @@ const slides = [
 export default function Onboarding() {
   const [current, setCurrent] = useState(0);
   const [animDir, setAnimDir] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragX, setDragX] = useState(0);
-  const startX = useRef(0);
   const [, setLocation] = useLocation();
 
   const slide = slides[current];
@@ -51,26 +48,6 @@ export default function Onboarding() {
     } else {
       setLocation("/register");
     }
-  };
-
-  /* ── Touch / Pointer swipe ── */
-  const onPointerDown = (e: React.PointerEvent) => {
-    startX.current = e.clientX;
-    setIsDragging(true);
-    setDragX(0);
-  };
-
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return;
-    setDragX(e.clientX - startX.current);
-  };
-
-  const onPointerUp = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    if (dragX < -50) goTo(current + 1);
-    else if (dragX > 50) goTo(current - 1);
-    setDragX(0);
   };
 
   /* ── Card slide variants ── */
@@ -207,12 +184,7 @@ export default function Onboarding() {
           minHeight: 0,
           position: "relative",
           overflow: "hidden",
-          cursor: isDragging ? "grabbing" : "grab",
         }}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
       >
         {/* Peek cards (prev & next ghost) */}
         {slides.map((s, i) => {
@@ -328,21 +300,6 @@ export default function Onboarding() {
           </motion.div>
         </AnimatePresence>
 
-        {/* Drag offset visual feedback */}
-        {isDragging && Math.abs(dragX) > 10 && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "8px 28px",
-              transform: `translateX(${dragX * 0.3}px)`,
-              pointerEvents: "none",
-            }}
-          />
-        )}
       </div>
 
       {/* ── Bottom: dots + buttons ── */}
