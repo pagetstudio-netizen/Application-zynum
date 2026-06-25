@@ -1657,7 +1657,7 @@ function BottomNav({ active, onChange }: { active: Tab; onChange: (t: Tab) => vo
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
-      <div className="flex items-stretch h-16 max-w-lg mx-auto">
+      <div className="flex items-stretch h-16 w-full">
         {TABS.map(tab => {
           const isActive = active === tab.id;
           return (
@@ -1749,7 +1749,7 @@ export default function Dashboard() {
   const navigate = (tab: Tab) => setActiveTab(tab);
 
   return (
-    <div className="h-[100dvh] overflow-hidden bg-gray-50 flex flex-col max-w-lg mx-auto relative">
+    <div className="h-[100dvh] overflow-hidden bg-gray-50 flex flex-col w-full relative">
       <NotificationBanner />
 
       <AnimatePresence mode="wait">
