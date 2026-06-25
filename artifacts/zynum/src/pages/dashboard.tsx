@@ -10,6 +10,7 @@ import {
   ArrowUpRight, ArrowDownLeft, Tag, History, RefreshCw,
   Phone, Globe2, Star, Lock, KeyRound, X, Menu,
   ChevronLeft, Clock, XCircle, Package, CreditCard, SlidersHorizontal,
+  Share2, DollarSign, ArrowDownToLine, Users,
 } from "lucide-react";
 import {
   useGetCurrentUser, useLogoutUser, useGetBalance,
@@ -775,14 +776,7 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
 // ─── SHARED SUB-PAGE WRAPPER ─────────────────────────────────────────────────
 function SubPage({ title, onBack, children }: { title: string; onBack: () => void; children: React.ReactNode }) {
   return (
-    <motion.div
-      key={title}
-      initial={{ x: "100%", opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: "100%", opacity: 0 }}
-      transition={{ type: "spring", damping: 28, stiffness: 280 }}
-      className="flex-1 flex flex-col overflow-hidden"
-    >
+    <div className="flex-1 flex flex-col overflow-hidden">
       <div className="bg-white px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 border-b border-gray-100">
         <button onClick={onBack} className="p-2 -ml-1 rounded-xl hover:bg-gray-100 active:scale-90 transition-all">
           <ChevronLeft className="w-5 h-5 text-gray-700" />
@@ -792,7 +786,7 @@ function SubPage({ title, onBack, children }: { title: string; onBack: () => voi
       <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
         {children}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -998,97 +992,305 @@ function SecurityPage({ onBack }: { onBack: () => void }) {
 // ─── REFERRAL PAGE ────────────────────────────────────────────────────────────
 function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }) {
   const { toast } = useToast();
-  const [stats, setStats] = useState<any>(null);
-  const [copiedCode, setCopiedCode] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
+  const { currency } = useCurrency();
+  const RATE = 620;
 
-  const refCode = `ZY${user.id.toString().padStart(6, "0")}`;
-  const refLink = `${window.location.origin}/?ref=${refCode}`;
+  const [stats, setStats]               = useState<any>(null);
+  const [withdrawals, setWithdrawals]   = useState<any[]>([]);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [copiedLink, setCopiedLink]     = useState(false);
+  const [copiedCode, setCopiedCode]     = useState(false);
+  const [showForm, setShowForm]         = useState(false);
+  const [amount, setAmount]             = useState("");
+  const [phone, setPhone]               = useState("");
+  const [country, setWithdrawCountry]   = useState("Sénégal");
+  const [submitting, setSubmitting]     = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem("zynum_token");
-    fetch("/api/v1/affiliate/stats", { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(d => setStats(d)).catch(() => {});
-  }, []);
+  const COUNTRIES = [
+    "Sénégal","Côte d'Ivoire","Cameroun","Mali","Burkina Faso","Guinée",
+    "Bénin","Togo","Niger","Congo","Gabon","Ghana","Nigeria","Kenya","France","Belgique","Autre",
+  ];
 
-  const copy = (text: string, which: "code" | "link") => {
+  const token = () => localStorage.getItem("zynum_token") ?? "";
+  const authH = () => ({ Authorization: `Bearer ${token()}`, "Content-Type": "application/json" });
+
+  const refCode = stats?.referralCode ?? `ZY${user.id.toString().padStart(6, "0")}`;
+  const refLink = `${window.location.origin}/register?ref=${refCode}`;
+
+  const fmt = (usd: number) =>
+    currency === "FCFA" ? `${Math.round(usd * RATE).toLocaleString("fr-FR")} FCFA` : `$${usd.toFixed(2)}`;
+
+  const load = async () => {
+    setLoadingStats(true);
+    try {
+      const [s, w] = await Promise.all([
+        fetch("/api/v1/affiliate/stats", { headers: authH() }).then(r => r.json()),
+        fetch("/api/v1/affiliate/withdrawals", { headers: authH() }).then(r => r.json()),
+      ]);
+      setStats(s);
+      setWithdrawals(w.withdrawals ?? []);
+    } catch { /* silent */ }
+    finally { setLoadingStats(false); }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const copyText = (text: string, which: "link" | "code") => {
     navigator.clipboard.writeText(text);
-    if (which === "code") { setCopiedCode(true); setTimeout(() => setCopiedCode(false), 1500); }
-    else { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 1500); }
-    toast({ title: "Copié !", description: which === "code" ? "Code de parrainage copié" : "Lien de parrainage copié" });
+    if (which === "link") { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
+    else { setCopiedCode(true); setTimeout(() => setCopiedCode(false), 2000); }
+    toast({ title: "Copié !" });
+  };
+
+  const handleWithdraw = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const n = parseFloat(amount);
+    if (!n || n <= 0) { toast({ variant: "destructive", title: "Montant invalide" }); return; }
+    const amountUsd = currency === "FCFA" ? n / RATE : n;
+    if (amountUsd > (stats?.affiliateBalance ?? 0)) {
+      toast({ variant: "destructive", title: "Solde insuffisant" }); return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/v1/affiliate/withdraw", {
+        method: "POST", headers: authH(),
+        body: JSON.stringify({ amountUsd, phone, country }),
+      }).then(r => r.json());
+      if (res.withdrawal) {
+        toast({ title: "Demande envoyée", description: "Traitement sous 48h." });
+        setShowForm(false); setAmount(""); setPhone("");
+        await load();
+      } else {
+        toast({ variant: "destructive", title: "Erreur", description: res.message });
+      }
+    } catch { toast({ variant: "destructive", title: "Erreur réseau" }); }
+    finally { setSubmitting(false); }
+  };
+
+  const balance   = stats?.affiliateBalance ?? 0;
+  const earned    = stats?.totalEarned ?? 0;
+  const filleuls  = stats?.filleulCount ?? 0;
+
+  const statusStyle: Record<string, { bg: string; color: string; label: string }> = {
+    pending:   { bg: "#FEF9EC", color: "#B45309", label: "En attente" },
+    validated: { bg: "#ECFDF5", color: "#065F46", label: "Validé" },
+    rejected:  { bg: "#FEF2F2", color: "#991B1B", label: "Rejeté" },
   };
 
   return (
     <SubPage title="Parrainage" onBack={onBack}>
-      <div className="px-4 pt-5 space-y-4">
-        {/* Banner */}
-        <div className="rounded-3xl p-5 text-white" style={{ backgroundColor: "#7C3AED" }}>
-          <Gift className="w-8 h-8 mb-2 opacity-80" />
-          <p className="font-black text-xl mb-1">Gagnez 10% de commission</p>
-          <p className="text-sm text-purple-200">Pour chaque ami qui s'inscrit et recharge son compte via votre lien</p>
-        </div>
+      <div className="pb-8">
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: "Filleuls", value: stats?.totalReferrals ?? 0 },
-            { label: "Actifs", value: stats?.activeReferrals ?? 0 },
-            { label: "Gains", value: stats?.totalEarnings ? `$${Number(stats.totalEarnings).toFixed(2)}` : "$0.00" },
-          ].map(s => (
-            <div key={s.label} className="bg-white rounded-2xl p-3 border border-gray-100 text-center">
-              <p className="text-lg font-black text-gray-900">{s.value}</p>
-              <p className="text-[10px] text-gray-400 font-medium">{s.label}</p>
+        {/* ── Hero gradient banner ── */}
+        <div className="relative overflow-hidden px-5 pt-7 pb-8" style={{ background: "linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%)" }}>
+          {/* decorative circles */}
+          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-10" style={{ background: "white" }} />
+          <div className="absolute -bottom-12 -left-6 w-32 h-32 rounded-full opacity-10" style={{ background: "white" }} />
+
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-4" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+              <span className="text-xs font-bold text-white/80">Programme actif</span>
             </div>
-          ))}
-        </div>
+            <h2 className="text-2xl font-black mb-1" style={{ color: "#ffffff" }}>Gagnez 10%</h2>
+            <p className="text-sm mb-6" style={{ color: "rgba(199,210,254,0.9)" }}>
+              Pour chaque achat de vos filleuls, vous recevez 10% de commission directement sur votre solde.
+            </p>
 
-        {/* Code */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 space-y-3">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Votre code de parrainage</p>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 bg-gray-50 border border-dashed border-gray-300 rounded-xl px-4 py-3 text-center">
-              <p className="text-xl font-black text-gray-900 tracking-widest">{refCode}</p>
-            </div>
-            <button
-              onClick={() => copy(refCode, "code")}
-              className="h-full px-4 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs active:scale-95 transition-transform flex items-center gap-1.5"
-            >
-              {copiedCode ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              {copiedCode ? "Copié" : "Copier"}
-            </button>
-          </div>
-        </div>
-
-        {/* Link */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100 space-y-2">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Lien de parrainage</p>
-          <div className="flex items-center gap-2">
-            <p className="flex-1 text-xs text-gray-500 bg-gray-50 rounded-xl px-3 py-2.5 truncate font-mono border border-gray-200">{refLink}</p>
-            <button
-              onClick={() => copy(refLink, "link")}
-              className="shrink-0 px-3 py-2.5 rounded-xl bg-blue-600 text-white active:scale-95 transition-transform"
-            >
-              {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            </button>
-          </div>
-        </div>
-
-        {/* How it works */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Comment ça marche ?</p>
-          {[
-            { n: "1", title: "Partagez votre code", desc: "Envoyez votre lien ou code à vos amis" },
-            { n: "2", title: "Ils s'inscrivent",   desc: "Vos amis créent un compte ZyNum" },
-            { n: "3", title: "Vous gagnez",         desc: "10% de commission sur chaque recharge" },
-          ].map(s => (
-            <div key={s.n} className="flex gap-3 mb-3 last:mb-0">
-              <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-xs font-black text-purple-700 shrink-0">{s.n}</div>
-              <div>
-                <p className="text-sm font-bold text-gray-900">{s.title}</p>
-                <p className="text-xs text-gray-400">{s.desc}</p>
+            {/* Balance card */}
+            <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.15)" }}>
+              <p className="text-xs font-semibold mb-1" style={{ color: "rgba(199,210,254,0.8)" }}>Solde disponible</p>
+              {loadingStats ? (
+                <div className="h-8 w-28 rounded-lg animate-pulse" style={{ background: "rgba(255,255,255,0.15)" }} />
+              ) : (
+                <p className="text-3xl font-black" style={{ color: "#ffffff" }}>{fmt(balance)}</p>
+              )}
+              <div className="flex items-center gap-4 mt-3">
+                <div>
+                  <p className="text-[10px] font-semibold" style={{ color: "rgba(199,210,254,0.7)" }}>Total gagné</p>
+                  <p className="text-sm font-bold" style={{ color: "#ffffff" }}>{loadingStats ? "—" : fmt(earned)}</p>
+                </div>
+                <div className="w-px h-6 opacity-20" style={{ background: "white" }} />
+                <div>
+                  <p className="text-[10px] font-semibold" style={{ color: "rgba(199,210,254,0.7)" }}>Filleuls</p>
+                  <p className="text-sm font-bold" style={{ color: "#ffffff" }}>{loadingStats ? "—" : filleuls}</p>
+                </div>
               </div>
             </div>
-          ))}
+          </div>
+        </div>
+
+        <div className="px-4 space-y-4 mt-4">
+
+          {/* ── Retrait button ── */}
+          {balance > 0 && !showForm && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold text-white transition-all active:scale-95"
+              style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)", boxShadow: "0 4px 16px rgba(124,58,237,0.35)" }}
+            >
+              <ArrowDownToLine className="w-4 h-4" />
+              Retirer {fmt(balance)}
+            </button>
+          )}
+
+          {balance <= 0 && !showForm && (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl" style={{ background: "#F5F3FF", border: "1px solid #DDD6FE" }}>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#EDE9FE" }}>
+                <DollarSign className="w-4 h-4" style={{ color: "#7C3AED" }} />
+              </div>
+              <p className="text-xs font-medium" style={{ color: "#5B21B6" }}>
+                Parrainez des amis pour accumuler des commissions et les retirer.
+              </p>
+            </div>
+          )}
+
+          {/* ── Withdraw form ── */}
+          {showForm && (
+            <div className="rounded-2xl p-5 bg-white border border-gray-100 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold text-gray-900">Demande de retrait</p>
+                <button onClick={() => setShowForm(false)} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              </div>
+              <form onSubmit={handleWithdraw} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1.5">
+                    Montant ({currency}) · Dispo : {fmt(balance)}
+                  </label>
+                  <input
+                    type="number" value={amount} onChange={e => setAmount(e.target.value)}
+                    placeholder={currency === "FCFA" ? "Ex: 5000" : "Ex: 8.00"}
+                    min={currency === "FCFA" ? "620" : "1"}
+                    max={currency === "FCFA" ? Math.round(balance * RATE) : balance}
+                    step={currency === "FCFA" ? "1" : "0.01"} required
+                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1.5">Pays</label>
+                  <select value={country} onChange={e => setWithdrawCountry(e.target.value)} required
+                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-indigo-400 bg-gray-50">
+                    {COUNTRIES.map(c => <option key={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1.5">Numéro Mobile Money</label>
+                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
+                    placeholder="Ex: +221 77 123 45 67" required
+                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 bg-gray-50"
+                  />
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl" style={{ background: "#EFF6FF", border: "1px solid #DBEAFE" }}>
+                  <Clock className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                  <p className="text-xs text-blue-700">Traitement sous 48h ouvrables.</p>
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <button type="button" onClick={() => setShowForm(false)}
+                    className="flex-1 h-11 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                    Annuler
+                  </button>
+                  <button type="submit" disabled={submitting}
+                    className="flex-1 h-11 rounded-xl text-sm font-bold text-white disabled:opacity-50 transition-all active:scale-95"
+                    style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)" }}>
+                    {submitting ? "Envoi..." : "Confirmer"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* ── Lien de parrainage ── */}
+          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-4 pt-4 pb-3 border-b border-gray-50">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Votre lien d'invitation</p>
+            </div>
+            <div className="px-4 py-4 space-y-3">
+              {/* Code pill */}
+              <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: "#F5F3FF", border: "1.5px dashed #C4B5FD" }}>
+                <div>
+                  <p className="text-[10px] font-bold text-purple-500 uppercase tracking-wider mb-0.5">Code</p>
+                  <p className="text-lg font-black text-gray-900 tracking-widest font-mono">{refCode}</p>
+                </div>
+                <button
+                  onClick={() => copyText(refCode, "code")}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all active:scale-90"
+                  style={{ background: "#7C3AED", color: "white" }}
+                >
+                  {copiedCode ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedCode ? "Copié" : "Copier"}
+                </button>
+              </div>
+              {/* Full link */}
+              <div className="flex items-center gap-2">
+                <p className="flex-1 text-xs text-gray-400 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 truncate font-mono">{refLink}</p>
+                <button
+                  onClick={() => copyText(refLink, "link")}
+                  className="shrink-0 flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold text-white transition-all active:scale-90"
+                  style={{ background: "#4F46E5" }}
+                >
+                  {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedLink ? "Copié" : "Lien"}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Comment ça marche ── */}
+          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-4">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Comment ça marche</p>
+            <div className="space-y-0">
+              {[
+                { icon: <Share2 className="w-4 h-4" />, color: "#4F46E5", bg: "#EEF2FF", title: "Partagez votre lien", desc: "Envoyez-le à vos amis, famille ou contacts" },
+                { icon: <Users className="w-4 h-4" />, color: "#059669", bg: "#ECFDF5", title: "Ils s'inscrivent & rechargent", desc: "Vos filleuls créent un compte et effectuent une recharge" },
+                { icon: <DollarSign className="w-4 h-4" />, color: "#D97706", bg: "#FFFBEB", title: "Vous recevez 10%", desc: "La commission est créditée instantanément sur votre solde" },
+              ].map((step, i, arr) => (
+                <div key={step.title} className="flex gap-3">
+                  <div className="flex flex-col items-center">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: step.bg, color: step.color }}>
+                      {step.icon}
+                    </div>
+                    {i < arr.length - 1 && <div className="w-px flex-1 my-1" style={{ background: "#E5E7EB" }} />}
+                  </div>
+                  <div className="pb-4">
+                    <p className="text-sm font-bold text-gray-900">{step.title}</p>
+                    <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{step.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Historique retraits ── */}
+          {withdrawals.length > 0 && (
+            <div className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+              <div className="px-4 pt-4 pb-3 border-b border-gray-50">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Historique des retraits</p>
+              </div>
+              <div className="divide-y divide-gray-50">
+                {withdrawals.map(w => {
+                  const s = statusStyle[w.status] ?? { bg: "#F3F4F6", color: "#6B7280", label: w.status };
+                  return (
+                    <div key={w.id} className="flex items-center justify-between px-4 py-3">
+                      <div>
+                        <p className="text-sm font-bold text-gray-900">{fmt(w.amountUsd)}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{w.phone} · {w.country}</p>
+                        {w.note && <p className="text-xs text-gray-500 mt-0.5 italic">{w.note}</p>}
+                      </div>
+                      <div className="text-right">
+                        <span className="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold" style={{ background: s.bg, color: s.color }}>
+                          {s.label}
+                        </span>
+                        <p className="text-[10px] text-gray-400 mt-1">{new Date(w.createdAt).toLocaleDateString("fr-FR")}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </SubPage>
@@ -1752,39 +1954,30 @@ export default function Dashboard() {
     <div className="h-[100dvh] overflow-hidden bg-gray-50 flex flex-col w-full relative">
       <NotificationBanner />
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.18 }}
-          className="flex-1 flex flex-col min-h-0 overflow-hidden"
-        >
-          {activeTab === "accueil" && <HomeTab user={user} onNavigate={navigate} />}
-          {activeTab === "numeros" && (
-            <NumerosTab />
-          )}
-          {activeTab === "sms" && (
-            <div className="flex-1 overflow-y-auto pb-24" style={{ background: "#F8FAFC" }}>
-              {/* Sticky title header */}
-              <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h1 className="text-xl font-extrabold text-gray-900 leading-tight">Historique</h1>
-                    <p className="text-xs text-gray-400 mt-0.5">Consultez l'historique de tous vos numéros achetés.</p>
-                  </div>
-                  <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center">
-                    <SlidersHorizontal className="w-4 h-4 text-gray-500" />
-                  </div>
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        {activeTab === "accueil" && <HomeTab user={user} onNavigate={navigate} />}
+        {activeTab === "numeros" && (
+          <NumerosTab />
+        )}
+        {activeTab === "sms" && (
+          <div className="flex-1 overflow-y-auto pb-24" style={{ background: "#F8FAFC" }}>
+            {/* Sticky title header */}
+            <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-xl font-extrabold text-gray-900 leading-tight">Historique</h1>
+                  <p className="text-xs text-gray-400 mt-0.5">Consultez l'historique de tous vos numéros achetés.</p>
+                </div>
+                <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center">
+                  <SlidersHorizontal className="w-4 h-4 text-gray-500" />
                 </div>
               </div>
-              <OrderHistory />
             </div>
-          )}
-          {activeTab === "compte" && <CompteTab user={user} onLogout={() => logoutMutation.mutate({})} />}
-        </motion.div>
-      </AnimatePresence>
+            <OrderHistory />
+          </div>
+        )}
+        {activeTab === "compte" && <CompteTab user={user} onLogout={() => logoutMutation.mutate({})} />}
+      </div>
 
       <BottomNav active={activeTab} onChange={navigate} />
     </div>
