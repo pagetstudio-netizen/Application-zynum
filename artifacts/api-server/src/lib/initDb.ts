@@ -264,8 +264,8 @@ async function ensureSchema() {
 }
 
 async function seedData() {
-  const adminEmail = "pagetstudio@gmail.com";
-  const adminPassword = "AAbb11##";
+  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@zynum.net";
+  const adminPassword = process.env.ADMIN_PASSWORD ?? "ChangeMe123!!";
 
   await db
     .insert(usersTable)

@@ -180,7 +180,7 @@ export async function sendAffiliateWithdrawalEmail(opts: {
   phone: string;
   country: string;
 }) {
-  const ADMIN_EMAIL = "pagetstudio@gmail.com";
+  const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? process.env.RESEND_FROM_EMAIL ?? "admin@zynum.net";
   const body = `
     <h2 style="font-size:22px;font-weight:800;color:#111827;margin:0 0 8px;">💸 Nouvelle demande de retrait affilié</h2>
     <p style="font-size:15px;color:#6b7280;margin:0 0 24px;">Un affilié a soumis une demande de retrait. Veuillez la traiter sous <strong>48h</strong>.</p>
