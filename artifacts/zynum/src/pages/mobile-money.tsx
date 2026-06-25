@@ -437,8 +437,8 @@ export default function MobileMoneyPage() {
                     : "border-gray-200 bg-white"
                 }`}
               >
-                <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden">
-                  <img src={op.logo} alt={op.label} className="w-12 h-12 object-contain"
+                <div className="w-14 h-14 rounded-full bg-white border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm">
+                  <img src={op.logo} alt={op.label} className="w-full h-full object-cover"
                     onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
                 </div>
                 <span className={`text-xs font-bold text-center leading-tight ${operator.id === op.id ? "text-blue-600" : "text-gray-700"}`}>
