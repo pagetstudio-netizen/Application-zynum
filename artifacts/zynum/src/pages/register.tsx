@@ -1,14 +1,42 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, User, Lock, Eye, EyeOff, ArrowRight, ChevronLeft, Check, Mail } from "lucide-react";
+import { Loader2, User, Lock, Eye, EyeOff, Mail, Globe2, Check } from "lucide-react";
 import { useRegisterUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
+
+const BG = "/auth-bg.png";
+
+const BTN_PRIMARY: React.CSSProperties = {
+  width: "100%", height: 54, borderRadius: 30,
+  background: "#1A3FFF", color: "#ffffff",
+  fontWeight: 900, fontSize: 16, border: "none",
+  cursor: "pointer", display: "flex", alignItems: "center",
+  justifyContent: "center", gap: 8,
+  boxShadow: "0 6px 32px rgba(26,63,255,0.45)",
+  transition: "opacity 0.15s",
+};
+const BTN_OUTLINE: React.CSSProperties = {
+  width: "100%", height: 54, borderRadius: 30,
+  background: "rgba(255,255,255,0.12)",
+  border: "2px solid rgba(255,255,255,0.7)",
+  color: "#ffffff", fontWeight: 800, fontSize: 15,
+  cursor: "pointer", display: "flex", alignItems: "center",
+  justifyContent: "center", gap: 8,
+  transition: "opacity 0.15s",
+};
+const LABEL: React.CSSProperties = {
+  color: "rgba(255,255,255,0.7)", fontSize: 11,
+  fontWeight: 700, textTransform: "uppercase",
+  letterSpacing: "0.08em", display: "block", marginBottom: 6,
+};
 
 export default function Register() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { lang, setLang } = useLanguage();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -25,20 +53,22 @@ export default function Register() {
     return params.get("ref") ?? "";
   });
 
-  const registerMutation = useRegisterUser({
-    mutation: {
-      onSuccess: (data: any) => {
-        localStorage.setItem("zynum_token", data.token);
-        queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
-        toast({ title: "Compte créé !", description: "Bienvenue sur ZyNum !" });
-        setLocation("/dashboard");
-      },
-      onError: (error: any) => {
-        const msg = error?.response?.data?.message || "Une erreur s'est produite";
-        setErrorMsg(msg);
-      },
-    },
-  });
+  const T = {
+    title:    lang === "fr" ? "Créer un compte" : "Create account",
+    subtitle: lang === "fr" ? "Rejoignez ZyNum gratuitement" : "Join ZyNum for free",
+    fname:    lang === "fr" ? "Prénom" : "First name",
+    lname:    lang === "fr" ? "Nom" : "Last name",
+    email:    "Email",
+    password: lang === "fr" ? "Mot de passe" : "Password",
+    confirm:  lang === "fr" ? "Confirmer le mot de passe" : "Confirm password",
+    terms1:   lang === "fr" ? "J'accepte les " : "I accept the ",
+    terms2:   lang === "fr" ? "conditions d'utilisation" : "terms of use",
+    terms3:   lang === "fr" ? " et la " : " and the ",
+    terms4:   lang === "fr" ? "politique de confidentialité" : "privacy policy",
+    submit:   lang === "fr" ? "S'inscrire maintenant" : "Register now",
+    hasAcct:  lang === "fr" ? "Déjà un compte ? Se connecter" : "Already have an account? Login",
+    langBtn:  lang === "fr" ? "English" : "Français",
+  };
 
   const pwdStrength = (() => {
     if (!password) return 0;
@@ -49,8 +79,23 @@ export default function Register() {
     if (/[^A-Za-z0-9]/.test(password)) s++;
     return s;
   })();
-  const strengthColor = ["bg-gray-200", "bg-red-400", "bg-orange-400", "bg-yellow-400", "bg-green-500"][pwdStrength];
-  const strengthLabel = ["", "Faible", "Moyen", "Bien", "Fort"][pwdStrength];
+  const strengthColor = ["rgba(255,255,255,0.2)", "rgba(239,68,68,0.8)", "rgba(251,146,60,0.8)", "rgba(250,204,21,0.8)", "rgba(34,197,94,0.9)"][pwdStrength];
+  const strengthLabel = ["", lang === "fr" ? "Faible" : "Weak", lang === "fr" ? "Moyen" : "Fair", lang === "fr" ? "Bien" : "Good", lang === "fr" ? "Fort" : "Strong"][pwdStrength];
+
+  const registerMutation = useRegisterUser({
+    mutation: {
+      onSuccess: (data: any) => {
+        localStorage.setItem("zynum_token", data.token);
+        queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
+        toast({ title: "Compte créé !", description: "Bienvenue sur ZyNum !" });
+        setLocation("/dashboard");
+      },
+      onError: (error: any) => {
+        const msg = error?.response?.data?.message || error?.data?.message || "Une erreur s'est produite";
+        setErrorMsg(msg);
+      },
+    },
+  });
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,174 +109,186 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 pt-12 pb-2">
-        <Link href="/" className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
-          <ChevronLeft className="w-5 h-5 text-gray-600" />
-        </Link>
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-            <span className="text-white font-black text-xs">Z</span>
+    <div style={{ minHeight: "100dvh", position: "relative" }}>
+      {/* Background */}
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 0,
+        backgroundImage: `url(${BG})`,
+        backgroundSize: "cover", backgroundPosition: "center",
+      }} />
+      <div style={{ position: "fixed", inset: 0, zIndex: 1, background: "rgba(8,12,40,0.62)" }} />
+
+      {/* Scrollable content */}
+      <div style={{ position: "relative", zIndex: 2, minHeight: "100dvh", display: "flex", flexDirection: "column", overflowY: "auto" }}>
+
+        {/* Top bar */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "52px 20px 16px", flexShrink: 0 }}>
+          <Link href="/">
+            <button style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 12, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+          </Link>
+
+          {/* Logo */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, overflow: "hidden", border: "2px solid rgba(255,255,255,0.3)" }}>
+              <img src="/logo.jpg" alt="ZyNum" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+            <span style={{ color: "#ffffff", fontWeight: 900, fontSize: 18, letterSpacing: "-0.3px" }}>ZyNum</span>
           </div>
-          <span className="font-extrabold text-gray-900 text-base">ZyNum</span>
+
+          {/* Language toggle */}
+          <button
+            onClick={() => setLang(lang === "fr" ? "en" : "fr")}
+            style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "7px 12px", cursor: "pointer" }}
+          >
+            <Globe2 style={{ width: 15, height: 15, color: "white" }} />
+            <span style={{ color: "white", fontSize: 12, fontWeight: 700 }}>{T.langBtn}</span>
+          </button>
         </div>
-        <div className="w-9" />
-      </div>
 
-      <div className="flex-1 flex flex-col px-6 pt-6 pb-10 max-w-sm mx-auto w-full overflow-y-auto">
+        {/* Form */}
+        <div style={{ flex: 1, padding: "8px 24px 48px" }}>
+          <div style={{ marginBottom: 24 }}>
+            <h1 style={{ color: "#ffffff", fontSize: 28, fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.5px" }}>{T.title}</h1>
+            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, margin: 0 }}>{T.subtitle}</p>
+          </div>
 
-        <div className="mb-6">
-              <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Créer un compte</h1>
-              <p className="text-sm text-gray-500">Rejoignez ZyNum gratuitement</p>
+          <form onSubmit={handleRegister} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+
+            {/* Name row */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div>
+                <label style={LABEL}>{T.fname}</label>
+                <div className="glass-input-icon">
+                  <User className="input-icon" style={{ width: 17, height: 17 }} />
+                  <input
+                    type="text" value={firstName} onChange={e => setFirstName(e.target.value)}
+                    placeholder="Jean" className="glass-input"
+                  />
+                </div>
+              </div>
+              <div>
+                <label style={LABEL}>{T.lname}</label>
+                <input
+                  type="text" value={lastName} onChange={e => setLastName(e.target.value)}
+                  placeholder="Dupont" className="glass-input"
+                />
+              </div>
             </div>
 
-            <form onSubmit={handleRegister} className="space-y-3.5">
-              {/* Names row */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Prénom</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      value={firstName}
-                      onChange={e => setFirstName(e.target.value)}
-                      placeholder="Jean"
-                      className="w-full h-12 pl-9 pr-3 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
-                    />
+            {/* Email */}
+            <div>
+              <label style={LABEL}>{T.email}</label>
+              <div className="glass-input-icon">
+                <Mail className="input-icon" style={{ width: 17, height: 17 }} />
+                <input
+                  type="email" value={email} onChange={e => setEmail(e.target.value)}
+                  placeholder="votre@email.com" autoComplete="email"
+                  className="glass-input"
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label style={LABEL}>{T.password}</label>
+              <div className="glass-input-icon" style={{ position: "relative" }}>
+                <Lock className="input-icon" style={{ width: 17, height: 17 }} />
+                <input
+                  type={showPassword ? "text" : "password"} value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••" autoComplete="new-password"
+                  className="glass-input" style={{ paddingRight: 48 }}
+                />
+                <button type="button" onClick={() => setShowPassword(s => !s)}
+                  style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.6)", display: "flex" }}>
+                  {showPassword ? <EyeOff style={{ width: 17, height: 17 }} /> : <Eye style={{ width: 17, height: 17 }} />}
+                </button>
+              </div>
+              {password.length > 0 && (
+                <div style={{ marginTop: 6 }}>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    {[1,2,3,4].map(i => (
+                      <div key={i} style={{ height: 3, flex: 1, borderRadius: 4, background: i <= pwdStrength ? strengthColor : "rgba(255,255,255,0.2)", transition: "background 0.3s" }} />
+                    ))}
                   </div>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Nom</label>
-                  <input
-                    type="text"
-                    value={lastName}
-                    onChange={e => setLastName(e.target.value)}
-                    placeholder="Dupont"
-                    className="w-full h-12 px-3 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Email</label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="votre@email.com"
-                    autoComplete="email"
-                    className="w-full h-12 pl-10 pr-4 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Mot de passe</label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    autoComplete="new-password"
-                    className="w-full h-12 pl-10 pr-12 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
-                  />
-                  <button type="button" onClick={() => setShowPassword(s => !s)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                {password.length > 0 && (
-                  <div className="mt-2 space-y-1">
-                    <div className="flex gap-1">
-                      {[1,2,3,4].map(i => (
-                        <div key={i} className={`h-1 flex-1 rounded-full transition-colors duration-300 ${i <= pwdStrength ? strengthColor : "bg-gray-200"}`} />
-                      ))}
-                    </div>
-                    <p className={`text-[11px] font-medium ${pwdStrength <= 1 ? "text-red-500" : pwdStrength <= 2 ? "text-orange-500" : pwdStrength <= 3 ? "text-yellow-600" : "text-green-600"}`}>
-                      {strengthLabel}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Confirm password */}
-              <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Confirmer le mot de passe</label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type={showConfirm ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                    autoComplete="new-password"
-                    className={`w-full h-12 pl-10 pr-12 rounded-2xl border bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:bg-white transition-all ${
-                      confirmPassword && confirmPassword !== password
-                        ? "border-red-300 focus:border-red-400 focus:ring-red-400/20"
-                        : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-                    }`}
-                  />
-                  <button type="button" onClick={() => setShowConfirm(s => !s)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                    {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                  {confirmPassword && confirmPassword === password && (
-                    <div className="absolute right-10 top-1/2 -translate-y-1/2">
-                      <Check className="w-4 h-4 text-green-500" />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Terms */}
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <div
-                  onClick={() => setAcceptTerms(s => !s)}
-                  className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                    acceptTerms ? "bg-blue-600 border-blue-600" : "border-gray-300 bg-white group-hover:border-blue-400"
-                  }`}
-                >
-                  {acceptTerms && <Check className="w-3 h-3 text-white" />}
-                </div>
-                <span className="text-xs text-gray-500 leading-relaxed">
-                  J'accepte les{" "}
-                  <span className="text-blue-600 font-semibold">conditions d'utilisation</span>{" "}
-                  et la{" "}
-                  <span className="text-blue-600 font-semibold">politique de confidentialité</span>
-                </span>
-              </label>
-
-              {/* Error */}
-              {errorMsg && (
-                <div className="bg-red-50 border border-red-200 text-red-600 text-xs font-medium rounded-xl px-3 py-2.5">
-                  {errorMsg}
+                  {strengthLabel && <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 11, marginTop: 3 }}>{strengthLabel}</p>}
                 </div>
               )}
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={registerMutation.isPending}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 disabled:opacity-60 active:scale-98 transition-all"
-              >
-                {registerMutation.isPending
-                  ? <Loader2 className="w-4 h-4 animate-spin" />
-                  : <>Créer mon compte <ArrowRight className="w-4 h-4" /></>}
-              </button>
-            </form>
-
-            <div className="mt-5 text-center">
-              <p className="text-sm text-gray-500">
-                Déjà un compte ?{" "}
-                <Link href="/login" className="text-blue-600 font-bold hover:text-blue-700">Se connecter</Link>
-              </p>
             </div>
+
+            {/* Confirm password */}
+            <div>
+              <label style={LABEL}>{T.confirm}</label>
+              <div className="glass-input-icon" style={{ position: "relative" }}>
+                <Lock className="input-icon" style={{ width: 17, height: 17 }} />
+                <input
+                  type={showConfirm ? "text" : "password"} value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••" autoComplete="new-password"
+                  className="glass-input" style={{
+                    paddingRight: 48,
+                    borderColor: confirmPassword && confirmPassword !== password ? "rgba(239,68,68,0.7)" : undefined
+                  }}
+                />
+                <div style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", display: "flex", alignItems: "center", gap: 6 }}>
+                  {confirmPassword && confirmPassword === password && (
+                    <Check style={{ width: 16, height: 16, color: "rgba(34,197,94,0.9)" }} />
+                  )}
+                  <button type="button" onClick={() => setShowConfirm(s => !s)}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.6)", display: "flex" }}>
+                    {showConfirm ? <EyeOff style={{ width: 17, height: 17 }} /> : <Eye style={{ width: 17, height: 17 }} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Terms */}
+            <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" }}>
+              <div
+                onClick={() => setAcceptTerms(s => !s)}
+                style={{
+                  width: 20, height: 20, borderRadius: 6, border: "2px solid",
+                  borderColor: acceptTerms ? "#1A3FFF" : "rgba(255,255,255,0.4)",
+                  background: acceptTerms ? "#1A3FFF" : "rgba(255,255,255,0.1)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0, marginTop: 1, transition: "all 0.15s",
+                }}
+              >
+                {acceptTerms && <Check style={{ width: 12, height: 12, color: "white" }} />}
+              </div>
+              <span style={{ color: "rgba(255,255,255,0.65)", fontSize: 12, lineHeight: 1.5 }}>
+                {T.terms1}
+                <span style={{ color: "rgba(255,255,255,0.9)", fontWeight: 700 }}>{T.terms2}</span>
+                {T.terms3}
+                <span style={{ color: "rgba(255,255,255,0.9)", fontWeight: 700 }}>{T.terms4}</span>
+              </span>
+            </label>
+
+            {/* Error */}
+            {errorMsg && (
+              <div style={{ background: "rgba(239,68,68,0.25)", border: "1px solid rgba(239,68,68,0.5)", borderRadius: 12, padding: "10px 14px", color: "#fca5a5", fontSize: 13, fontWeight: 500 }}>
+                {errorMsg}
+              </div>
+            )}
+
+            {/* Submit */}
+            <button type="submit" disabled={registerMutation.isPending}
+              style={{ ...BTN_PRIMARY, marginTop: 4, opacity: registerMutation.isPending ? 0.7 : 1 }}>
+              {registerMutation.isPending
+                ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} />
+                : T.submit}
+            </button>
+          </form>
+
+          {/* Login link */}
+          <div style={{ marginTop: 14 }}>
+            <Link href="/login">
+              <button style={BTN_OUTLINE}>{T.hasAcct}</button>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

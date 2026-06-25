@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "fgzpfk_jxBn6nQ68uAfFB"
+uri = "file://artifacts/zynum/public/auth-bg.png"
+type = "image"
+title = "auth background"
