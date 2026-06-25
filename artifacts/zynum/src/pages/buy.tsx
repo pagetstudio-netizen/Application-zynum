@@ -430,10 +430,11 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
             {user && <BalancePillWhite />}
           </div>
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <input
               placeholder="Rechercher un service…"
-              className="w-full pl-10 pr-4 h-10 rounded-xl text-sm focus:outline-none bg-white text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-white/50"
+              className="w-full pl-10 pr-4 h-10 rounded-xl text-sm focus:outline-none text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-white/60 shadow-md"
+              style={{ backgroundColor: '#ffffff' }}
               value={searchService}
               onChange={(e) => setSearchService(e.target.value)}
             />
@@ -510,10 +511,11 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
 
           {/* Recherche */}
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <input
               placeholder={t("buy_s2_placeholder")}
-              className="w-full pl-10 pr-4 h-10 rounded-xl text-sm focus:outline-none bg-white text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-white/50"
+              className="w-full pl-10 pr-4 h-10 rounded-xl text-sm focus:outline-none text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-white/60 shadow-md"
+              style={{ backgroundColor: '#ffffff' }}
               value={searchCountry}
               onChange={(e) => setSearchCountry(e.target.value)}
             />

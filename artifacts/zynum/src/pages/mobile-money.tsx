@@ -359,7 +359,8 @@ export default function MobileMoneyPage() {
               placeholder="Rechercher un pays..."
               value={cpQuery}
               onChange={e => setCpQuery(e.target.value)}
-              className="w-full h-11 pl-12 pr-4 rounded-2xl border-2 text-base focus:outline-none bg-white text-gray-900 placeholder:text-gray-400"
+              className="w-full h-11 pl-12 pr-4 rounded-2xl text-base focus:outline-none text-gray-900 placeholder:text-gray-500 shadow-md focus:ring-2 focus:ring-white/60"
+              style={{ backgroundColor: '#ffffff' }}
             />
           </div>
         </div>
