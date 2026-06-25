@@ -380,41 +380,53 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
 
   if (isEmbedded && isUserLoading) return <div className="flex justify-center py-24"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
 
-  const BalancePill = () => (
-    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border ${
-      balance === 0 ? "bg-red-50 border-red-200 text-red-600"
-      : balance < 1 ? "bg-yellow-50 border-yellow-200 text-yellow-700"
-      :               "bg-green-50 border-green-200 text-green-700"
-    }`}>
-      <Wallet className="w-4 h-4 shrink-0" />
-      {t("buy_balance_pill")} {formatBalance()}
-      {balance === 0 && <button onClick={() => { window.location.href = "/recharge"; }} className="underline ml-1 hover:text-red-800">{t("buy_top_up_pill")}</button>}
-    </div>
-  );
-
-  const BalancePillWhite = () => (
-    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold" style={{ backgroundColor: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.35)" }}>
-      <Wallet className="w-3.5 h-3.5 shrink-0" style={{ color: "white" }} />
-      <span style={{ color: "white" }}>{t("buy_balance_pill")} {formatBalance()}</span>
-    </div>
-  );
-
-  const Breadcrumb = () => (
-    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-6 flex-wrap">
-      {selectedServiceInfo && (
-        <span className="flex items-center gap-1">
-          <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={16} />
-          <span className="text-gray-800 font-medium">{selectedServiceInfo.name}</span>
+  // ── BALANCE PILL (blanc ou coloré selon contexte) ───────────────────────────
+  const BalancePill = ({ variant = "colored" }: { variant?: "colored" | "white" }) => {
+    if (variant === "white") {
+      return (
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: 6,
+          padding: "6px 14px", borderRadius: 999,
+          background: balance > 0 ? "rgba(34,197,94,0.18)" : "rgba(239,68,68,0.18)",
+          border: `1px solid ${balance > 0 ? "rgba(34,197,94,0.4)" : "rgba(239,68,68,0.4)"}`,
+        }}>
+          <Wallet style={{ width: 15, height: 15, color: balance > 0 ? "#16a34a" : "#dc2626", flexShrink: 0 }} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: balance > 0 ? "#15803d" : "#b91c1c", whiteSpace: "nowrap" }}>
+            {t("buy_balance_pill")} {formatBalance()}
+          </span>
+          {balance === 0 && (
+            <button
+              onClick={() => { window.location.href = "/recharge"; }}
+              style={{ fontSize: 12, fontWeight: 800, color: "#b91c1c", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0, marginLeft: 2 }}
+            >
+              {t("buy_top_up_pill")} →
+            </button>
+          )}
+        </div>
+      );
+    }
+    return (
+      <div style={{
+        display: "inline-flex", alignItems: "center", gap: 6,
+        padding: "6px 14px", borderRadius: 999,
+        background: balance > 0 ? "#f0fdf4" : "#fff1f2",
+        border: `1px solid ${balance > 0 ? "#bbf7d0" : "#fecdd3"}`,
+      }}>
+        <Wallet style={{ width: 15, height: 15, color: balance > 0 ? "#16a34a" : "#e11d48", flexShrink: 0 }} />
+        <span style={{ fontSize: 13, fontWeight: 700, color: balance > 0 ? "#15803d" : "#be123c", whiteSpace: "nowrap" }}>
+          {t("buy_balance_pill")} {formatBalance()}
         </span>
-      )}
-      {selectedCountryInfo && (
-        <>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-gray-800 font-medium">{selectedCountryInfo.name}</span>
-        </>
-      )}
-    </div>
-  );
+        {balance === 0 && (
+          <button
+            onClick={() => { window.location.href = "/recharge"; }}
+            style={{ fontSize: 12, fontWeight: 800, color: "#e11d48", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0, marginLeft: 2 }}
+          >
+            {t("buy_top_up_pill")} →
+          </button>
+        )}
+      </div>
+    );
+  };
 
   // ── STEP 1 — SERVICE ────────────────────────────────────────────────────────
   if (step === "service") {
@@ -422,56 +434,75 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
       s.name.toLowerCase().includes(searchService.toLowerCase())
     );
     return (
-      <div className="flex flex-col min-h-full">
-        {/* Sticky header bleu */}
-        <div className="sticky top-0 z-20 px-4 pt-3 pb-3 space-y-2" style={{ backgroundColor: "#1A3FFF" }}>
-          <div className="flex items-center justify-between">
-            <h1 className="text-lg font-extrabold" style={{ color: "white" }}>Choisir un service</h1>
-            {user && <BalancePillWhite />}
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#F5F6FA" }}>
+
+        {/* ── En-tête fixé ── */}
+        <div style={{ flexShrink: 0, position: "sticky", top: 0, zIndex: 20, background: "#F5F6FA", paddingBottom: 4 }}>
+          {/* Carte titre + solde */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            background: "#ffffff", borderRadius: 18, margin: "12px 16px 0",
+            padding: "14px 16px",
+            boxShadow: "0 1px 6px rgba(0,0,0,0.07)",
+          }}>
+            <span style={{ fontSize: 17, fontWeight: 800, color: "#111827" }}>Choisir un service</span>
+            {user && <BalancePill variant="colored" />}
           </div>
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+
+          {/* Barre de recherche */}
+          <div style={{ position: "relative", margin: "10px 16px 8px" }}>
+            <Search style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: "#9CA3AF", pointerEvents: "none" }} />
             <input
-              placeholder="Rechercher un service…"
-              className="w-full pl-10 pr-4 h-10 rounded-xl text-sm focus:outline-none text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-white/60 shadow-md"
-              style={{ backgroundColor: '#ffffff' }}
+              placeholder="Rechercher un service..."
               value={searchService}
               onChange={(e) => setSearchService(e.target.value)}
+              style={{
+                width: "100%", boxSizing: "border-box",
+                paddingLeft: 42, paddingRight: 16, height: 44,
+                borderRadius: 14, border: "1.5px solid #E5E7EB",
+                background: "#ffffff", fontSize: 14, color: "#111827",
+                outline: "none",
+              }}
             />
           </div>
         </div>
 
-        {/* List */}
-        <div className="flex-1 overflow-y-auto">
+        {/* ── Liste des services ── */}
+        <div style={{ flex: 1, overflowY: "auto", background: "#ffffff", borderRadius: "18px 18px 0 0", margin: "0 0 0 0" }}>
           {isLoadingServices ? (
-            <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>
+            <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}>
+              <Loader2 style={{ width: 32, height: 32, color: "#3b82f6", animation: "spin 1s linear infinite" }} />
+            </div>
           ) : filtered.length === 0 ? (
-            <div className="py-16 text-center text-gray-400 text-sm">
-              Aucun service pour "<strong className="text-gray-900">{searchService}</strong>"
+            <div style={{ padding: "64px 24px", textAlign: "center", color: "#9CA3AF", fontSize: 14 }}>
+              Aucun service pour « <strong style={{ color: "#111827" }}>{searchService}</strong> »
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
-              {filtered.map((svc, i) => (
-                <motion.button
-                  key={svc.id}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: Math.min(i * 0.025, 0.25) }}
-                  onClick={() => { setSelectedService(svc.id); setSelectedCountry(null); setSelectedOperator(null); goTo("country"); }}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 bg-white hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
-                >
-                  <ServiceLogo icon={svc.icon} color={svc.color} name={svc.name} size={46} />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-gray-900 text-sm">{svc.name}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">Disponible dans plusieurs pays</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-sm font-bold text-blue-600">Sélectionner</span>
-                    <ChevronRight className="w-4 h-4 text-blue-400" />
-                  </div>
-                </motion.button>
-              ))}
-            </div>
+            filtered.map((svc, i) => (
+              <button
+                key={svc.id}
+                onClick={() => { setSelectedService(svc.id); setSelectedCountry(null); setSelectedOperator(null); goTo("country"); }}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", gap: 14,
+                  padding: "14px 20px", background: "transparent", border: "none",
+                  borderBottom: i < filtered.length - 1 ? "1px solid #F3F4F6" : "none",
+                  cursor: "pointer", textAlign: "left",
+                  WebkitTapHighlightColor: "transparent",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = "#F9FAFB")}
+                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+              >
+                <ServiceLogo icon={svc.icon} color={svc.color} name={svc.name} size={50} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontWeight: 700, fontSize: 15, color: "#111827", margin: 0 }}>{svc.name}</p>
+                  <p style={{ fontSize: 12, color: "#9CA3AF", margin: "3px 0 0" }}>Disponible dans plusieurs pays</p>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "#2563EB" }}>Sélectionner</span>
+                  <ChevronRight style={{ width: 16, height: 16, color: "#60A5FA" }} />
+                </div>
+              </button>
+            ))
           )}
         </div>
       </div>
@@ -486,57 +517,81 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
       .filter((c) => c.name.toLowerCase().includes(searchCountry.toLowerCase()));
 
     return (
-      <div className="flex flex-col min-h-full">
-        {/* Header fixé bleu */}
-        <div className="sticky top-0 z-20 px-4 pt-3 pb-3 space-y-2" style={{ backgroundColor: "#1A3FFF" }}>
-          {/* Ligne retour + titre + solde */}
-          <div className="flex items-center gap-2">
-            <button onClick={() => goBack("service")} className="p-2 -ml-2 rounded-xl active:bg-blue-700 transition-colors">
-              <ArrowLeft className="w-5 h-5" style={{ color: "white" }} />
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#ffffff" }}>
+
+        {/* ── En-tête fixé ── */}
+        <div style={{ flexShrink: 0, position: "sticky", top: 0, zIndex: 20, background: "#ffffff", borderBottom: "1px solid #F3F4F6" }}>
+          {/* Barre retour + titre + solde */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px 10px" }}>
+            <button
+              onClick={() => goBack("service")}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 4, borderRadius: 10, display: "flex", alignItems: "center", flexShrink: 0 }}
+            >
+              <ArrowLeft style={{ width: 22, height: 22, color: "#374151" }} />
             </button>
-            <h1 className="text-base font-extrabold flex-1" style={{ color: "white" }}>Choisir un pays</h1>
-            {user && <BalancePillWhite />}
+            <span style={{ flex: 1, fontSize: 15, fontWeight: 600, color: "#6B7280" }}>Changer de service</span>
+            {user && <BalancePill variant="white" />}
           </div>
 
           {/* Carte service sélectionné */}
           {selectedServiceInfo && (
-            <div className="flex items-center gap-3 p-3 rounded-2xl" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
-              <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={38} />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>{t("buy_service_selected")}</p>
-                <p className="font-bold text-sm truncate" style={{ color: "white" }}>{selectedServiceInfo.name}</p>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 14,
+              margin: "0 16px 12px", padding: "12px 14px",
+              background: "#F9FAFB", borderRadius: 16,
+              border: "1px solid #E5E7EB",
+            }}>
+              <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={44} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 600, margin: 0, textTransform: "uppercase", letterSpacing: "0.05em" }}>Service sélectionné</p>
+                <p style={{ fontSize: 15, fontWeight: 800, color: "#111827", margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedServiceInfo.name}</p>
               </div>
             </div>
           )}
-
-          {/* Recherche */}
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-            <input
-              placeholder={t("buy_s2_placeholder")}
-              className="w-full pl-10 pr-4 h-10 rounded-xl text-sm focus:outline-none text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-white/60 shadow-md"
-              style={{ backgroundColor: '#ffffff' }}
-              value={searchCountry}
-              onChange={(e) => setSearchCountry(e.target.value)}
-            />
-          </div>
         </div>
 
-        {/* Liste */}
-        <div className="flex-1">
+        {/* ── Titre section + recherche (scrollable) ── */}
+        <div style={{ flexShrink: 0, padding: "16px 16px 0" }}>
+          <p style={{ fontSize: 20, fontWeight: 800, color: "#111827", margin: "0 0 4px" }}>Dans quel pays ?</p>
+          <p style={{ fontSize: 13, color: "#6B7280", margin: "0 0 12px", lineHeight: 1.5 }}>
+            Sélectionnez le pays pour lequel vous souhaitez un numéro virtuel.
+          </p>
+
+          {/* Barre recherche pays */}
+          <div style={{ position: "relative", marginBottom: 8 }}>
+            <Search style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: "#9CA3AF", pointerEvents: "none" }} />
+            <input
+              placeholder="Rechercher un pays..."
+              value={searchCountry}
+              onChange={(e) => setSearchCountry(e.target.value)}
+              style={{
+                width: "100%", boxSizing: "border-box",
+                paddingLeft: 42, paddingRight: 16, height: 44,
+                borderRadius: 14, border: "1.5px solid #E5E7EB",
+                background: "#F9FAFB", fontSize: 14, color: "#111827",
+                outline: "none",
+              }}
+            />
+          </div>
+
+          {/* séparateur */}
+          <div style={{ height: 1, background: "#F3F4F6", margin: "8px 0" }} />
+        </div>
+
+        {/* ── Liste pays ── */}
+        <div style={{ flex: 1, overflowY: "auto" }}>
           {isLoadingCountries ? (
-            <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+            <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}>
+              <Loader2 style={{ width: 28, height: 28, color: "#3b82f6", animation: "spin 1s linear infinite" }} />
+            </div>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <>
               {filtered.map((country, i) => {
                 const priceUsd = country.priceUsd ?? 0;
                 const priceFcfa = country.priceFcfa ?? Math.round(priceUsd * 620);
                 return (
-                  <motion.button
+                  <button
                     key={country.code}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: Math.min(i * 0.025, 0.25) }}
                     onClick={() => {
                       setSelectedCountry(country.code);
                       if (isEmbedded) {
@@ -546,30 +601,38 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                         if (user) { setLocation("/dashboard"); } else { setLocation("/login"); }
                       }
                     }}
-                    className="w-full flex items-center justify-between gap-4 px-4 py-3.5 bg-white hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
+                    style={{
+                      width: "100%", display: "flex", alignItems: "center",
+                      padding: "13px 20px", background: "transparent", border: "none",
+                      borderBottom: i < filtered.length - 1 ? "1px solid #F3F4F6" : "none",
+                      cursor: "pointer", textAlign: "left",
+                      WebkitTapHighlightColor: "transparent",
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "#F9FAFB")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{country.flag ?? "🌐"}</span>
-                      <div>
-                        <p className="font-semibold text-gray-900">{country.name}</p>
-                        <p className="text-xs text-gray-400">
-                          {country.available} {country.available > 1 ? t("buy_num_available_plural") : t("buy_num_available_single")}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <p className="font-bold text-gray-900 text-sm">
-                        {currency === "FCFA" ? `${priceFcfa.toLocaleString("fr-FR")} FCFA` : `$${priceUsd.toFixed(2)}`}
+                    <span style={{ fontSize: 26, marginRight: 14, flexShrink: 0, lineHeight: 1 }}>{country.flag ?? "🌐"}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontWeight: 700, fontSize: 15, color: "#111827", margin: 0 }}>{country.name}</p>
+                      <p style={{ fontSize: 12, color: "#9CA3AF", margin: "2px 0 0" }}>
+                        {country.available.toLocaleString("fr-FR")} {country.available > 1 ? t("buy_num_available_plural") : t("buy_num_available_single")}
                       </p>
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
                     </div>
-                  </motion.button>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                      <span style={{ fontWeight: 700, fontSize: 15, color: "#111827" }}>
+                        {currency === "FCFA" ? `${priceFcfa.toLocaleString("fr-FR")} FCFA` : `$${priceUsd.toFixed(2)}`}
+                      </span>
+                      <ChevronRight style={{ width: 16, height: 16, color: "#D1D5DB" }} />
+                    </div>
+                  </button>
                 );
               })}
               {filtered.length === 0 && (
-                <div className="py-16 text-center text-muted-foreground">{t("buy_no_country_for")}</div>
+                <div style={{ padding: "64px 24px", textAlign: "center", color: "#9CA3AF", fontSize: 14 }}>
+                  {t("buy_no_country_for")}
+                </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>
