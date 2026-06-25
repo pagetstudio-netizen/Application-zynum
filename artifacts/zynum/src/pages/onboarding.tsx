@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight } from "lucide-react";
 
 const slides = [
   {
@@ -9,159 +8,418 @@ const slides = [
     image: "/onboarding1.png",
     title: "Bienvenue sur ZyNum",
     subtitle: "Votre numéro virtuel dans 180+ pays, livré en quelques secondes.",
-    cta: "Démarrer",
-    secondary: null,
+    accent: "#1A3FFF",
+    bg: "#EEF2FF",
   },
   {
     id: 1,
     image: "/onboarding2.png",
     title: "Recevez vos SMS instantanément",
     subtitle: "Telegram, WhatsApp, Google, TikTok et 200+ services disponibles.",
-    cta: "Suivant",
-    secondary: null,
+    accent: "#7C3AED",
+    bg: "#F5F3FF",
   },
   {
     id: 2,
     image: "/onboarding3.png",
     title: "Payez facilement en FCFA",
     subtitle: "Rechargez via TMoney, Moov Money, Orange Money ou USDT.",
-    cta: "Créer un compte",
-    secondary: "J'ai déjà un compte",
+    accent: "#059669",
+    bg: "#ECFDF5",
   },
-];
-
-const DOT_COLORS = ["bg-blue-500", "bg-purple-500", "bg-emerald-500"];
-const BG_GRADIENTS = [
-  "from-blue-50 via-white to-indigo-50",
-  "from-purple-50 via-white to-pink-50",
-  "from-emerald-50 via-white to-teal-50",
-];
-const BTN_COLORS = [
-  "from-blue-500 to-indigo-600",
-  "from-purple-500 to-pink-600",
-  "from-emerald-500 to-teal-600",
 ];
 
 export default function Onboarding() {
   const [current, setCurrent] = useState(0);
-  const [direction, setDirection] = useState(1);
+  const [animDir, setAnimDir] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragX, setDragX] = useState(0);
+  const startX = useRef(0);
   const [, setLocation] = useLocation();
 
   const slide = slides[current];
 
-  const next = () => {
+  const goTo = (idx: number) => {
+    if (idx < 0 || idx >= slides.length || idx === current) return;
+    setAnimDir(idx > current ? 1 : -1);
+    setCurrent(idx);
+  };
+
+  const handleNext = () => {
     if (current < slides.length - 1) {
-      setDirection(1);
-      setCurrent((c) => c + 1);
+      goTo(current + 1);
     } else {
       setLocation("/register");
     }
   };
 
-  const skip = () => setLocation("/login");
+  /* ── Touch / Pointer swipe ── */
+  const onPointerDown = (e: React.PointerEvent) => {
+    startX.current = e.clientX;
+    setIsDragging(true);
+    setDragX(0);
+  };
 
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    setDragX(e.clientX - startX.current);
+  };
+
+  const onPointerUp = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    if (dragX < -50) goTo(current + 1);
+    else if (dragX > 50) goTo(current - 1);
+    setDragX(0);
+  };
+
+  /* ── Card slide variants ── */
   const variants = {
-    enter: (d: number) => ({ x: d > 0 ? 60 : -60, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (d: number) => ({ x: d > 0 ? -60 : 60, opacity: 0 }),
+    enter: (d: number) => ({
+      x: d > 0 ? "100%" : "-100%",
+      opacity: 0,
+      scale: 0.92,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: (d: number) => ({
+      x: d > 0 ? "-100%" : "100%",
+      opacity: 0,
+      scale: 0.92,
+    }),
   };
 
   return (
     <div
-      className={`h-[100dvh] overflow-hidden flex flex-col bg-gradient-to-br ${BG_GRADIENTS[current]} transition-all duration-700`}
+      style={{
+        height: "100dvh",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        background: "#F8F9FF",
+        position: "relative",
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        transition: "background 0.5s",
+      }}
     >
-      {/* Top bar — fixed, shrink-0 */}
-      <div className="shrink-0 flex items-center justify-between px-6 pt-safe pt-4 pb-2">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl overflow-hidden">
-            <img src="/logo.jpg" alt="ZyNum" className="w-full h-full object-cover" />
+      {/* ── Top bar ── */}
+      <div
+        style={{
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "52px 20px 0",
+        }}
+      >
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              overflow: "hidden",
+              border: `2px solid ${slide.accent}22`,
+            }}
+          >
+            <img
+              src="/logo.jpg"
+              alt="ZyNum"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
           </div>
-          <span className="font-bold text-gray-800 text-lg tracking-tight">ZyNum</span>
+          <span
+            style={{
+              fontWeight: 900,
+              fontSize: 18,
+              letterSpacing: "-0.3px",
+              color: "#111",
+            }}
+          >
+            ZyNum
+          </span>
         </div>
+
+        {/* Skip */}
         {current < slides.length - 1 && (
-          <button onClick={() => setLocation("/login")} className="text-sm text-gray-400 font-medium active:scale-90 transition-all">
+          <button
+            onClick={() => setLocation("/login")}
+            style={{
+              background: "none",
+              border: "none",
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#9CA3AF",
+              cursor: "pointer",
+              padding: "8px 4px",
+            }}
+          >
             Passer
           </button>
         )}
       </div>
 
-      {/* Illustration — flex-1, compressible */}
-      <div className="flex-1 min-h-0 flex items-center justify-center px-6 py-2">
-        <div className="w-full max-w-sm" style={{ maxHeight: "100%" }}>
-          <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
-              key={current}
-              custom={direction}
-              variants={variants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="w-full flex items-center justify-center"
-              style={{ height: "min(288px, 100%)" }}
-            >
-              <img
-                src={slide.image}
-                alt={slide.title}
-                className="w-full h-full object-contain"
-              />
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
-
-      {/* Text + CTA — fixed at bottom, shrink-0 */}
-      <div className="shrink-0 px-6 pb-10 space-y-5">
-        {/* Dots */}
-        <div className="flex justify-center gap-2">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => { setDirection(i > current ? 1 : -1); setCurrent(i); }}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === current ? `w-8 ${DOT_COLORS[current]}` : "w-2 bg-gray-200"
-              }`}
-            />
-          ))}
-        </div>
-
-        {/* Text */}
+      {/* ── Page title ── */}
+      <div style={{ flexShrink: 0, padding: "20px 24px 12px", textAlign: "center" }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={current}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.3 }}
-            className="text-center space-y-2"
           >
-            <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">
+            <h1
+              style={{
+                fontSize: 24,
+                fontWeight: 900,
+                color: "#111827",
+                margin: 0,
+                letterSpacing: "-0.4px",
+                lineHeight: 1.25,
+              }}
+            >
               {slide.title}
             </h1>
-            <p className="text-sm text-gray-500 leading-relaxed max-w-xs mx-auto">
+            <p
+              style={{
+                fontSize: 14,
+                color: "#6B7280",
+                margin: "8px 0 0",
+                lineHeight: 1.6,
+              }}
+            >
               {slide.subtitle}
             </p>
           </motion.div>
         </AnimatePresence>
+      </div>
 
-        {/* Buttons */}
-        <div className="space-y-3 max-w-sm mx-auto w-full">
-          <button
-            onClick={next}
-            className={`w-full h-14 rounded-2xl bg-gradient-to-r ${BTN_COLORS[current]} text-white font-bold text-base flex items-center justify-center gap-2 transition-all active:scale-95`}
-          >
-            {slide.cta}
-            <ArrowRight className="w-5 h-5" />
-          </button>
-          {slide.secondary && (
-            <button
-              onClick={skip}
-              className="w-full h-12 rounded-2xl border-2 border-gray-200 text-gray-600 font-semibold text-sm active:bg-gray-50 transition-all active:scale-95"
+      {/* ── Cards carousel ── */}
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          position: "relative",
+          overflow: "hidden",
+          cursor: isDragging ? "grabbing" : "grab",
+        }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
+        {/* Peek cards (prev & next ghost) */}
+        {slides.map((s, i) => {
+          if (i === current) return null;
+          const offset = (i - current) * 88; /* vw */
+          return (
+            <div
+              key={s.id}
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transform: `translateX(${offset}vw)`,
+                padding: "8px 28px",
+                pointerEvents: "none",
+              }}
             >
-              {slide.secondary}
-            </button>
-          )}
+              <div
+                style={{
+                  width: "100%",
+                  maxWidth: 340,
+                  height: "100%",
+                  borderRadius: 28,
+                  background: s.bg,
+                  border: `1.5px solid ${s.accent}22`,
+                  opacity: 0.45,
+                  overflow: "hidden",
+                }}
+              >
+                <img
+                  src={s.image}
+                  alt={s.title}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    objectPosition: "top",
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Active card */}
+        <AnimatePresence mode="wait" custom={animDir}>
+          <motion.div
+            key={current}
+            custom={animDir}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.38, ease: [0.32, 0, 0.67, 0] }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "8px 28px",
+            }}
+          >
+            <div
+              style={{
+                width: "100%",
+                maxWidth: 340,
+                height: "100%",
+                borderRadius: 28,
+                background: slide.bg,
+                border: `2px solid ${slide.accent}33`,
+                boxShadow: `0 16px 48px ${slide.accent}22, 0 4px 16px rgba(0,0,0,0.08)`,
+                overflow: "hidden",
+                position: "relative",
+              }}
+            >
+              <img
+                src={slide.image}
+                alt={slide.title}
+                draggable={false}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "top",
+                  pointerEvents: "none",
+                }}
+              />
+              {/* Accent badge */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 16,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: slide.accent,
+                  borderRadius: 20,
+                  padding: "6px 16px",
+                  fontSize: 11,
+                  fontWeight: 800,
+                  color: "#fff",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  whiteSpace: "nowrap",
+                  boxShadow: `0 4px 16px ${slide.accent}55`,
+                }}
+              >
+                {current === 0 ? "180+ pays" : current === 1 ? "200+ services" : "TMoney · Orange · USDT"}
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Drag offset visual feedback */}
+        {isDragging && Math.abs(dragX) > 10 && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "8px 28px",
+              transform: `translateX(${dragX * 0.3}px)`,
+              pointerEvents: "none",
+            }}
+          />
+        )}
+      </div>
+
+      {/* ── Bottom: dots + buttons ── */}
+      <div
+        style={{
+          flexShrink: 0,
+          padding: "12px 24px 40px",
+        }}
+      >
+        {/* Dots */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 8,
+            marginBottom: 20,
+          }}
+        >
+          {slides.map((s, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              style={{
+                height: 8,
+                width: i === current ? 28 : 8,
+                borderRadius: 4,
+                background: i === current ? slide.accent : "#E5E7EB",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+                transition: "all 0.3s ease",
+              }}
+            />
+          ))}
         </div>
+
+        {/* Primary CTA */}
+        <button
+          onClick={handleNext}
+          style={{
+            width: "100%",
+            height: 54,
+            borderRadius: 30,
+            background: slide.accent,
+            color: "#ffffff",
+            fontWeight: 900,
+            fontSize: 16,
+            border: "none",
+            cursor: "pointer",
+            boxShadow: `0 6px 24px ${slide.accent}44`,
+            transition: "all 0.3s ease",
+          }}
+        >
+          {current < slides.length - 1 ? "Continuer" : "Créer un compte"}
+        </button>
+
+        {/* Secondary CTA on last slide */}
+        {current === slides.length - 1 && (
+          <button
+            onClick={() => setLocation("/login")}
+            style={{
+              width: "100%",
+              height: 50,
+              borderRadius: 30,
+              background: "transparent",
+              border: `2px solid ${slide.accent}55`,
+              color: slide.accent,
+              fontWeight: 800,
+              fontSize: 15,
+              cursor: "pointer",
+              marginTop: 10,
+              transition: "all 0.3s ease",
+            }}
+          >
+            J'ai déjà un compte
+          </button>
+        )}
       </div>
     </div>
   );
