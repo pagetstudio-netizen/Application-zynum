@@ -9,7 +9,7 @@ import {
   Copy, Check, Shield, Gift, Code2, HelpCircle, Settings,
   ArrowUpRight, ArrowDownLeft, Tag, History, RefreshCw,
   Phone, Globe2, Star, Lock, KeyRound, X, Menu,
-  ChevronLeft, Clock, XCircle, Package, CreditCard,
+  ChevronLeft, Clock, XCircle, Package, CreditCard, SlidersHorizontal,
 } from "lucide-react";
 import {
   useGetCurrentUser, useLogoutUser, useGetBalance,
@@ -1766,9 +1766,18 @@ export default function Dashboard() {
             <NumerosTab />
           )}
           {activeTab === "sms" && (
-            <div className="flex-1 overflow-y-auto bg-white pb-24">
-              <div style={{ position: "sticky", top: 0, zIndex: 10, backgroundColor: "#ffffff", padding: "16px 16px 12px", borderBottom: "1px solid #f3f4f6" }}>
-                <h1 style={{ fontWeight: 800, color: "#111827", fontSize: "20px", margin: 0 }}>Historique d'achat</h1>
+            <div className="flex-1 overflow-y-auto pb-24" style={{ background: "#F8FAFC" }}>
+              {/* Sticky title header */}
+              <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-xl font-extrabold text-gray-900 leading-tight">Historique</h1>
+                    <p className="text-xs text-gray-400 mt-0.5">Consultez l'historique de tous vos numéros achetés.</p>
+                  </div>
+                  <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center">
+                    <SlidersHorizontal className="w-4 h-4 text-gray-500" />
+                  </div>
+                </div>
               </div>
               <OrderHistory />
             </div>
