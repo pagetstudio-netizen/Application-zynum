@@ -389,7 +389,7 @@ export default function OrderHistory() {
     <div className="flex flex-col" style={{ background: "#F8FAFC", minHeight: "100%" }}>
 
       {/* ── Search bar ── */}
-      <div className="px-4 pt-4 pb-2 bg-white border-b border-gray-100">
+      <div className="sticky top-0 z-10 px-4 pt-4 pb-2 bg-white border-b border-gray-100">
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -407,7 +407,7 @@ export default function OrderHistory() {
       </div>
 
       {/* ── Filter pills ── */}
-      <div className="bg-white border-b border-gray-100 px-4 py-2.5">
+      <div className="sticky top-[72px] z-10 bg-white border-b border-gray-100 px-4 py-2.5">
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-0.5">
           {FILTERS.map(f => (
             <button
