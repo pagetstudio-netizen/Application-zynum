@@ -1,0 +1,1 @@
+- [Tailwind text-white mobile rendering](tailwind-white-mobile.md) — use inline style color:#ffffff instead of text-white class; fails on Android Chrome on blue/dark backgrounds.

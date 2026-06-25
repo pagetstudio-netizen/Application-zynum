@@ -395,10 +395,10 @@ export default function MobileMoneyPage() {
           <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
-          <h1 className="font-extrabold text-base flex-1 text-center pr-8 text-white">Recharge Mobile Money</h1>
+          <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: '#ffffff' }}>Recharge Mobile Money</h1>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 pb-32" style={{ paddingTop: HEADER_H + 16 }}>
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-32" style={{ paddingTop: HEADER_H + 16 }}>
           <p className="text-gray-500 text-sm mb-5 leading-relaxed">
             Saisissez votre numéro et choisissez votre opérateur.
           </p>
@@ -471,7 +471,8 @@ export default function MobileMoneyPage() {
         <div className="fixed bottom-0 left-0 right-0 px-5 pb-8 pt-4 bg-white border-t border-gray-100">
           <button
             onClick={goToAmount}
-            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-transform bg-[#1A3FFF]"
+            className="w-full py-4 rounded-full font-black text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-transform bg-[#1A3FFF]"
+            style={{ color: '#ffffff' }}
           >
             Suivante
           </button>
@@ -490,7 +491,7 @@ export default function MobileMoneyPage() {
           <button onClick={() => setStep("phone")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
-          <h1 className="font-extrabold text-base flex-1 text-center pr-8 text-white">Montant à recharger</h1>
+          <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: '#ffffff' }}>Montant à recharger</h1>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-32" style={{ paddingTop: HEADER_H + 16 }}>
@@ -561,7 +562,8 @@ export default function MobileMoneyPage() {
           <button
             onClick={handlePayClick}
             disabled={amountFcfa < 300}
-            className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all bg-[#1A3FFF] disabled:opacity-50"
+            className="w-full py-4 rounded-full font-black text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all bg-[#1A3FFF] disabled:opacity-50"
+            style={{ color: '#ffffff' }}
           >
             {amountFcfa > 0
               ? `Payer ${isFcfa ? `${amountFcfa.toLocaleString("fr-FR")} FCFA` : `$${(amountFcfa / FCFA_PER_USD).toFixed(2)}`}`

@@ -137,7 +137,7 @@ export default function CardPaymentPage() {
               <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
                 <ChevronLeft className="w-5 h-5 text-white" />
               </button>
-              <h1 className="font-extrabold text-base flex-1 text-center pr-8 text-white">Recharge Carte Bancaire</h1>
+              <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: '#ffffff' }}>Recharge Carte Bancaire</h1>
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 pb-32" style={{ paddingTop: HEADER_H + 16 }}>
@@ -204,7 +204,8 @@ export default function CardPaymentPage() {
                   if (amountFcfa < 500) { toast({ variant: "destructive", title: "Minimum 500 FCFA" }); return; }
                   setStep("card");
                 }}
-                className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all bg-[#1A3FFF]"
+                className="w-full py-4 rounded-full font-black text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all bg-[#1A3FFF]"
+                style={{ color: '#ffffff' }}
               >
                 {amountFcfa > 0
                   ? `Continuer · ${isFcfa ? `${amountFcfa.toLocaleString("fr-FR")} FCFA` : `$${(amountFcfa / FCFA_PER_USD).toFixed(2)}`}`
@@ -225,7 +226,7 @@ export default function CardPaymentPage() {
               <button onClick={() => setStep("amount")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
                 <ChevronLeft className="w-5 h-5 text-white" />
               </button>
-              <h1 className="font-extrabold text-base flex-1 text-center pr-8 text-white">Informations de carte</h1>
+              <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: '#ffffff' }}>Informations de carte</h1>
             </div>
 
             <div className="flex-1 overflow-y-auto px-5 pb-32" style={{ paddingTop: HEADER_H }}>
@@ -306,7 +307,8 @@ export default function CardPaymentPage() {
             <div className="fixed bottom-0 left-0 right-0 px-5 pb-8 pt-4 border-t border-gray-100 bg-white">
               <button
                 onClick={submitCard}
-                className="w-full py-4 rounded-full font-black text-white text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all bg-[#1A3FFF]"
+                className="w-full py-4 rounded-full font-black text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all bg-[#1A3FFF]"
+                style={{ color: '#ffffff' }}
               >
                 Payer {amountFcfa.toLocaleString("fr-FR")} FCFA
               </button>
@@ -327,7 +329,7 @@ export default function CardPaymentPage() {
                   <ChevronLeft className="w-5 h-5 text-white" />
                 </button>
               )}
-              <h1 className="font-extrabold text-base flex-1 text-center pr-8 text-white">Paiement</h1>
+              <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: '#ffffff' }}>Paiement</h1>
             </div>
 
             <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-6" style={{ paddingTop: HEADER_H }}>
@@ -357,7 +359,8 @@ export default function CardPaymentPage() {
                   </div>
                   {paymentUrl && (
                     <a href={paymentUrl} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#1A3FFF] text-white font-bold shadow-lg shadow-blue-200">
+                      className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#1A3FFF] font-bold shadow-lg shadow-blue-200"
+                      style={{ color: '#ffffff' }}>
                       <ExternalLink className="w-4 h-4" /> Payer maintenant
                     </a>
                   )}
@@ -414,7 +417,8 @@ export default function CardPaymentPage() {
                     <p className="text-gray-500 text-sm">{payError}</p>
                   </div>
                   <button onClick={() => setStep("card")}
-                    className="w-full py-4 rounded-full font-black text-white text-lg bg-[#1A3FFF] shadow-lg shadow-blue-500/30">
+                    className="w-full py-4 rounded-full font-black text-lg bg-[#1A3FFF] shadow-lg shadow-blue-500/30"
+                    style={{ color: '#ffffff' }}>
                     Réessayer
                   </button>
                 </>
