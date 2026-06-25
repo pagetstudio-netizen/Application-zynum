@@ -61,11 +61,13 @@ function useCountdown(createdAt: string, active: boolean) {
 
 function CopyButton({ text, label }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
   const handle = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    toast({ title: label ? `${label} copié !` : "Copié !", duration: 2000 });
   };
   return (
     <button

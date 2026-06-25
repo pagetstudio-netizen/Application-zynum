@@ -117,7 +117,7 @@ export default function AffiliatePage() {
     if (!referralLink) return;
     navigator.clipboard.writeText(referralLink);
     setCopied(true);
-    toast({ title: "Lien copié !", description: "Partagez-le avec vos contacts." });
+    toast({ title: "Lien copié !", description: "Partagez-le avec vos contacts.", duration: 2000 });
     setTimeout(() => setCopied(false), 2000);
   };
 

@@ -85,10 +85,12 @@ function OtpModal({
   const [copied, setCopied] = useState(false);
   const ussd = operator.ussdCode ?? "#144#";
 
+  const { toast: snack } = useToast();
   function copyUssd() {
     navigator.clipboard.writeText(ussd);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    snack({ title: "Code USSD copié !", duration: 2000 });
   }
 
   return (

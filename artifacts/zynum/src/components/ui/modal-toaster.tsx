@@ -3,6 +3,88 @@ import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
+function Snackbar({
+  current,
+  isOpen,
+  onClose,
+}: {
+  current: ReturnType<typeof useToast>["toasts"][0]
+  isOpen: boolean
+  onClose: () => void
+}) {
+  const isDestructive = current?.variant === "destructive"
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        top: isOpen ? 56 : -120,
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 300,
+        transition: "top 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s",
+        opacity: isOpen ? 1 : 0,
+        pointerEvents: isOpen ? "auto" : "none",
+        cursor: "pointer",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          paddingLeft: 12,
+          paddingRight: 18,
+          paddingTop: 10,
+          paddingBottom: 10,
+          borderRadius: 50,
+          background: isDestructive ? "#EF4444" : "#111827",
+          color: "#ffffff",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.28)",
+          whiteSpace: "nowrap",
+          maxWidth: "calc(100vw - 48px)",
+        }}
+      >
+        <div
+          style={{
+            width: 22,
+            height: 22,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.18)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          {isDestructive ? (
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          ) : (
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          )}
+        </div>
+        <div>
+          {current?.title && (
+            <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.3, color: "#ffffff" }}>
+              {current.title}
+            </div>
+          )}
+          {current?.description && (
+            <div style={{ fontSize: 12, opacity: 0.8, marginTop: 1, color: "#ffffff" }}>
+              {current.description}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function ModalToaster() {
   const { toasts, dismiss } = useToast()
   const current = toasts[0]
@@ -12,6 +94,16 @@ export function ModalToaster() {
 
   function handleClose() {
     if (current) dismiss(current.id)
+  }
+
+  if (current?.duration) {
+    return (
+      <Snackbar
+        current={current}
+        isOpen={isOpen}
+        onClose={handleClose}
+      />
+    )
   }
 
   return (

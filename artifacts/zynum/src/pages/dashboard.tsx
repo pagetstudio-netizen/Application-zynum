@@ -805,6 +805,7 @@ function InfosPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }
     navigator.clipboard.writeText(`ZY${user.id.toString().padStart(6, "0")}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+    toast({ title: "ID copié !", duration: 2000 });
   };
 
   const saveName = async () => {
@@ -1039,7 +1040,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
     navigator.clipboard.writeText(text);
     if (which === "link") { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
     else { setCopiedCode(true); setTimeout(() => setCopiedCode(false), 2000); }
-    toast({ title: "Copié !" });
+    toast({ title: "Copié !", duration: 2000 });
   };
 
   const handleWithdraw = async (e: React.FormEvent) => {
@@ -1337,7 +1338,7 @@ function APIPage({ onBack }: { onBack: () => void }) {
     navigator.clipboard.writeText(apiKey);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
-    toast({ title: "Clé API copiée !" });
+    toast({ title: "Clé API copiée !", duration: 2000 });
   };
 
   return (

@@ -84,6 +84,7 @@ export default function Login() {
       onError: (error: any) => {
         const msg = error?.data?.message || error?.message || "Email ou mot de passe incorrect";
         setErrorMsg(msg);
+        toast({ title: "Erreur de connexion", description: msg, variant: "destructive", duration: 3500 });
       },
     },
   });
@@ -91,7 +92,7 @@ export default function Login() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-    if (!email || !password) { setErrorMsg("Veuillez remplir tous les champs"); return; }
+    if (!email || !password) { const m = "Veuillez remplir tous les champs"; setErrorMsg(m); toast({ title: "Champs manquants", description: m, variant: "destructive", duration: 3000 }); return; }
     loginMutation.mutate({ data: { email, password } });
   };
 
@@ -127,6 +128,7 @@ export default function Login() {
       setLocation("/dashboard");
     } catch (err: any) {
       setErrorMsg(err.message);
+      toast({ title: "Code invalide", description: err.message, variant: "destructive", duration: 3500 });
     } finally {
       setIsSubmitting(false);
     }

@@ -93,6 +93,7 @@ export default function Register() {
       onError: (error: any) => {
         const msg = error?.response?.data?.message || error?.data?.message || "Une erreur s'est produite";
         setErrorMsg(msg);
+        toast({ title: "Erreur d'inscription", description: msg, variant: "destructive", duration: 3500 });
       },
     },
   });
@@ -100,10 +101,10 @@ export default function Register() {
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-    if (!firstName || !email || !password) { setErrorMsg("Veuillez remplir tous les champs"); return; }
-    if (password !== confirmPassword) { setErrorMsg("Les mots de passe ne correspondent pas"); return; }
-    if (password.length < 8) { setErrorMsg("Le mot de passe doit contenir au moins 8 caractères"); return; }
-    if (!acceptTerms) { setErrorMsg("Veuillez accepter les conditions d'utilisation"); return; }
+    if (!firstName || !email || !password) { const m = "Veuillez remplir tous les champs"; setErrorMsg(m); toast({ title: "Champs manquants", description: m, variant: "destructive", duration: 3000 }); return; }
+    if (password !== confirmPassword) { const m = "Les mots de passe ne correspondent pas"; setErrorMsg(m); toast({ title: "Erreur", description: m, variant: "destructive", duration: 3000 }); return; }
+    if (password.length < 8) { const m = "Le mot de passe doit contenir au moins 8 caractères"; setErrorMsg(m); toast({ title: "Mot de passe trop court", description: m, variant: "destructive", duration: 3000 }); return; }
+    if (!acceptTerms) { const m = "Veuillez accepter les conditions d'utilisation"; setErrorMsg(m); toast({ title: "Conditions requises", description: m, variant: "destructive", duration: 3000 }); return; }
     const name = `${firstName} ${lastName}`.trim();
     registerMutation.mutate({ data: { name, email, password, confirmPassword } } as any);
   };
