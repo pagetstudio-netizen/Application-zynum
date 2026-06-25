@@ -595,8 +595,8 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
             <div className="flex items-center gap-3 p-3 rounded-2xl" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
               <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={38} />
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-white/70">{selectedServiceInfo.name}</p>
-                <p className="font-bold text-sm text-white truncate">{selectedCountryInfo?.name}</p>
+                <p className="text-xs font-medium" style={{ color: '#ffffff' }}>{selectedServiceInfo.name}</p>
+                <p className="font-bold text-sm truncate" style={{ color: '#ffffff' }}>{selectedCountryInfo?.name}</p>
               </div>
             </div>
           )}
@@ -763,9 +763,9 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                       <img src={svc.icon} alt={svc.name} className="w-10 h-10 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                     </div>
                   )}
-                  <div className="text-white">
-                    <p className="font-black text-xl">{activeOrder.serviceName}</p>
-                    <p className="text-white/80 text-sm font-medium">{activeOrder.countryName}</p>
+                  <div>
+                    <p className="font-black text-xl" style={{ color: '#ffffff' }}>{activeOrder.serviceName}</p>
+                    <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.85)' }}>{activeOrder.countryName}</p>
                   </div>
                 </div>
               </div>
