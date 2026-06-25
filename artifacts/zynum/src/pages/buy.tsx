@@ -430,11 +430,10 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
             {user && <BalancePillWhite />}
           </div>
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "rgba(255,255,255,0.6)" }} />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               placeholder="Rechercher un service…"
-              style={{ backgroundColor: "rgba(255,255,255,0.18)", color: "white", border: "none" }}
-              className="w-full pl-10 pr-4 h-10 rounded-xl text-sm focus:outline-none placeholder:text-white/50"
+              className="w-full pl-10 pr-4 h-10 rounded-xl text-sm focus:outline-none bg-white text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-white/50"
               value={searchService}
               onChange={(e) => setSearchService(e.target.value)}
             />
@@ -511,11 +510,10 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
 
           {/* Recherche */}
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "rgba(255,255,255,0.6)" }} />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               placeholder={t("buy_s2_placeholder")}
-              style={{ backgroundColor: "rgba(255,255,255,0.18)", color: "white", border: "none" }}
-              className="w-full pl-10 pr-4 h-10 rounded-xl text-sm focus:outline-none placeholder:text-white/50"
+              className="w-full pl-10 pr-4 h-10 rounded-xl text-sm focus:outline-none bg-white text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-white/50"
               value={searchCountry}
               onChange={(e) => setSearchCountry(e.target.value)}
             />
@@ -579,149 +577,156 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
   // ── STEP 3 — OPERATOR ───────────────────────────────────────────────────────
   if (step === "operator") {
     return (
-      <AnimatePresence mode="wait">
-        <StepPage key="operator" dir={dir}>
-          <div className="max-w-2xl mx-auto">
-            <StepIndicator current="operator" />
-            <button onClick={() => goBack("country")} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-5 transition-colors">
-              <ArrowLeft className="w-4 h-4" /> {t("buy_change_country")}
+      <div className="flex flex-col min-h-full">
+        {/* Sticky header bleu */}
+        <div className="sticky top-0 z-20 px-4 pt-3 pb-3 space-y-2" style={{ backgroundColor: "#1A3FFF" }}>
+          <div className="flex items-center gap-2">
+            <button onClick={() => goBack("country")} className="p-2 -ml-2 rounded-xl active:bg-blue-700 transition-colors">
+              <ArrowLeft className="w-5 h-5 text-white" />
             </button>
-            <Breadcrumb />
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm">
-              {selectedServiceInfo && <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={48} />}
-              <div className="flex-1">
-                <p className="font-bold text-gray-900 text-lg">{selectedServiceInfo?.name}</p>
-                <p className="text-gray-500 text-sm">{selectedCountryInfo?.name}</p>
+            <h1 className="text-base font-extrabold flex-1 text-white">{t("buy_s3_title")}</h1>
+            {user && <BalancePillWhite />}
+          </div>
+
+          {/* Carte service + pays */}
+          {selectedServiceInfo && (
+            <div className="flex items-center gap-3 p-3 rounded-2xl" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
+              <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={38} />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-white/70">{selectedServiceInfo.name}</p>
+                <p className="font-bold text-sm text-white truncate">{selectedCountryInfo?.name}</p>
               </div>
-              {user && <BalancePill />}
             </div>
-            <div className="mb-5">
-              <h2 className="text-2xl font-bold text-gray-900 mb-1">{t("buy_s3_title")}</h2>
-              <p className="text-gray-500 text-sm">{t("buy_s3_sub")}</p>
-            </div>
-            {isLoadingOperators ? (
-              <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-            ) : operators.length === 0 ? (
-              <div className="py-12 text-center text-muted-foreground">{t("buy_no_operator")}</div>
-            ) : (
-              <div className="space-y-3 mb-8">
-                {operators.map((op, i) => {
-                  const active = selectedOperator === op.name;
-                  return (
-                    <motion.button
-                      key={op.name}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.07 }}
-                      onClick={() => setSelectedOperator(op.name)}
-                      className={`w-full flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border text-left transition-all ${
-                        active ? "border-primary/50 bg-primary/10 shadow-lg shadow-primary/10" : "border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 shadow-sm"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold border ${active ? "bg-primary/20 border-primary/30 text-primary" : "bg-gray-100 border-gray-200 text-gray-500"}`}>
-                          {op.label?.slice(0, 1).toUpperCase() ?? "?"}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-gray-900">{op.label ?? op.name}</p>
-                            {i === 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 border border-green-200 text-green-700">{t("buy_recommended")}</span>}
-                          </div>
-                          <p className="text-xs text-gray-400">{op.available} {t("buy_num_dispo")}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className="text-right">
-                          <p className="font-bold text-gray-900">
-                            {currency === "FCFA" ? `${op.priceFcfa?.toLocaleString("fr-FR")} FCFA` : `$${op.priceUsd?.toFixed(2)}`}
-                          </p>
-                        </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${active ? "border-primary bg-primary" : "border-gray-300"}`}>
-                          {active && <Check className="w-3 h-3 text-white" />}
-                        </div>
-                      </div>
-                    </motion.button>
-                  );
-                })}
-              </div>
-            )}
-            {/* ── Code de réduction ── */}
-            {selectedOperator && (
-              <div className="mb-5 rounded-2xl border border-gray-200 bg-gray-50 p-4 space-y-3">
-                <p className="text-sm font-semibold text-gray-700">Code de réduction</p>
-                {discountApplied ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-green-50 border border-green-200">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
-                        <div>
-                          <p className="text-sm font-bold text-green-700">{discountApplied.code} — {discountApplied.percent}% de réduction</p>
-                          <p className="text-xs text-green-600">Économie : {discountApplied.savedFcfa.toLocaleString("fr-FR")} FCFA</p>
-                        </div>
-                      </div>
-                      <button onClick={removeDiscount} className="p-1 rounded-lg hover:bg-green-100 text-green-500">
-                        <X className="w-4 h-4" />
-                      </button>
+          )}
+        </div>
+
+        {/* Sous-titre */}
+        <div className="px-4 pt-4 pb-2">
+          <p className="text-xs text-gray-500">{t("buy_s3_sub")}</p>
+        </div>
+
+        {/* Liste opérateurs */}
+        <div className="flex-1 px-4 space-y-3 pb-4">
+          {isLoadingOperators ? (
+            <div className="flex justify-center py-16"><Loader2 className="w-7 h-7 animate-spin text-blue-500" /></div>
+          ) : operators.length === 0 ? (
+            <div className="py-16 text-center text-gray-400 text-sm">{t("buy_no_operator")}</div>
+          ) : (
+            operators.map((op, i) => {
+              const active = selectedOperator === op.name;
+              return (
+                <motion.button
+                  key={op.name}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.07 }}
+                  onClick={() => setSelectedOperator(op.name)}
+                  className={`w-full flex items-center justify-between gap-3 px-4 py-4 rounded-2xl border text-left transition-all ${
+                    active ? "border-blue-400 bg-blue-50 shadow-md shadow-blue-100" : "border-gray-200 bg-white hover:bg-gray-50 shadow-sm"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold ${active ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-500"}`}>
+                      {op.label?.slice(0, 1).toUpperCase() ?? "?"}
                     </div>
-                    <div className="flex justify-between items-center px-3 py-2 rounded-xl bg-white border border-gray-200">
-                      <span className="text-xs text-gray-500 line-through">
-                        {currency === "FCFA"
-                          ? `${(operatorsData?.operators?.find(o => o.name === selectedOperator)?.priceFcfa ?? 0).toLocaleString("fr-FR")} FCFA`
-                          : `$${(operatorsData?.operators?.find(o => o.name === selectedOperator)?.priceUsd ?? 0).toFixed(2)}`
-                        }
-                      </span>
-                      <span className="text-sm font-bold text-primary">
-                        {currency === "FCFA"
-                          ? `${discountApplied.discountedPriceFcfa.toLocaleString("fr-FR")} FCFA`
-                          : `$${discountApplied.discountedPriceUsd.toFixed(2)}`
-                        }
-                      </span>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-semibold text-gray-900 text-sm">{op.label ?? op.name}</p>
+                        {i === 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 border border-green-200 text-green-700">{t("buy_recommended")}</span>}
+                      </div>
+                      <p className="text-xs text-gray-400 mt-0.5">{op.available} {t("buy_num_dispo")}</p>
                     </div>
                   </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <input
-                      value={discountInput}
-                      onChange={e => { setDiscountInput(e.target.value.toUpperCase()); setDiscountError(null); }}
-                      onKeyDown={e => e.key === "Enter" && validateDiscount()}
-                      placeholder="Entrez votre code promo"
-                      className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 uppercase"
-                    />
-                    <button
-                      onClick={validateDiscount}
-                      disabled={!discountInput.trim() || discountLoading}
-                      className="px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold disabled:opacity-50 hover:bg-primary/90 transition-colors"
-                    >
-                      {discountLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Appliquer"}
+                  <div className="flex items-center gap-3 shrink-0">
+                    <p className="font-bold text-gray-900 text-sm">
+                      {currency === "FCFA" ? `${op.priceFcfa?.toLocaleString("fr-FR")} FCFA` : `$${op.priceUsd?.toFixed(2)}`}
+                    </p>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${active ? "border-blue-600 bg-blue-600" : "border-gray-300"}`}>
+                      {active && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                  </div>
+                </motion.button>
+              );
+            })
+          )}
+
+          {/* Code de réduction */}
+          {selectedOperator && (
+            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 space-y-3">
+              <p className="text-sm font-semibold text-gray-700">Code de réduction</p>
+              {discountApplied ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-green-50 border border-green-200">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+                      <div>
+                        <p className="text-sm font-bold text-green-700">{discountApplied.code} — {discountApplied.percent}% de réduction</p>
+                        <p className="text-xs text-green-600">Économie : {discountApplied.savedFcfa.toLocaleString("fr-FR")} FCFA</p>
+                      </div>
+                    </div>
+                    <button onClick={removeDiscount} className="p-1 rounded-lg hover:bg-green-100 text-green-500">
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
-                )}
-                {discountError && <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{discountError}</p>}
-              </div>
-            )}
-
-            <Button
-              className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-lg shadow-2xl shadow-primary/25"
-              disabled={!selectedOperator || buyMutation.isPending || balance === 0}
-              onClick={handleGetNumber}
-            >
-              {buyMutation.isPending ? (
-                <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> {t("buy_assigning")}</>
+                  <div className="flex justify-between items-center px-3 py-2 rounded-xl bg-white border border-gray-200">
+                    <span className="text-xs text-gray-500 line-through">
+                      {currency === "FCFA"
+                        ? `${(operatorsData?.operators?.find(o => o.name === selectedOperator)?.priceFcfa ?? 0).toLocaleString("fr-FR")} FCFA`
+                        : `$${(operatorsData?.operators?.find(o => o.name === selectedOperator)?.priceUsd ?? 0).toFixed(2)}`}
+                    </span>
+                    <span className="text-sm font-bold text-blue-600">
+                      {currency === "FCFA"
+                        ? `${discountApplied.discountedPriceFcfa.toLocaleString("fr-FR")} FCFA`
+                        : `$${discountApplied.discountedPriceUsd.toFixed(2)}`}
+                    </span>
+                  </div>
+                </div>
               ) : (
-                <><Phone className="w-5 h-5 mr-2" /> {t("buy_get_number")}</>
+                <div className="flex gap-2">
+                  <input
+                    value={discountInput}
+                    onChange={e => { setDiscountInput(e.target.value.toUpperCase()); setDiscountError(null); }}
+                    onKeyDown={e => e.key === "Enter" && validateDiscount()}
+                    placeholder="Entrez votre code promo"
+                    className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 uppercase"
+                  />
+                  <button
+                    onClick={validateDiscount}
+                    disabled={!discountInput.trim() || discountLoading}
+                    className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold disabled:opacity-50 hover:bg-blue-700 transition-colors"
+                  >
+                    {discountLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Appliquer"}
+                  </button>
+                </div>
               )}
-            </Button>
-            {balance === 0 && (
-              <p className="text-center text-xs text-red-400 mt-3">
-                {t("buy_insufficient")}.{" "}
-                <button onClick={() => { window.location.href = "/recharge"; }} className="underline hover:text-red-700">
-                  {t("buy_insufficient_top_up")}
-                </button>
-              </p>
+              {discountError && <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{discountError}</p>}
+            </div>
+          )}
+        </div>
+
+        {/* Bouton fixé en bas */}
+        <div className="sticky bottom-0 bg-white border-t border-gray-100 px-4 py-4">
+          <Button
+            className="w-full h-13 py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-base shadow-lg shadow-blue-500/30"
+            disabled={!selectedOperator || buyMutation.isPending || balance === 0}
+            onClick={handleGetNumber}
+          >
+            {buyMutation.isPending ? (
+              <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> {t("buy_assigning")}</>
+            ) : (
+              <><Phone className="w-5 h-5 mr-2" /> {t("buy_get_number")}</>
             )}
-          </div>
-        </StepPage>
-      </AnimatePresence>
+          </Button>
+          {balance === 0 && (
+            <p className="text-center text-xs text-red-400 mt-2">
+              {t("buy_insufficient")}.{" "}
+              <button onClick={() => { window.location.href = "/recharge"; }} className="underline hover:text-red-700">
+                {t("buy_insufficient_top_up")}
+              </button>
+            </p>
+          )}
+        </div>
+      </div>
     );
   }
 
