@@ -33,7 +33,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "pnpm --filter @workspace/zynum exec vite --config vite.config.ts --host 0.0.0.0 --port 5000"
+args = "PORT=5000 pnpm --filter @workspace/zynum run dev"
 waitForPort = 5000
 
 [[workflows.workflow]]
@@ -88,3 +88,13 @@ channel = "stable-25_05"
 [userenv.shared]
 API_BASE_URL = "https://zynum.net"
 NODE_ENV = "production"
+RESEND_FROM_EMAIL = "noreply@zynum.net"
+ASHTECHPAY_API_KEY = "ak_6fa1a9048fd07c52a4aedab2eb14d57399f5c50e62476a17"
+SUPABASE_DATABASE_URL = "postgresql://postgres.tkaadzqmpjgsavmbibja:o9tgN6oyhDQnlEZg@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
+TELEGRAM_BOT_TOKEN = "8599037292:AAG45XW9tFF4LJqVNZrF4lovtOavU3e5y-w"
+RESEND_API_KEY = "re_5e959QQt_K42BXxZcq1p24SUFz575WDpP"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrYWFkenFtcGpnc2F2bWJpYmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4Mjg4MTIsImV4cCI6MjA5MDQwNDgxMn0.Rrs4rkg51gi3MzjaVeQaIFAPxH0SUcqHAZLf4UvCgws"
+SENDAVAPAY_SDK_KEY = "sdk_UdliGtXwaCzvJw4m93K2Ik6OK9D56n0H"
+SENDAVAPAY_WEBHOOK_SECRET = "whsec_fe77118b598a921732fc64b563c9073d9538cb1eeb2b90de"
+ADMIN_EMAIL = "pagetstudio@gmail.com"
+ADMIN_PASSWORD = "AAbb11##"
