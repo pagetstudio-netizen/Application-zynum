@@ -86,14 +86,5 @@ channel = "stable-25_05"
 [userenv]
 
 [userenv.shared]
-ASHTECHPAY_API_KEY = "ak_6fa1a9048fd07c52a4aedab2eb14d57399f5c50e62476a17"
 API_BASE_URL = "https://zynum.net"
-SUPABASE_DATABASE_URL = "postgresql://postgres.tkaadzqmpjgsavmbibja:o9tgN6oyhDQnlEZg@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
 NODE_ENV = "production"
-TELEGRAM_BOT_TOKEN = "8599037292:AAG45XW9tFF4LJqVNZrF4lovtOavU3e5y-w"
-RESEND_API_KEY = "re_5e959QQt_K42BXxZcq1p24SUFz575WDpP"
-RESEND_FROM_EMAIL = "noreply@zynum.net"
-SENDAVAPAY_SDK_KEY = "sdk_UdliGtXwaCzvJw4m93K2Ik6OK9D56n0H"
-SENDAVAPAY_WEBHOOK_SECRET = "whsec_fe77118b598a921732fc64b563c9073d9538cb1eeb2b90de"
-ADMIN_EMAIL = "pagetstudio@gmail.com"
-ADMIN_PASSWORD = "AAbb11##"
