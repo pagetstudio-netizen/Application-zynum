@@ -1,7 +1,7 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import { build as esbuild } from "esbuild";
-import { rm, readFile } from "fs/promises";
+import { rm, readFile, writeFile } from "fs/promises";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -74,6 +74,19 @@ async function buildAll() {
     external: externals,
     logLevel: "info",
   });
+
+  // Créer un wrapper ESM dist/index.mjs
+  // Replit artifact mode cherche index.mjs car package.json a "type":"module".
+  // Ce wrapper charge simplement le bundle CJS self-contained.
+  const esmWrapper = [
+    'import { createRequire } from "module";',
+    'import { fileURLToPath } from "url";',
+    'import { dirname, join } from "path";',
+    'const require = createRequire(import.meta.url);',
+    'require(join(dirname(fileURLToPath(import.meta.url)), "index.cjs"));',
+  ].join("\n") + "\n";
+  await writeFile(path.resolve(distDir, "index.mjs"), esmWrapper);
+  console.log("  dist/index.mjs  (ESM wrapper → index.cjs)");
 }
 
 buildAll().catch((err) => {

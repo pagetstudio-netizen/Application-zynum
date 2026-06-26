@@ -3,14 +3,10 @@ import { initDb } from "./lib/initDb.js";
 import { scheduleDailyReport } from "./lib/telegram.js";
 import { scheduleAutoCancel } from "./lib/scheduler.js";
 
-const rawPort = process.env["PORT"];
-
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
-
+// En déploiement Replit artifact mode, PORT peut ne pas être injecté
+// → on default à 8080 (le port attendu par l'artifact runner).
+// En Plesk, app.js set PORT=3000 avant de charger ce bundle.
+const rawPort = process.env["PORT"] ?? "8080";
 const port = Number(rawPort);
 
 if (Number.isNaN(port) || port <= 0) {
