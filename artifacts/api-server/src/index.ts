@@ -1,4 +1,4 @@
-import app, { setDbReady } from "./app";
+import app, { setStartupOk, setStartupError } from "./app";
 import { initDb } from "./lib/initDb.js";
 import { scheduleDailyReport } from "./lib/telegram.js";
 import { scheduleAutoCancel } from "./lib/scheduler.js";
@@ -17,19 +17,21 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-// Start listening immediately so Passenger/Plesk doesn't timeout waiting for the port
+// Start listening immediately so Passenger/Plesk doesn't timeout
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
 
-// Init DB in background — server is already accepting requests
+// Init DB in background — /health reports the real state
 initDb()
   .then(() => {
-    setDbReady(true);
+    setStartupOk();
     scheduleDailyReport();
     scheduleAutoCancel();
   })
   .catch((err) => {
+    setStartupError(err);
     console.error("Failed to initialize database:", err);
-    process.exit(1);
+    // Stay alive so /health exposes the real error — check zynum.net/health in your browser
+    // Passenger will eventually restart; you can also force-restart after fixing the env var
   });

@@ -6,9 +6,36 @@ import router from "./routes/index.js";
 
 const app: Express = express();
 
-let dbReady = false;
+type StartupState =
+  | { status: "starting"; startedAt: string }
+  | { status: "ok"; startedAt: string; readyAt: string }
+  | { status: "error"; startedAt: string; errorAt: string; error: string; stack?: string };
+
+const startedAt = new Date().toISOString();
+let startupState: StartupState = { status: "starting", startedAt };
+
+export function setStartupOk() {
+  startupState = {
+    status: "ok",
+    startedAt,
+    readyAt: new Date().toISOString(),
+  };
+}
+
+export function setStartupError(err: unknown) {
+  const e = err instanceof Error ? err : new Error(String(err));
+  startupState = {
+    status: "error",
+    startedAt,
+    errorAt: new Date().toISOString(),
+    error: e.message,
+    stack: e.stack,
+  };
+}
+
+// Keep backwards-compatible export used by index.ts
 export function setDbReady(ready: boolean) {
-  dbReady = ready;
+  if (ready) setStartupOk();
 }
 
 const allowedOrigins = [
@@ -32,16 +59,28 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check — responds instantly, before DB is ready
+// Health check — responds instantly with detailed startup state
 app.get("/health", (_req, res) => {
-  res.json({ status: dbReady ? "ok" : "starting", dbReady });
+  const code = startupState.status === "error" ? 500
+    : startupState.status === "starting" ? 503
+    : 200;
+  res.status(code).json({
+    ...startupState,
+    uptime: Math.round(process.uptime()) + "s",
+    node: process.version,
+    env: process.env.NODE_ENV ?? "undefined",
+    db: process.env.SUPABASE_DATABASE_URL
+      ? "SUPABASE_DATABASE_URL set ✓"
+      : process.env.DATABASE_URL
+        ? "DATABASE_URL set ✓"
+        : "⚠ no database URL found",
+    port: process.env.PORT ?? "undefined",
+  });
 });
 
 app.use("/api", router);
 
 if (process.env.NODE_ENV === "production") {
-  // __dirname at runtime: artifacts/api-server/dist/
-  // frontend build:       artifacts/zynum/dist/public/
   const frontendPath = path.resolve(__dirname, "../../zynum/dist/public");
   if (fs.existsSync(frontendPath)) {
     app.use(express.static(frontendPath));
