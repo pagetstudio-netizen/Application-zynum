@@ -1,0 +1,24 @@
+{
+  "name": "ZyNum",
+  "short_name": "ZyNum",
+  "description": "Numéros virtuels pour SMS & OTP | Afrique & Monde",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/images/logo.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.jpg",
+      "sizes": "1499x1500",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
