@@ -76,6 +76,9 @@ app.get("/health", (_req, res) => {
   });
 });
 
+// Healthcheck Replit deployment : GET /api → 200
+app.get("/api", (_req, res) => res.status(200).json({ status: "ok" }));
+
 app.use("/api", router);
 
 if (process.env.NODE_ENV === "production") {
