@@ -1,12 +1,8 @@
 import path from "path";
-import { fileURLToPath } from "url";
 import fs from "fs";
 import express, { type Express } from "express";
 import cors from "cors";
 import router from "./routes/index.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app: Express = express();
 
@@ -34,10 +30,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", router);
 
 if (process.env.NODE_ENV === "production") {
-  const frontendPath = path.join(__dirname, "../../zynum/dist/public");
+  // __dirname at runtime: artifacts/api-server/dist/
+  // frontend build:       artifacts/zynum/dist/public/
+  const frontendPath = path.resolve(__dirname, "../../zynum/dist/public");
   if (fs.existsSync(frontendPath)) {
     app.use(express.static(frontendPath));
-    app.get("*", (_req, res) => {
+    app.get("/{*splat}", (_req, res) => {
       res.sendFile(path.join(frontendPath, "index.html"));
     });
   } else {
