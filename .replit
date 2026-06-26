@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "bash"]
+modules = ["web", "bash", "nodejs-24"]
 
 [deployment]
 router = "application"
@@ -89,7 +89,7 @@ channel = "stable-25_05"
 
 [userenv.shared]
 API_BASE_URL = "https://zynum.net"
-NODE_ENV = "production"
+NODE_ENV = "development"
 RESEND_FROM_EMAIL = "noreply@zynum.net"
 ASHTECHPAY_API_KEY = "ak_6fa1a9048fd07c52a4aedab2eb14d57399f5c50e62476a17"
 SUPABASE_DATABASE_URL = "postgresql://postgres.tkaadzqmpjgsavmbibja:o9tgN6oyhDQnlEZg@aws-1-eu-north-1.pooler.supabase.com:6543/postgres"
