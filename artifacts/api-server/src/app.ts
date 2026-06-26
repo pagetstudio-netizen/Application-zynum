@@ -59,12 +59,10 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check — responds instantly with detailed startup state
+// Health check — toujours HTTP 200 (Passenger/Plesk intercepte les 5xx/503)
+// Le vrai statut est dans le champ JSON "status"
 app.get("/health", (_req, res) => {
-  const code = startupState.status === "error" ? 500
-    : startupState.status === "starting" ? 503
-    : 200;
-  res.status(code).json({
+  res.status(200).json({
     ...startupState,
     uptime: Math.round(process.uptime()) + "s",
     node: process.version,
