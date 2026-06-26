@@ -1,0 +1,15 @@
+{
+  "name": "zynum",
+  "version": "1.0.0",
+  "description": "ZyNum – Virtual phone numbers for SMS verification",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "build": "npm run build:server && npm run build:client",
+    "build:server": "cd .. && npx tsx artifacts/api-server/build.ts",
+    "build:client": "cd ../artifacts/zynum && npx vite build --config vite.config.ts"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

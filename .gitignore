@@ -3,6 +3,10 @@
 # compiled output
 dist
 tmp
+
+# Plesk deployment: include built dist so "git pull + restart" works with no build step
+!artifacts/api-server/dist/
+!artifacts/zynum/dist/
 out-tsc
 *.tsbuildinfo
 .expo
