@@ -82,6 +82,10 @@ externalPort = 3003
 localPort = 18533
 externalPort = 3000
 
+[[ports]]
+localPort = 5000
+externalPort = 80
+
 [nix]
 channel = "stable-25_05"
 
@@ -100,4 +104,3 @@ SENDAVAPAY_SDK_KEY = "sdk_UdliGtXwaCzvJw4m93K2Ik6OK9D56n0H"
 SENDAVAPAY_WEBHOOK_SECRET = "whsec_fe77118b598a921732fc64b563c9073d9538cb1eeb2b90de"
 ADMIN_EMAIL = "pagetstudio@gmail.com"
 ADMIN_PASSWORD = "AAbb11##"
-PORT = "8080"
