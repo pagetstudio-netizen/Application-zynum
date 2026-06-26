@@ -3,8 +3,8 @@ modules = ["web", "bash", "nodejs-24"]
 [deployment]
 router = "application"
 deploymentTarget = "autoscale"
-run = ["node", "artifacts/api-server/dist/index.mjs"]
-build = ["bash", "-c", "pnpm install && pnpm --filter @workspace/api-server run build"]
+run = ["node", "artifacts/api-server/dist/index.cjs"]
+build = ["bash", "-c", "pnpm install && pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/zynum run build"]
 
 [deployment.postBuild]
 args = ["pnpm", "store", "prune"]

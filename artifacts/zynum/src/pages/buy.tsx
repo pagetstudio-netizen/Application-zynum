@@ -650,7 +650,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
               <ArrowLeft className="w-5 h-5 text-white" />
             </button>
             <h1 className="text-base font-extrabold flex-1 text-white">{t("buy_s3_title")}</h1>
-            {user && <BalancePillWhite />}
+            {user && <BalancePill variant="white" />}
           </div>
 
           {/* Carte service + pays */}
