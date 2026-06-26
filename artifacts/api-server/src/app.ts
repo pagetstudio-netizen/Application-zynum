@@ -6,6 +6,11 @@ import router from "./routes/index.js";
 
 const app: Express = express();
 
+let dbReady = false;
+export function setDbReady(ready: boolean) {
+  dbReady = ready;
+}
+
 const allowedOrigins = [
   "https://zynum.net",
   "https://www.zynum.net",
@@ -26,6 +31,11 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Health check — responds instantly, before DB is ready
+app.get("/health", (_req, res) => {
+  res.json({ status: dbReady ? "ok" : "starting", dbReady });
+});
 
 app.use("/api", router);
 
