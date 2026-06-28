@@ -774,14 +774,15 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
 }
 
 // ─── SHARED SUB-PAGE WRAPPER ─────────────────────────────────────────────────
-function SubPage({ title, onBack, children }: { title: string; onBack: () => void; children: React.ReactNode }) {
+function SubPage({ title, onBack, children, rightAction }: { title: string; onBack: () => void; children: React.ReactNode; rightAction?: React.ReactNode }) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="bg-white px-4 pt-4 pb-3 flex items-center gap-3 shrink-0 border-b border-gray-100">
         <button onClick={onBack} className="p-2 -ml-1 rounded-xl hover:bg-gray-100 active:scale-90 transition-all">
           <ChevronLeft className="w-5 h-5 text-gray-700" />
         </button>
-        <h1 className="font-bold text-gray-900 text-base">{title}</h1>
+        <h1 className="font-bold text-gray-900 text-base flex-1">{title}</h1>
+        {rightAction}
       </div>
       <div className="flex-1 overflow-y-auto bg-gray-50 pb-24">
         {children}
@@ -993,307 +994,248 @@ function SecurityPage({ onBack }: { onBack: () => void }) {
 // ─── REFERRAL PAGE ────────────────────────────────────────────────────────────
 function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }) {
   const { toast } = useToast();
-  const { currency } = useCurrency();
   const RATE = 620;
 
-  const [stats, setStats]               = useState<any>(null);
-  const [withdrawals, setWithdrawals]   = useState<any[]>([]);
-  const [loadingStats, setLoadingStats] = useState(true);
-  const [copiedLink, setCopiedLink]     = useState(false);
-  const [copiedCode, setCopiedCode]     = useState(false);
-  const [showForm, setShowForm]         = useState(false);
-  const [amount, setAmount]             = useState("");
-  const [phone, setPhone]               = useState("");
-  const [country, setWithdrawCountry]   = useState("Sénégal");
-  const [submitting, setSubmitting]     = useState(false);
-
-  const COUNTRIES = [
-    "Sénégal","Côte d'Ivoire","Cameroun","Mali","Burkina Faso","Guinée",
-    "Bénin","Togo","Niger","Congo","Gabon","Ghana","Nigeria","Kenya","France","Belgique","Autre",
-  ];
+  const [stats, setStats]           = useState<any>(null);
+  const [loadingStats, setLoading]  = useState(true);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [showWithdrawInfo, setShowWithdrawInfo] = useState(false);
 
   const token = () => localStorage.getItem("zynum_token") ?? "";
-  const authH = () => ({ Authorization: `Bearer ${token()}`, "Content-Type": "application/json" });
+  const authH = () => ({ Authorization: `Bearer ${token()}` });
 
   const refCode = stats?.referralCode ?? `ZY${user.id.toString().padStart(6, "0")}`;
   const refLink = `${window.location.origin}/register?ref=${refCode}`;
 
-  const fmt = (usd: number) =>
-    currency === "FCFA" ? `${Math.round(usd * RATE).toLocaleString("fr-FR")} FCFA` : `$${usd.toFixed(2)}`;
-
   const load = async () => {
-    setLoadingStats(true);
+    setLoading(true);
     try {
-      const [s, w] = await Promise.all([
-        fetch("/api/v1/affiliate/stats", { headers: authH() }).then(r => r.json()),
-        fetch("/api/v1/affiliate/withdrawals", { headers: authH() }).then(r => r.json()),
-      ]);
+      const s = await fetch("/api/v1/affiliate/stats", { headers: authH() }).then(r => r.json());
       setStats(s);
-      setWithdrawals(w.withdrawals ?? []);
     } catch { /* silent */ }
-    finally { setLoadingStats(false); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
-  const copyText = (text: string, which: "link" | "code") => {
-    navigator.clipboard.writeText(text);
-    if (which === "link") { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
-    else { setCopiedCode(true); setTimeout(() => setCopiedCode(false), 2000); }
-    toast({ title: "Copié !", duration: 2000 });
+  const copyCode = () => {
+    navigator.clipboard.writeText(refCode);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+    toast({ title: "Code copié !", duration: 2000 });
   };
 
-  const handleWithdraw = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const n = parseFloat(amount);
-    if (!n || n <= 0) { toast({ variant: "destructive", title: "Montant invalide" }); return; }
-    const amountUsd = currency === "FCFA" ? n / RATE : n;
-    if (amountUsd > (stats?.affiliateBalance ?? 0)) {
-      toast({ variant: "destructive", title: "Solde insuffisant" }); return;
+  const shareCode = () => {
+    const text = `Rejoins ZyNum et obtiens des numéros virtuels pour tes SMS OTP ! Utilise mon code de parrainage : ${refCode}\n${refLink}`;
+    if (navigator.share) {
+      navigator.share({ title: "Mon code ZyNum", text }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(refLink);
+      toast({ title: "Lien copié !", description: "Partagez-le avec vos contacts.", duration: 2000 });
     }
-    setSubmitting(true);
-    try {
-      const res = await fetch("/api/v1/affiliate/withdraw", {
-        method: "POST", headers: authH(),
-        body: JSON.stringify({ amountUsd, phone, country }),
-      }).then(r => r.json());
-      if (res.withdrawal) {
-        toast({ title: "Demande envoyée", description: "Traitement sous 48h." });
-        setShowForm(false); setAmount(""); setPhone("");
-        await load();
-      } else {
-        toast({ variant: "destructive", title: "Erreur", description: res.message });
-      }
-    } catch { toast({ variant: "destructive", title: "Erreur réseau" }); }
-    finally { setSubmitting(false); }
   };
 
-  const balance   = stats?.affiliateBalance ?? 0;
-  const earned    = stats?.totalEarned ?? 0;
-  const filleuls  = stats?.filleulCount ?? 0;
-
-  const statusStyle: Record<string, { bg: string; color: string; label: string }> = {
-    pending:   { bg: "#FEF9EC", color: "#B45309", label: "En attente" },
-    validated: { bg: "#ECFDF5", color: "#065F46", label: "Validé" },
-    rejected:  { bg: "#FEF2F2", color: "#991B1B", label: "Rejeté" },
-  };
+  const filleuls     = stats?.filleulCount ?? 0;
+  const balanceUsd   = stats?.affiliateBalance ?? 0;
+  const pointsBonus  = Math.round(balanceUsd * RATE);
 
   return (
-    <SubPage title="Parrainage" onBack={onBack}>
-      <div className="pb-8">
+    <SubPage title="Code de parrainage" onBack={onBack} rightAction={
+      <button onClick={load} style={{ padding: 6, background: "none", border: "none", cursor: "pointer" }}>
+        <RefreshCw style={{ width: 18, height: 18, color: "#2563EB" }} />
+      </button>
+    }>
+      <div style={{ background: "#F5F9FF", minHeight: "100%", paddingBottom: 32 }}>
 
-        {/* ── Hero gradient banner ── */}
-        <div className="relative overflow-hidden px-5 pt-7 pb-8" style={{ background: "linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%)" }}>
-          {/* decorative circles */}
-          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-10" style={{ background: "white" }} />
-          <div className="absolute -bottom-12 -left-6 w-32 h-32 rounded-full opacity-10" style={{ background: "white" }} />
-
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-4" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-              <span className="text-xs font-bold text-white/80">Programme actif</span>
-            </div>
-            <h2 className="text-2xl font-black mb-1" style={{ color: "#ffffff" }}>Gagnez 10%</h2>
-            <p className="text-sm mb-6" style={{ color: "rgba(199,210,254,0.9)" }}>
-              Pour chaque achat de vos filleuls, vous recevez 10% de commission directement sur votre solde.
-            </p>
-
-            {/* Balance card */}
-            <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.15)" }}>
-              <p className="text-xs font-semibold mb-1" style={{ color: "rgba(199,210,254,0.8)" }}>Solde disponible</p>
-              {loadingStats ? (
-                <div className="h-8 w-28 rounded-lg animate-pulse" style={{ background: "rgba(255,255,255,0.15)" }} />
-              ) : (
-                <p className="text-3xl font-black" style={{ color: "#ffffff" }}>{fmt(balance)}</p>
-              )}
-              <div className="flex items-center gap-4 mt-3">
-                <div>
-                  <p className="text-[10px] font-semibold" style={{ color: "rgba(199,210,254,0.7)" }}>Total gagné</p>
-                  <p className="text-sm font-bold" style={{ color: "#ffffff" }}>{loadingStats ? "—" : fmt(earned)}</p>
-                </div>
-                <div className="w-px h-6 opacity-20" style={{ background: "white" }} />
-                <div>
-                  <p className="text-[10px] font-semibold" style={{ color: "rgba(199,210,254,0.7)" }}>Filleuls</p>
-                  <p className="text-sm font-bold" style={{ color: "#ffffff" }}>{loadingStats ? "—" : filleuls}</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* ── Hero section ── */}
+        <div style={{ background: "linear-gradient(160deg, #D0E8FF 0%, #B8D9FF 100%)", padding: "32px 24px 28px", textAlign: "center" }}>
+          {/* Illustration */}
+          <div style={{ fontSize: 56, marginBottom: 16, lineHeight: 1 }}>🎁</div>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: "#0F172A", margin: "0 0 8px", lineHeight: 1.3 }}>
+            Parrainez vos amis et vos proches pour profiter de nombreux avantages !
+          </h2>
+          <p style={{ fontSize: 13, color: "#4B7FC4", margin: 0, fontWeight: 500 }}>
+            Gagnez 10% de commission sur chaque achat de vos filleuls
+          </p>
         </div>
 
-        <div className="px-4 space-y-4 mt-4">
+        <div style={{ padding: "20px 16px 0", display: "flex", flexDirection: "column", gap: 16 }}>
 
-          {/* ── Retrait button ── */}
-          {balance > 0 && !showForm && (
-            <button
-              onClick={() => setShowForm(true)}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold text-white transition-all active:scale-95"
-              style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)", boxShadow: "0 4px 16px rgba(124,58,237,0.35)" }}
-            >
-              <ArrowDownToLine className="w-4 h-4" />
-              Retirer {fmt(balance)}
-            </button>
-          )}
-
-          {balance <= 0 && !showForm && (
-            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl" style={{ background: "#F5F3FF", border: "1px solid #DDD6FE" }}>
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#EDE9FE" }}>
-                <DollarSign className="w-4 h-4" style={{ color: "#7C3AED" }} />
+          {/* ── Code card ── */}
+          <div style={{ background: "#fff", borderRadius: 20, padding: "20px 16px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: "#E0F2FE", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Gift style={{ width: 18, height: 18, color: "#0284C7" }} />
               </div>
-              <p className="text-xs font-medium" style={{ color: "#5B21B6" }}>
-                Parrainez des amis pour accumuler des commissions et les retirer.
+              <span style={{ fontWeight: 700, fontSize: 15, color: "#1E293B" }}>Mon code de parrainage</span>
+            </div>
+
+            {/* Code box + copy button */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+              <div style={{
+                flex: 1, border: "1.5px solid #BAE6FD", borderRadius: 14,
+                padding: "12px 16px", background: "#F0F9FF",
+              }}>
+                {loadingStats ? (
+                  <div style={{ height: 22, background: "#BAE6FD", borderRadius: 6, width: 120, animation: "pulse 1.5s infinite" }} />
+                ) : (
+                  <span style={{ fontSize: 18, fontWeight: 900, color: "#0284C7", letterSpacing: 2, fontFamily: "monospace" }}>
+                    {refCode}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={copyCode}
+                style={{
+                  width: 46, height: 46, borderRadius: 14, border: "none", cursor: "pointer",
+                  background: copiedCode ? "#22C55E" : "#0284C7",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "background 0.2s", flexShrink: 0,
+                }}
+              >
+                {copiedCode
+                  ? <Check style={{ width: 20, height: 20, color: "#fff" }} />
+                  : <Copy style={{ width: 20, height: 20, color: "#fff" }} />
+                }
+              </button>
+            </div>
+
+            {/* Share button */}
+            <button
+              onClick={shareCode}
+              style={{
+                width: "100%", padding: "14px 0", borderRadius: 50, border: "none", cursor: "pointer",
+                background: "linear-gradient(135deg, #0EA5E9, #2563EB)",
+                color: "#fff", fontWeight: 800, fontSize: 15,
+                boxShadow: "0 4px 14px rgba(14,165,233,0.4)",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                transition: "opacity 0.15s",
+              }}
+            >
+              <Share2 style={{ width: 18, height: 18 }} />
+              Partager mon code
+            </button>
+          </div>
+
+          {/* ── Stats row ── */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {/* Filleuls */}
+            <div style={{ background: "#fff", borderRadius: 20, padding: "18px 16px", boxShadow: "0 2px 10px rgba(0,0,0,0.06)", textAlign: "center" }}>
+              <div style={{ width: 44, height: 44, borderRadius: 14, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}>
+                <Users style={{ width: 22, height: 22, color: "#2563EB" }} />
+              </div>
+              <p style={{ fontSize: 12, color: "#94A3B8", fontWeight: 600, margin: "0 0 4px" }}>Filleuls</p>
+              <p style={{ fontSize: 26, fontWeight: 900, color: "#2563EB", margin: 0 }}>
+                {loadingStats ? "—" : filleuls}
               </p>
             </div>
-          )}
 
-          {/* ── Withdraw form ── */}
-          {showForm && (
-            <div className="rounded-2xl p-5 bg-white border border-gray-100 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-bold text-gray-900">Demande de retrait</p>
-                <button onClick={() => setShowForm(false)} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                  <X className="w-4 h-4 text-gray-400" />
-                </button>
+            {/* Points Bonus */}
+            <div style={{ background: "#fff", borderRadius: 20, padding: "18px 16px", boxShadow: "0 2px 10px rgba(0,0,0,0.06)", textAlign: "center", position: "relative" }}>
+              {/* 3-dot menu */}
+              <button
+                onClick={() => setShowWithdrawInfo(true)}
+                style={{
+                  position: "absolute", top: 10, right: 10,
+                  background: "none", border: "none", cursor: "pointer",
+                  padding: 4, borderRadius: 8, display: "flex", flexDirection: "column", gap: 3, alignItems: "center",
+                }}
+              >
+                {[0,1,2].map(i => <span key={i} style={{ width: 4, height: 4, borderRadius: "50%", background: "#94A3B8", display: "block" }} />)}
+              </button>
+              <div style={{ width: 44, height: 44, borderRadius: 14, background: "#FFF7ED", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}>
+                <Star style={{ width: 22, height: 22, color: "#F97316" }} />
               </div>
-              <form onSubmit={handleWithdraw} className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1.5">
-                    Montant ({currency}) · Dispo : {fmt(balance)}
-                  </label>
-                  <input
-                    type="number" value={amount} onChange={e => setAmount(e.target.value)}
-                    placeholder={currency === "FCFA" ? "Ex: 5000" : "Ex: 8.00"}
-                    min={currency === "FCFA" ? "620" : "1"}
-                    max={currency === "FCFA" ? Math.round(balance * RATE) : balance}
-                    step={currency === "FCFA" ? "1" : "0.01"} required
-                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 bg-gray-50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1.5">Pays</label>
-                  <select value={country} onChange={e => setWithdrawCountry(e.target.value)} required
-                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-indigo-400 bg-gray-50">
-                    {COUNTRIES.map(c => <option key={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1.5">Numéro Mobile Money</label>
-                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
-                    placeholder="Ex: +221 77 123 45 67" required
-                    className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 bg-gray-50"
-                  />
-                </div>
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl" style={{ background: "#EFF6FF", border: "1px solid #DBEAFE" }}>
-                  <Clock className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                  <p className="text-xs text-blue-700">Traitement sous 48h ouvrables.</p>
-                </div>
-                <div className="flex gap-2 pt-1">
-                  <button type="button" onClick={() => setShowForm(false)}
-                    className="flex-1 h-11 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
-                    Annuler
-                  </button>
-                  <button type="submit" disabled={submitting}
-                    className="flex-1 h-11 rounded-xl text-sm font-bold text-white disabled:opacity-50 transition-all active:scale-95"
-                    style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)" }}>
-                    {submitting ? "Envoi..." : "Confirmer"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {/* ── Lien de parrainage ── */}
-          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-4 pt-4 pb-3 border-b border-gray-50">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Votre lien d'invitation</p>
-            </div>
-            <div className="px-4 py-4 space-y-3">
-              {/* Code pill */}
-              <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: "#F5F3FF", border: "1.5px dashed #C4B5FD" }}>
-                <div>
-                  <p className="text-[10px] font-bold text-purple-500 uppercase tracking-wider mb-0.5">Code</p>
-                  <p className="text-lg font-black text-gray-900 tracking-widest font-mono">{refCode}</p>
-                </div>
-                <button
-                  onClick={() => copyText(refCode, "code")}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all active:scale-90"
-                  style={{ background: "#7C3AED", color: "white" }}
-                >
-                  {copiedCode ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copiedCode ? "Copié" : "Copier"}
-                </button>
-              </div>
-              {/* Full link */}
-              <div className="flex items-center gap-2">
-                <p className="flex-1 text-xs text-gray-400 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 truncate font-mono">{refLink}</p>
-                <button
-                  onClick={() => copyText(refLink, "link")}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold text-white transition-all active:scale-90"
-                  style={{ background: "#4F46E5" }}
-                >
-                  {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copiedLink ? "Copié" : "Lien"}
-                </button>
-              </div>
+              <p style={{ fontSize: 12, color: "#94A3B8", fontWeight: 600, margin: "0 0 4px" }}>Points Bonus</p>
+              <p style={{ fontSize: 26, fontWeight: 900, color: "#F97316", margin: 0 }}>
+                {loadingStats ? "—" : pointsBonus.toLocaleString("fr-FR")}
+              </p>
             </div>
           </div>
 
-          {/* ── Comment ça marche ── */}
-          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-4">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Comment ça marche</p>
-            <div className="space-y-0">
-              {[
-                { icon: <Share2 className="w-4 h-4" />, color: "#4F46E5", bg: "#EEF2FF", title: "Partagez votre lien", desc: "Envoyez-le à vos amis, famille ou contacts" },
-                { icon: <Users className="w-4 h-4" />, color: "#059669", bg: "#ECFDF5", title: "Ils s'inscrivent & rechargent", desc: "Vos filleuls créent un compte et effectuent une recharge" },
-                { icon: <DollarSign className="w-4 h-4" />, color: "#D97706", bg: "#FFFBEB", title: "Vous recevez 10%", desc: "La commission est créditée instantanément sur votre solde" },
-              ].map((step, i, arr) => (
-                <div key={step.title} className="flex gap-3">
-                  <div className="flex flex-col items-center">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: step.bg, color: step.color }}>
-                      {step.icon}
-                    </div>
-                    {i < arr.length - 1 && <div className="w-px flex-1 my-1" style={{ background: "#E5E7EB" }} />}
-                  </div>
-                  <div className="pb-4">
-                    <p className="text-sm font-bold text-gray-900">{step.title}</p>
-                    <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{step.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* ── Withdrawal button ── */}
+          <button
+            onClick={() => setShowWithdrawInfo(true)}
+            style={{
+              width: "100%", padding: "14px 0", borderRadius: 50, border: "none", cursor: "pointer",
+              background: "linear-gradient(135deg, #7C3AED, #4F46E5)",
+              color: "#fff", fontWeight: 800, fontSize: 15,
+              boxShadow: "0 4px 14px rgba(124,58,237,0.35)",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            }}
+          >
+            <ArrowDownToLine style={{ width: 18, height: 18 }} />
+            Demander un retrait
+          </button>
 
-          {/* ── Historique retraits ── */}
-          {withdrawals.length > 0 && (
-            <div className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
-              <div className="px-4 pt-4 pb-3 border-b border-gray-50">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Historique des retraits</p>
+          {/* ── How it works ── */}
+          <div style={{ background: "#fff", borderRadius: 20, padding: "18px 16px", boxShadow: "0 2px 10px rgba(0,0,0,0.06)" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 1, margin: "0 0 16px" }}>Comment ça marche</p>
+            {[
+              { emoji: "🔗", color: "#4F46E5", bg: "#EEF2FF", title: "Partagez votre code", desc: "Envoyez-le à vos amis, famille ou contacts" },
+              { emoji: "👤", color: "#059669", bg: "#ECFDF5", title: "Ils s'inscrivent", desc: "Vos filleuls créent un compte avec votre code" },
+              { emoji: "💰", color: "#D97706", bg: "#FFFBEB", title: "Vous recevez 10%", desc: "Commission créditée instantanément sur votre solde" },
+            ].map((step, i, arr) => (
+              <div key={step.title} style={{ display: "flex", gap: 12 }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 12, background: step.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
+                    {step.emoji}
+                  </div>
+                  {i < arr.length - 1 && <div style={{ width: 2, flex: 1, background: "#F1F5F9", margin: "4px 0" }} />}
+                </div>
+                <div style={{ paddingBottom: i < arr.length - 1 ? 16 : 0 }}>
+                  <p style={{ fontWeight: 700, fontSize: 14, color: "#1E293B", margin: "2px 0 2px" }}>{step.title}</p>
+                  <p style={{ fontSize: 12, color: "#94A3B8", margin: 0, lineHeight: 1.5 }}>{step.desc}</p>
+                </div>
               </div>
-              <div className="divide-y divide-gray-50">
-                {withdrawals.map(w => {
-                  const s = statusStyle[w.status] ?? { bg: "#F3F4F6", color: "#6B7280", label: w.status };
-                  return (
-                    <div key={w.id} className="flex items-center justify-between px-4 py-3">
-                      <div>
-                        <p className="text-sm font-bold text-gray-900">{fmt(w.amountUsd)}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{w.phone} · {w.country}</p>
-                        {w.note && <p className="text-xs text-gray-500 mt-0.5 italic">{w.note}</p>}
-                      </div>
-                      <div className="text-right">
-                        <span className="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold" style={{ background: s.bg, color: s.color }}>
-                          {s.label}
-                        </span>
-                        <p className="text-[10px] text-gray-400 mt-1">{new Date(w.createdAt).toLocaleDateString("fr-FR")}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+            ))}
+          </div>
 
         </div>
       </div>
+
+      {/* ── Withdrawal info bottom sheet ── */}
+      {showWithdrawInfo && (
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "flex-end" }}
+          onClick={() => setShowWithdrawInfo(false)}
+        >
+          <div
+            style={{ width: "100%", background: "#fff", borderRadius: "24px 24px 0 0", padding: "0 0 40px", boxShadow: "0 -4px 32px rgba(0,0,0,0.15)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 8px" }}>
+              <div style={{ width: 40, height: 4, borderRadius: 99, background: "#E2E8F0" }} />
+            </div>
+            <div style={{ padding: "16px 20px 20px", textAlign: "center" }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>💸</div>
+              <h3 style={{ fontWeight: 800, fontSize: 18, color: "#0F172A", margin: "0 0 10px" }}>
+                Demande de retrait
+              </h3>
+              <p style={{ fontSize: 14, color: "#64748B", margin: "0 0 20px", lineHeight: 1.6 }}>
+                Le retrait de vos commissions s'effectue via le site{" "}
+                <span style={{ fontWeight: 800, color: "#2563EB" }}>ZyNum.net</span>.
+              </p>
+              <div style={{ background: "#EFF6FF", borderRadius: 16, padding: "14px 16px", marginBottom: 20, textAlign: "left" }}>
+                <p style={{ fontSize: 13, color: "#1D4ED8", margin: 0, lineHeight: 1.6, fontWeight: 500 }}>
+                  📌 Connectez-vous sur <strong>zynum.net</strong>, accédez à votre compte et utilisez la section <strong>Retrait</strong> pour demander le virement de vos commissions.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowWithdrawInfo(false)}
+                style={{
+                  width: "100%", padding: "14px 0", borderRadius: 50, border: "none", cursor: "pointer",
+                  background: "linear-gradient(135deg, #0EA5E9, #2563EB)",
+                  color: "#fff", fontWeight: 800, fontSize: 15,
+                }}
+              >
+                Compris
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </SubPage>
   );
 }
