@@ -387,17 +387,17 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
         <div style={{
           display: "inline-flex", alignItems: "center", gap: 6,
           padding: "6px 14px", borderRadius: 999,
-          background: balance > 0 ? "rgba(34,197,94,0.18)" : "rgba(239,68,68,0.18)",
-          border: `1px solid ${balance > 0 ? "rgba(34,197,94,0.4)" : "rgba(239,68,68,0.4)"}`,
+          background: "rgba(255,255,255,0.20)",
+          border: "1px solid rgba(255,255,255,0.55)",
         }}>
-          <Wallet style={{ width: 15, height: 15, color: balance > 0 ? "#16a34a" : "#dc2626", flexShrink: 0 }} />
-          <span style={{ fontSize: 13, fontWeight: 700, color: balance > 0 ? "#15803d" : "#b91c1c", whiteSpace: "nowrap" }}>
+          <Wallet style={{ width: 15, height: 15, color: "#ffffff", flexShrink: 0 }} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#ffffff", whiteSpace: "nowrap" }}>
             {t("buy_balance_pill")} {formatBalance()}
           </span>
           {balance === 0 && (
             <button
               onClick={() => { window.location.href = "/recharge"; }}
-              style={{ fontSize: 12, fontWeight: 800, color: "#b91c1c", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0, marginLeft: 2 }}
+              style={{ fontSize: 12, fontWeight: 800, color: "#ffffff", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0, marginLeft: 2 }}
             >
               {t("buy_top_up_pill")} →
             </button>
@@ -647,9 +647,9 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
         <div className="sticky top-0 z-20 px-4 pt-3 pb-3 space-y-2" style={{ backgroundColor: "#1A3FFF" }}>
           <div className="flex items-center gap-2">
             <button onClick={() => goBack("country")} className="p-2 -ml-2 rounded-xl active:bg-blue-700 transition-colors">
-              <ArrowLeft className="w-5 h-5 text-white" />
+              <ArrowLeft style={{ width: 20, height: 20, color: "#ffffff" }} />
             </button>
-            <h1 className="text-base font-extrabold flex-1 text-white">{t("buy_s3_title")}</h1>
+            <h1 className="text-base font-extrabold flex-1" style={{ color: "#ffffff" }}>{t("buy_s3_title")}</h1>
             {user && <BalancePill variant="white" />}
           </div>
 
