@@ -5,6 +5,7 @@ import { Loader2, Mail, Lock, Eye, EyeOff, Globe2 } from "lucide-react";
 import { useLoginUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/use-language";
+import { LazyBgImage } from "@/components/lazy-image";
 
 type Step = "credentials" | "verify_2fa";
 
@@ -134,13 +135,24 @@ export default function Login() {
     }
   };
 
+  const [bgLoaded, setBgLoaded] = useState(false);
+
   return (
     <div style={{ height: "100dvh", position: "relative", overflow: "hidden" }}>
-      {/* Background */}
+      {/* Skeleton shown until background is ready */}
+      {!bgLoaded && (
+        <div className="img-skeleton" style={{ position: "fixed", inset: 0, zIndex: 0 }} />
+      )}
+      {/* Hidden preloader */}
+      <img src={BG} alt="" onLoad={() => setBgLoaded(true)}
+        style={{ position: "absolute", width: 0, height: 0, opacity: 0, pointerEvents: "none" }} />
+      {/* Background image */}
       <div style={{
         position: "fixed", inset: 0, zIndex: 0,
-        backgroundImage: `url(${BG})`,
+        backgroundImage: bgLoaded ? `url(${BG})` : "none",
         backgroundSize: "cover", backgroundPosition: "center",
+        opacity: bgLoaded ? 1 : 0,
+        transition: "opacity 0.45s ease",
       }} />
       <div style={{ position: "fixed", inset: 0, zIndex: 1, background: "rgba(8,12,40,0.62)" }} />
 

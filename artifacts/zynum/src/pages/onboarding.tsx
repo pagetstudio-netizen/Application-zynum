@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
+import { LazyImage } from "@/components/lazy-image";
 
 const slides = [
   {
@@ -244,10 +245,10 @@ export default function Onboarding() {
                   overflow: "hidden",
                 }}
               >
-                <img
+                <LazyImage
                   src={s.image}
                   alt={s.title}
-                  style={{
+                  imgStyle={{
                     width: "100%",
                     height: "100%",
                     objectFit: "cover",
@@ -291,11 +292,11 @@ export default function Onboarding() {
                 position: "relative",
               }}
             >
-              <img
+              <LazyImage
                 src={slide.image}
                 alt={slide.title}
                 draggable={false}
-                style={{
+                imgStyle={{
                   width: "100%",
                   height: "100%",
                   objectFit: "cover",
