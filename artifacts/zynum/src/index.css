@@ -64,6 +64,19 @@ img {
   --radius-2xl: calc(var(--radius) + 8px);
 }
 
+/* ── Prevent horizontal overflow on all pages (mobile white gap fix) ─────── */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+}
+#root {
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+}
+/* ─────────────────────────────────────────────────────────────────────────── */
+
 :root {
   /* LIGHT THEME — default for all pages except homepage */
   --background: 210 20% 96%;

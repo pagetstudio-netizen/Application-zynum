@@ -442,11 +442,11 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
           <div style={{
             display: "flex", alignItems: "center", justifyContent: "space-between",
             background: "#ffffff", borderRadius: 18, margin: "12px 16px 0",
-            padding: "14px 16px",
+            padding: "14px 16px", overflow: "hidden",
             boxShadow: "0 1px 6px rgba(0,0,0,0.07)",
           }}>
-            <span style={{ fontSize: 17, fontWeight: 800, color: "#111827" }}>Choisir un service</span>
-            {user && <BalancePill variant="colored" />}
+            <span style={{ fontSize: 17, fontWeight: 800, color: "#111827", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 8 }}>Choisir un service</span>
+            {user && <div style={{ flexShrink: 0 }}><BalancePill variant="colored" /></div>}
           </div>
 
           {/* Barre de recherche */}
@@ -522,15 +522,15 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
         {/* ── En-tête fixé ── */}
         <div style={{ flexShrink: 0, position: "sticky", top: 0, zIndex: 20, background: "#ffffff", borderBottom: "1px solid #F3F4F6" }}>
           {/* Barre retour + titre + solde */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px 10px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px 10px", overflow: "hidden" }}>
             <button
               onClick={() => goBack("service")}
               style={{ background: "none", border: "none", cursor: "pointer", padding: 4, borderRadius: 10, display: "flex", alignItems: "center", flexShrink: 0 }}
             >
               <ArrowLeft style={{ width: 22, height: 22, color: "#374151" }} />
             </button>
-            <span style={{ flex: 1, fontSize: 15, fontWeight: 600, color: "#6B7280" }}>Changer de service</span>
-            {user && <BalancePill variant="white" />}
+            <span style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 600, color: "#6B7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Changer de service</span>
+            {user && <div style={{ flexShrink: 0 }}><BalancePill variant="white" /></div>}
           </div>
 
           {/* Carte service sélectionné */}
@@ -645,12 +645,12 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
       <div className="flex flex-col min-h-full">
         {/* Sticky header bleu */}
         <div className="sticky top-0 z-20 px-4 pt-3 pb-3 space-y-2" style={{ backgroundColor: "#1A3FFF" }}>
-          <div className="flex items-center gap-2">
-            <button onClick={() => goBack("country")} className="p-2 -ml-2 rounded-xl active:bg-blue-700 transition-colors">
+          <div className="flex items-center gap-2 min-w-0">
+            <button onClick={() => goBack("country")} className="p-2 -ml-2 rounded-xl active:bg-blue-700 transition-colors shrink-0">
               <ArrowLeft style={{ width: 20, height: 20, color: "#ffffff" }} />
             </button>
-            <h1 className="text-base font-extrabold flex-1" style={{ color: "#ffffff" }}>{t("buy_s3_title")}</h1>
-            {user && <BalancePill variant="white" />}
+            <h1 className="text-base font-extrabold flex-1 min-w-0 truncate" style={{ color: "#ffffff" }}>{t("buy_s3_title")}</h1>
+            {user && <div className="shrink-0"><BalancePill variant="white" /></div>}
           </div>
 
           {/* Carte service + pays */}
