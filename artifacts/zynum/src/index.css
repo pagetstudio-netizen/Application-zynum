@@ -466,3 +466,9 @@ html.light .bg-clip-text.from-white {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
+
+/* White placeholder for search inputs on blue headers */
+.search-input-white::placeholder {
+  color: rgba(255, 255, 255, 0.65) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.65) !important;
+}

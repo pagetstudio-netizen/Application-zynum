@@ -35,6 +35,14 @@ const ALL_COUNTRIES: Country[] = [
     { id:"MTN_BJ",  label:"MTN MoMo",   logo:imgMTN,  aggregator:"omnipay", needsOtp:false, needsReturnUrl:false },
     { id:"MOOV_BJ", label:"Moov Money", logo:imgMoov, aggregator:"omnipay", needsOtp:false, needsReturnUrl:false },
   ]},
+  { code:"CD", name:"Congo (RDC)", flag:"🇨🇩", prefix:"243", currency:"CDF", operators:[
+    { id:"AIRTEL_CD", label:"Airtel Money", logo:imgAirtel, aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_AIRTEL_CD" },
+    { id:"MPESA_CD",  label:"M-Pesa",       logo:imgMTN,   aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_MPESA_CD"  },
+  ]},
+  { code:"CG", name:"Congo (Brazzaville)", flag:"🇨🇬", prefix:"242", currency:"XAF", operators:[
+    { id:"MTN_CG",    label:"MTN MoMo",     logo:imgMTN,    aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_MTN_CG"    },
+    { id:"AIRTEL_CG", label:"Airtel Money", logo:imgAirtel, aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_AIRTEL_CG" },
+  ]},
   { code:"CI", name:"Côte d'Ivoire", flag:"🇨🇮", prefix:"225", currency:"XOF", operators:[
     { id:"ORANGE_CI", label:"Orange Money", logo:imgOrangeMoney, aggregator:"omnipay", needsOtp:true,  needsReturnUrl:false, ussdCode:"#144*82#" },
     { id:"MTN_CI",    label:"MTN MoMo",     logo:imgMTN,         aggregator:"omnipay", needsOtp:false, needsReturnUrl:false },
@@ -45,9 +53,13 @@ const ALL_COUNTRIES: Country[] = [
     { id:"MTN_CM",    label:"MTN MoMo",     logo:imgMTN,         aggregator:"omnipay", needsOtp:false, needsReturnUrl:false },
     { id:"ORANGE_CM", label:"Orange Money", logo:imgOrangeMoney, aggregator:"omnipay", needsOtp:false, needsReturnUrl:false },
   ]},
+  { code:"GA", name:"Gabon", flag:"🇬🇦", prefix:"241", currency:"XAF", operators:[
+    { id:"AIRTEL_GA", label:"Airtel Money", logo:imgAirtel, aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_AIRTEL_GA" },
+    { id:"MOOV_GA",   label:"Moov Money",   logo:imgMoov,   aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_MOOV_GA"   },
+  ]},
   { code:"GH", name:"Ghana", flag:"🇬🇭", prefix:"233", currency:"GHS", operators:[
     { id:"MTN_GH",    label:"MTN MoMo",   logo:imgMTN,    aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"MTNGH" },
-    { id:"AIRTEL_GH", label:"AirtelTigo", logo:imgAirtel, aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"ATGH" },
+    { id:"AIRTEL_GH", label:"AirtelTigo", logo:imgAirtel, aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"ATGH"  },
   ]},
   { code:"GN", name:"Guinée", flag:"🇬🇳", prefix:"224", currency:"GNF", operators:[
     { id:"MTN_GN",    label:"MTN Mobile Money", logo:imgMTN,         aggregator:"omnipay", needsOtp:false, needsReturnUrl:false },
@@ -56,20 +68,50 @@ const ALL_COUNTRIES: Country[] = [
   { code:"KE", name:"Kenya", flag:"🇰🇪", prefix:"254", currency:"KES", operators:[
     { id:"MPESA_KE", label:"M-Pesa", logo:imgMTN, aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"MPESAKE" },
   ]},
+  { code:"MG", name:"Madagascar", flag:"🇲🇬", prefix:"261", currency:"MGA", operators:[
+    { id:"MVOLA_MG",  label:"MVola",        logo:imgOrangeMoney, aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"MVOLAMG"  },
+    { id:"AIRTEL_MG", label:"Airtel Money", logo:imgAirtel,      aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"AIRTELMG" },
+  ]},
   { code:"ML", name:"Mali", flag:"🇲🇱", prefix:"223", currency:"XOF", operators:[
     { id:"ORANGE_ML", label:"Orange Money", logo:imgOrangeMoney, aggregator:"omnipay", needsOtp:false, needsReturnUrl:false },
     { id:"MOOV_ML",   label:"Moov Money",   logo:imgMoov,        aggregator:"omnipay", needsOtp:false, needsReturnUrl:false },
   ]},
+  { code:"MR", name:"Mauritanie", flag:"🇲🇷", prefix:"222", currency:"MRU", operators:[
+    { id:"MATTEL_MR", label:"Mattel Money", logo:imgOrangeMoney, aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_MATTEL_MR" },
+  ]},
+  { code:"NE", name:"Niger", flag:"🇳🇪", prefix:"227", currency:"XOF", operators:[
+    { id:"AIRTEL_NE", label:"Airtel Money", logo:imgAirtel, aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_AIRTEL_NE" },
+    { id:"MOOV_NE",   label:"Moov Money",   logo:imgMoov,   aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_MOOV_NE"   },
+  ]},
   { code:"NG", name:"Nigeria", flag:"🇳🇬", prefix:"234", currency:"NGN", operators:[
     { id:"MTN_NG", label:"MTN MoMo", logo:imgMTN, aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"MTNNG" },
+  ]},
+  { code:"RW", name:"Rwanda", flag:"🇷🇼", prefix:"250", currency:"RWF", operators:[
+    { id:"MTN_RW", label:"MTN MoMo", logo:imgMTN, aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"MTNRW" },
   ]},
   { code:"SN", name:"Sénégal", flag:"🇸🇳", prefix:"221", currency:"XOF", operators:[
     { id:"WAVE_SN",   label:"Wave",         logo:imgWave,        aggregator:"omnipay", needsOtp:false, needsReturnUrl:true  },
     { id:"ORANGE_SN", label:"Orange Money", logo:imgOrangeMoney, aggregator:"omnipay", needsOtp:false, needsReturnUrl:false },
   ]},
+  { code:"TD", name:"Tchad", flag:"🇹🇩", prefix:"235", currency:"XAF", operators:[
+    { id:"AIRTEL_TD", label:"Airtel Money", logo:imgAirtel, aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_AIRTEL_TD" },
+    { id:"MOOV_TD",   label:"Moov Money",   logo:imgMoov,   aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_MOOV_TD"   },
+  ]},
   { code:"TG", name:"Togo", flag:"🇹🇬", prefix:"228", currency:"XOF", operators:[
     { id:"TOGOCEL_TG", label:"T-Money",    logo:imgTMoney, aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_TMONEY_TG" },
-    { id:"MOOV_TG",    label:"Moov Money", logo:imgMoov,   aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_FLOOZ_TG" },
+    { id:"MOOV_TG",    label:"Moov Money", logo:imgMoov,   aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_FLOOZ_TG"  },
+  ]},
+  { code:"TZ", name:"Tanzanie", flag:"🇹🇿", prefix:"255", currency:"TZS", operators:[
+    { id:"MPESA_TZ",  label:"M-Pesa",       logo:imgMTN,    aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"MPESATZ"  },
+    { id:"AIRTEL_TZ", label:"Airtel Money", logo:imgAirtel, aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"AIRTELTZ" },
+  ]},
+  { code:"UG", name:"Ouganda", flag:"🇺🇬", prefix:"256", currency:"UGX", operators:[
+    { id:"MTN_UG",    label:"MTN MoMo",     logo:imgMTN,    aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"MTNUG"    },
+    { id:"AIRTEL_UG", label:"Airtel Money", logo:imgAirtel, aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"AIRTELUG" },
+  ]},
+  { code:"ZM", name:"Zambie", flag:"🇿🇲", prefix:"260", currency:"ZMW", operators:[
+    { id:"MTN_ZM",    label:"MTN MoMo",     logo:imgMTN,    aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"MTNZM"    },
+    { id:"AIRTEL_ZM", label:"Airtel Money", logo:imgAirtel, aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"AIRTELZM" },
   ]},
 ].sort((a, b) => a.name.localeCompare(b.name, "fr"));
 
@@ -371,20 +413,24 @@ export default function MobileMoneyPage() {
         <div className="fixed top-0 left-0 right-0 z-10 px-4 pt-3 pb-3 bg-[#1A3FFF]">
           <div className="flex items-center gap-2 mb-2">
             <button onClick={() => setStep("phone")} className="p-2 -ml-2 rounded-xl active:bg-blue-700 transition-colors">
-              <ChevronLeft className="w-6 h-6 text-white" />
+              <ChevronLeft className="w-6 h-6 text-force-white" />
             </button>
-            <h1 className="text-lg font-black text-white">Sélectionnez votre pays</h1>
+            <h1 className="text-lg font-black text-force-white">Sélectionnez votre pays</h1>
           </div>
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-force-white" style={{ opacity: 0.8 }} />
             <input
               ref={cpInputRef}
               type="text"
               placeholder="Rechercher un pays..."
               value={cpQuery}
               onChange={e => setCpQuery(e.target.value)}
-              className="w-full h-11 pl-12 pr-4 rounded-2xl text-base focus:outline-none text-gray-900 placeholder:text-gray-500 shadow-md focus:ring-2 focus:ring-white/60"
-              style={{ backgroundColor: '#ffffff' }}
+              className="w-full h-11 pl-12 pr-4 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-white/40 search-input-white"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.18)',
+                color: '#ffffff',
+                caretColor: '#ffffff',
+              }}
             />
           </div>
         </div>
