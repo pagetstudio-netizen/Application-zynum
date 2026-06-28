@@ -79,20 +79,19 @@ router.get("/v1/admin/users", ...auth, async (req, res): Promise<void> => {
   const { q, page = "1", limit = "20" } = req.query as Record<string, string>;
   const offset = (parseInt(page) - 1) * parseInt(limit);
 
-  let query = db.select({ id: usersTable.id, name: usersTable.name, email: usersTable.email, balanceUsd: usersTable.balanceUsd, isAdmin: usersTable.isAdmin, isBanned: usersTable.isBanned, createdAt: usersTable.createdAt }).from(usersTable);
+  const baseQuery = db.select({ id: usersTable.id, name: usersTable.name, email: usersTable.email, balanceUsd: usersTable.balanceUsd, isAdmin: usersTable.isAdmin, isBanned: usersTable.isBanned, createdAt: usersTable.createdAt }).from(usersTable);
 
-  if (q) {
-    query = query.where(or(like(usersTable.name, `%${q}%`), like(usersTable.email, `%${q}%`)));
-  }
-
-  const users = await query.orderBy(desc(usersTable.createdAt)).limit(parseInt(limit)).offset(offset);
+  const users = await (q
+    ? baseQuery.where(or(like(usersTable.name, `%${q}%`), like(usersTable.email, `%${q}%`)))
+    : baseQuery
+  ).orderBy(desc(usersTable.createdAt)).limit(parseInt(limit)).offset(offset);
   const [{ c }] = await db.select({ c: count() }).from(usersTable);
 
   res.json({ users, total: c, page: parseInt(page), limit: parseInt(limit) });
 });
 
 router.get("/v1/admin/users/:id", ...auth, async (req, res): Promise<void> => {
-  const userId = parseInt(req.params.id);
+  const userId = parseInt(req.params["id"] as string, 10);
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
   if (!user) { res.status(404).json({ error: "User not found" }); return; }
 
@@ -145,7 +144,7 @@ router.patch("/v1/admin/users/:id", ...auth, async (req: any, res): Promise<void
 });
 
 router.delete("/v1/admin/users/:id", ...auth, async (req, res): Promise<void> => {
-  const userId = parseInt(req.params.id);
+  const userId = parseInt(req.params["id"] as string, 10);
   await db.delete(usersTable).where(eq(usersTable.id, userId));
   res.json({ success: true });
 });
@@ -291,7 +290,7 @@ router.post("/v1/admin/messages", ...auth, async (req: any, res): Promise<void> 
 });
 
 router.patch("/v1/admin/messages/:id", ...auth, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params["id"] as string, 10);
   const { subject, content, color, linkUrl, linkLabel, imageUrl, isActive } = req.body;
   const updates: Record<string, unknown> = {};
   if (subject   !== undefined) updates.subject   = subject;
@@ -307,7 +306,7 @@ router.patch("/v1/admin/messages/:id", ...auth, async (req, res): Promise<void> 
 });
 
 router.delete("/v1/admin/messages/:id", ...auth, async (req, res): Promise<void> => {
-  await db.delete(adminMessagesTable).where(eq(adminMessagesTable.id, parseInt(req.params.id)));
+  await db.delete(adminMessagesTable).where(eq(adminMessagesTable.id, parseInt(req.params["id"] as string, 10)));
   res.json({ success: true });
 });
 
@@ -365,7 +364,7 @@ router.post("/v1/admin/payment-providers", ...auth, async (req, res): Promise<vo
 });
 
 router.patch("/v1/admin/payment-providers/:id", ...auth, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params["id"] as string, 10);
   const { isActive, isSelected, config, name } = req.body;
   const updates: Record<string, unknown> = {};
   if (isActive !== undefined) updates.isActive = isActive;
@@ -377,7 +376,7 @@ router.patch("/v1/admin/payment-providers/:id", ...auth, async (req, res): Promi
 });
 
 router.delete("/v1/admin/payment-providers/:id", ...auth, async (req, res): Promise<void> => {
-  await db.delete(paymentProvidersTable).where(eq(paymentProvidersTable.id, parseInt(req.params.id)));
+  await db.delete(paymentProvidersTable).where(eq(paymentProvidersTable.id, parseInt(req.params["id"] as string, 10)));
   res.json({ success: true });
 });
 
@@ -394,7 +393,7 @@ router.post("/v1/admin/faq", ...auth, async (req, res): Promise<void> => {
 });
 
 router.patch("/v1/admin/faq/:id", ...auth, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params["id"] as string, 10);
   const { type, category, question, answer, lang, isActive, sortOrder } = req.body;
   const updates: Record<string, unknown> = {};
   if (type !== undefined) updates.type = type;
@@ -409,7 +408,7 @@ router.patch("/v1/admin/faq/:id", ...auth, async (req, res): Promise<void> => {
 });
 
 router.delete("/v1/admin/faq/:id", ...auth, async (req, res): Promise<void> => {
-  await db.delete(faqArticlesTable).where(eq(faqArticlesTable.id, parseInt(req.params.id)));
+  await db.delete(faqArticlesTable).where(eq(faqArticlesTable.id, parseInt(req.params["id"] as string, 10)));
   res.json({ success: true });
 });
 
@@ -426,7 +425,7 @@ router.post("/v1/admin/social-links", ...auth, async (req, res): Promise<void> =
 });
 
 router.patch("/v1/admin/social-links/:id", ...auth, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params["id"] as string, 10);
   const updates: Record<string, unknown> = {};
   const { platform, url, icon, isActive, sortOrder } = req.body;
   if (platform !== undefined) updates.platform = platform;
@@ -439,7 +438,7 @@ router.patch("/v1/admin/social-links/:id", ...auth, async (req, res): Promise<vo
 });
 
 router.delete("/v1/admin/social-links/:id", ...auth, async (req, res): Promise<void> => {
-  await db.delete(socialLinksTable).where(eq(socialLinksTable.id, parseInt(req.params.id)));
+  await db.delete(socialLinksTable).where(eq(socialLinksTable.id, parseInt(req.params["id"] as string, 10)));
   res.json({ success: true });
 });
 
@@ -500,7 +499,7 @@ router.post("/v1/admin/countries", ...auth, async (req, res): Promise<void> => {
 
 // Admin: update override fields (toggle disable, set multiplier)
 router.patch("/v1/admin/countries/by-slug/:slug", ...auth, async (req, res): Promise<void> => {
-  const slug = req.params.slug;
+  const slug = req.params["slug"] as string;
   const { isDisabled, priceMultiplier, countryName } = req.body;
 
   const existing = await db.select().from(countryOverridesTable)
@@ -529,7 +528,7 @@ router.patch("/v1/admin/countries/by-slug/:slug", ...auth, async (req, res): Pro
 });
 
 router.patch("/v1/admin/countries/:id", ...auth, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params["id"] as string, 10);
   const { isDisabled, priceMultiplier } = req.body;
   const updates: Record<string, unknown> = {};
   if (isDisabled !== undefined) updates.isDisabled = isDisabled;
@@ -626,7 +625,7 @@ router.get("/v1/admin/affiliate/withdrawals", ...auth, async (req, res): Promise
 });
 
 router.post("/v1/admin/affiliate/withdrawals/:id/validate", ...auth, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params["id"] as string, 10);
   const { note } = req.body;
 
   const [updated] = await db
@@ -644,7 +643,7 @@ router.post("/v1/admin/affiliate/withdrawals/:id/validate", ...auth, async (req,
 });
 
 router.post("/v1/admin/affiliate/withdrawals/:id/reject", ...auth, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params["id"] as string, 10);
   const { note } = req.body;
 
   const [withdrawal] = await db

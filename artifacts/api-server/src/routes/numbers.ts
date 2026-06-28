@@ -199,7 +199,7 @@ router.get("/v1/check/:orderId", requireAuth, async (req: AuthRequest, res): Pro
 
 // ─── Cancel order ─────────────────────────────────────────────────────────────
 router.post("/v1/cancel/:orderId", requireAuth, async (req: AuthRequest, res): Promise<void> => {
-  const rawId = req.params.orderId;
+  const rawId = req.params["orderId"] as string;
 
   const [dbOrder] = await db
     .select()
@@ -245,7 +245,7 @@ router.post("/v1/cancel/:orderId", requireAuth, async (req: AuthRequest, res): P
 
 // ─── Finish/confirm order ─────────────────────────────────────────────────────
 router.post("/v1/finish/:orderId", requireAuth, async (req: AuthRequest, res): Promise<void> => {
-  const rawId = req.params.orderId;
+  const rawId = req.params["orderId"] as string;
   const userId = req.userId!;
 
   const [dbOrder] = await db

@@ -1,20 +1,14 @@
-import pino from "pino";
-
 const isProduction = process.env.NODE_ENV === "production";
 
-export const logger = pino({
-  level: process.env.LOG_LEVEL ?? "info",
-  redact: [
-    "req.headers.authorization",
-    "req.headers.cookie",
-    "res.headers['set-cookie']",
-  ],
-  ...(isProduction
-    ? {}
-    : {
-        transport: {
-          target: "pino-pretty",
-          options: { colorize: true },
-        },
-      }),
-});
+function formatMsg(level: string, msg: string, data?: unknown): string {
+  const ts = new Date().toISOString();
+  const extra = data !== undefined ? ` ${JSON.stringify(data)}` : "";
+  return `[${ts}] ${level.toUpperCase()} ${msg}${extra}`;
+}
+
+export const logger = {
+  info:  (msg: string, data?: unknown) => console.log(formatMsg("info", msg, data)),
+  warn:  (msg: string, data?: unknown) => console.warn(formatMsg("warn", msg, data)),
+  error: (msg: string, data?: unknown) => console.error(formatMsg("error", msg, data)),
+  debug: (msg: string, data?: unknown) => { if (!isProduction) console.debug(formatMsg("debug", msg, data)); },
+};

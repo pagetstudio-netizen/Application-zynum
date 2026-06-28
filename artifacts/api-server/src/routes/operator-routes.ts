@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db, operatorRoutesTable } from "@workspace/db";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/authMiddleware.js";
 import { requireAdmin } from "../middlewares/adminMiddleware.js";
 
@@ -230,7 +230,7 @@ router.post("/v1/admin/operator-routes", ...auth, async (req: Request, res: Resp
 // ─── Admin: update ────────────────────────────────────────────────────────────
 router.patch("/v1/admin/operator-routes/:id", ...auth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { res.status(400).json({ error: "ID invalide" }); return; }
 
     const {
@@ -295,7 +295,7 @@ router.post("/v1/admin/operator-routes/bulk", ...auth, async (req: Request, res:
 // ─── Admin: delete ────────────────────────────────────────────────────────────
 router.delete("/v1/admin/operator-routes/:id", ...auth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { res.status(400).json({ error: "ID invalide" }); return; }
     await db.delete(operatorRoutesTable).where(eq(operatorRoutesTable.id, id));
     res.json({ success: true });

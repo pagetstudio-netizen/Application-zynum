@@ -45,7 +45,7 @@ router.post("/v1/admin/discount-codes", requireAuth, requireAdmin, async (req: A
 
 // ─── Admin: update discount code ──────────────────────────────────────────────
 router.patch("/v1/admin/discount-codes/:id", requireAuth, requireAdmin, async (req: AuthRequest, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params["id"] as string, 10);
   const { code, percent, country, isActive } = req.body as {
     code?: string;
     percent?: number;
@@ -76,7 +76,7 @@ router.patch("/v1/admin/discount-codes/:id", requireAuth, requireAdmin, async (r
 
 // ─── Admin: delete discount code ──────────────────────────────────────────────
 router.delete("/v1/admin/discount-codes/:id", requireAuth, requireAdmin, async (req: AuthRequest, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params["id"] as string, 10);
   await db.delete(discountCodesTable).where(eq(discountCodesTable.id, id));
   res.json({ success: true });
 });
