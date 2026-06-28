@@ -323,11 +323,20 @@ function EmptyState({ filter }: { filter: FilterKey }) {
   );
 }
 
-export default function OrderHistory() {
+export default function OrderHistory({
+  filter: externalFilter,
+  setFilter: externalSetFilter,
+}: {
+  filter?: FilterKey;
+  setFilter?: (f: FilterKey) => void;
+} = {}) {
   const { currency } = useCurrency();
   const { toast } = useToast();
 
-  const [filter, setFilter]   = useState<FilterKey>("all");
+  const [internalFilter, setInternalFilter] = useState<FilterKey>("all");
+  const filter    = externalFilter    ?? internalFilter;
+  const setFilter = externalSetFilter ?? setInternalFilter;
+
   const [search, setSearch]   = useState("");
   const [page, setPage]       = useState(1);
   const [allOrders, setAllOrders] = useState<any[]>([]);

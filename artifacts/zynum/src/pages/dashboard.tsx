@@ -1951,6 +1951,16 @@ export default function Dashboard() {
 
   const navigate = (tab: Tab) => setActiveTab(tab);
 
+  const [historyFilter, setHistoryFilter] = useState<"all" | "received" | "pending" | "canceled">("all");
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+
+  const HISTORY_FILTERS: { key: typeof historyFilter; label: string; color: string }[] = [
+    { key: "all",      label: "Tous les achats",    color: "#2563EB" },
+    { key: "received", label: "SMS reçus",           color: "#059669" },
+    { key: "pending",  label: "En attente",          color: "#D97706" },
+    { key: "canceled", label: "Annulés / Expirés",   color: "#6B7280" },
+  ];
+
   return (
     <div className="h-[100dvh] overflow-hidden bg-gray-50 flex flex-col w-full relative">
       <NotificationBanner />
@@ -1967,20 +1977,114 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-xl font-extrabold text-gray-900 leading-tight">Historique</h1>
-                  <p className="text-xs text-gray-400 mt-0.5">Consultez l'historique de tous vos numéros achetés.</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {historyFilter === "all" ? "Tous vos numéros achetés" :
+                     historyFilter === "received" ? "SMS reçus uniquement" :
+                     historyFilter === "pending"  ? "Commandes en attente" :
+                     "Commandes annulées / expirées"}
+                  </p>
                 </div>
-                <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center">
-                  <SlidersHorizontal className="w-4 h-4 text-gray-500" />
-                </div>
+                <button
+                  onClick={() => setFilterDrawerOpen(true)}
+                  style={{
+                    width: 36, height: 36, borderRadius: 12,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: historyFilter !== "all" ? "#2563EB" : "#F3F4F6",
+                    border: "none", cursor: "pointer", position: "relative",
+                  }}
+                >
+                  <SlidersHorizontal style={{ width: 16, height: 16, color: historyFilter !== "all" ? "#ffffff" : "#6B7280" }} />
+                  {historyFilter !== "all" && (
+                    <span style={{
+                      position: "absolute", top: -4, right: -4,
+                      width: 10, height: 10, borderRadius: "50%",
+                      background: "#EF4444", border: "2px solid white",
+                    }} />
+                  )}
+                </button>
               </div>
             </div>
-            <OrderHistory />
+            <OrderHistory filter={historyFilter} setFilter={setHistoryFilter} />
           </div>
         )}
         {activeTab === "compte" && <CompteTab user={user} onLogout={() => logoutMutation.mutate({})} />}
       </div>
 
       <BottomNav active={activeTab} onChange={navigate} />
+
+      {/* ── Filter Drawer ── */}
+      {filterDrawerOpen && (
+        <div
+          style={{
+            position: "fixed", inset: 0, zIndex: 100,
+            background: "rgba(0,0,0,0.45)",
+            display: "flex", alignItems: "flex-end",
+          }}
+          onClick={() => setFilterDrawerOpen(false)}
+        >
+          <div
+            style={{
+              width: "100%", background: "#fff",
+              borderRadius: "24px 24px 0 0",
+              padding: "0 0 32px",
+              boxShadow: "0 -4px 32px rgba(0,0,0,0.12)",
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Handle */}
+            <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 8px" }}>
+              <div style={{ width: 40, height: 4, borderRadius: 99, background: "#E5E7EB" }} />
+            </div>
+            <div style={{ padding: "8px 20px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <p style={{ fontWeight: 800, fontSize: 16, color: "#111827", margin: 0 }}>Filtrer l'historique</p>
+              <button
+                onClick={() => setFilterDrawerOpen(false)}
+                style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+              >
+                <X style={{ width: 16, height: 16, color: "#6B7280" }} />
+              </button>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "0 16px" }}>
+              {HISTORY_FILTERS.map(f => {
+                const active = historyFilter === f.key;
+                return (
+                  <button
+                    key={f.key}
+                    onClick={() => { setHistoryFilter(f.key); setFilterDrawerOpen(false); }}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      padding: "14px 16px", borderRadius: 16, border: "none", cursor: "pointer",
+                      background: active ? f.color : "#F9FAFB",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <span style={{ fontSize: 15, fontWeight: 700, color: active ? "#ffffff" : "#374151" }}>{f.label}</span>
+                    {active && (
+                      <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Check style={{ width: 12, height: 12, color: "#ffffff" }} />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {historyFilter !== "all" && (
+              <div style={{ padding: "12px 16px 0" }}>
+                <button
+                  onClick={() => { setHistoryFilter("all"); setFilterDrawerOpen(false); }}
+                  style={{
+                    width: "100%", padding: "12px", borderRadius: 16,
+                    border: "1.5px solid #E5E7EB", background: "white",
+                    fontSize: 14, fontWeight: 600, color: "#6B7280", cursor: "pointer",
+                  }}
+                >
+                  Réinitialiser le filtre
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
