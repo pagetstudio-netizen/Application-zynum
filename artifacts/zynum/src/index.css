@@ -460,3 +460,9 @@ html.light .bg-clip-text.from-white {
   color: rgba(255,255,255,0.6);
   pointer-events: none;
 }
+
+/* Force white text on blue backgrounds — Android Chrome ignores text-white class */
+.text-force-white {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}

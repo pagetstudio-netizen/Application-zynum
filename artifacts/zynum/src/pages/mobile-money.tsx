@@ -618,7 +618,7 @@ export default function MobileMoneyPage() {
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
         )}
-        <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: "#ffffff" }}>Paiement en cours</h1>
+        <h1 className="font-extrabold text-base flex-1 text-center pr-8 text-force-white">Paiement en cours</h1>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-6" style={{ paddingTop: HEADER_H }}>
@@ -689,8 +689,7 @@ export default function MobileMoneyPage() {
               <p className="text-gray-500 text-sm">{payError}</p>
             </div>
             <button onClick={() => setStep("amount")}
-              className="w-full py-4 rounded-full font-black text-lg bg-[#1A3FFF] shadow-lg shadow-blue-500/30"
-              style={{ color: "#ffffff" }}>
+              className="w-full py-4 rounded-full font-black text-lg bg-[#1A3FFF] shadow-lg shadow-blue-500/30 text-force-white">
               Réessayer
             </button>
           </>
