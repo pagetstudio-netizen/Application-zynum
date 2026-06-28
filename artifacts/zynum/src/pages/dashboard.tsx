@@ -1870,6 +1870,9 @@ export default function Dashboard() {
     }
   }, []);
 
+  const [historyFilter, setHistoryFilter] = useState<"all" | "received" | "pending" | "canceled">("all");
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+
   // Redirect if not logged in
   useEffect(() => {
     if (!isLoading && !user) {
@@ -1892,9 +1895,6 @@ export default function Dashboard() {
   }
 
   const navigate = (tab: Tab) => setActiveTab(tab);
-
-  const [historyFilter, setHistoryFilter] = useState<"all" | "received" | "pending" | "canceled">("all");
-  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
   const HISTORY_FILTERS: { key: typeof historyFilter; label: string; color: string }[] = [
     { key: "all",      label: "Tous les achats",    color: "#2563EB" },
