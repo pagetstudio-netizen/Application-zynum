@@ -26,7 +26,7 @@ import OrderHistory from "@/pages/history";
 import Recharge from "@/pages/recharge";
 import { OmnipayModal } from "@/components/omnipay-modal";
 import { PaxityModal } from "@/components/paxity-modal";
-import { NotificationBanner, useNotifications } from "@/components/notification-banner";
+import { useNotifications } from "@/components/notification-banner";
 import imgTMoneyOp  from "@assets/images_(1)_1774832430242.png";
 import imgMoovOp    from "@assets/moov_(1)_1763835082986-GKkwwfPK_1774832019539.png";
 import imgAirtelOp  from "@assets/Airtel_logo-01_1774832430216.png";
@@ -1907,8 +1907,6 @@ export default function Dashboard() {
 
   return (
     <div className="h-[100dvh] overflow-hidden bg-gray-50 flex flex-col w-full relative">
-      <NotificationBanner />
-
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {activeTab === "accueil" && <HomeTab user={user} onNavigate={navigate} />}
         {activeTab === "numeros" && (
