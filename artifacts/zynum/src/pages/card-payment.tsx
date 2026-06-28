@@ -166,7 +166,7 @@ export default function CardPaymentPage() {
               {/* Presets */}
               <div className="grid grid-cols-4 gap-2 mb-6">
                 {AMOUNT_PRESETS_FCFA.map(a => {
-                  const label = isFcfa ? `${a >= 1000 ? `${a/1000}k` : a}` : `$${(a/FCFA_PER_USD).toFixed(0)}`;
+                  const label = isFcfa ? a.toLocaleString("fr-FR") : `$${(a/FCFA_PER_USD).toFixed(0)}`;
                   return (
                     <button key={a}
                       onClick={() => setAmountRaw(isFcfa ? String(a) : String((a / FCFA_PER_USD).toFixed(2)))}

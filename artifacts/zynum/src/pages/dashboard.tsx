@@ -831,8 +831,12 @@ function InfosPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }
       <div className="px-4 pt-5 space-y-4">
         {/* Avatar */}
         <div className="flex flex-col items-center py-4">
-          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-4xl font-black text-white shadow-xl shadow-blue-500/30 mb-3">
-            {user.name.charAt(0).toUpperCase()}
+          <div className="w-24 h-24 rounded-3xl overflow-hidden shadow-xl shadow-blue-500/30 mb-3">
+            <img
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=4F46E5&color=fff&size=192&bold=true&format=png`}
+              alt={user.name}
+              className="w-full h-full object-cover"
+            />
           </div>
           <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">Compte vérifié</span>
         </div>
