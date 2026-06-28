@@ -1836,7 +1836,10 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<Tab>("accueil");
 
-  const { data: rawUser, isLoading } = useGetCurrentUser({ query: { retry: false } });
+  const { data: rawUser, isLoading, isFetching } = useGetCurrentUser({
+    query: { retry: false, staleTime: 30_000 },
+  });
+  const showLoader = isLoading && !rawUser;
   const user = rawUser as UserWithAdmin | undefined;
 
   const logoutMutation = useLogoutUser({
@@ -1881,15 +1884,10 @@ export default function Dashboard() {
     }
   }, [isLoading, user, setLocation]);
 
-  if (isLoading || !user) {
+  if (showLoader || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30 animate-pulse">
-            <span className="text-white font-black text-lg">Z</span>
-          </div>
-          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        </div>
+        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
