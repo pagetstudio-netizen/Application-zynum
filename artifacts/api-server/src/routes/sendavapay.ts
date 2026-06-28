@@ -132,8 +132,8 @@ router.post("/v1/payments/sendavapay/initiate", async (req: Request, res: Respon
       return;
     }
 
-    const apiKey    = process.env.SENDAVAPAY_API_KEY    ?? "";
-    const apiSecret = process.env.SENDAVAPAY_API_SECRET ?? "";
+    const apiKey    = process.env.SENDAVAPAY_SDK_KEY        ?? "";
+    const apiSecret = process.env.SENDAVAPAY_WEBHOOK_SECRET ?? "";
     if (!apiKey || !apiSecret) {
       res.status(503).json({ error: "SendavaPay non configuré. Clé API ou secret manquant." });
       return;
@@ -216,8 +216,8 @@ router.post("/v1/payments/sendavapay/confirm-otp", async (req: Request, res: Res
       return;
     }
 
-    const apiKey    = process.env.SENDAVAPAY_API_KEY    ?? "";
-    const apiSecret = process.env.SENDAVAPAY_API_SECRET ?? "";
+    const apiKey    = process.env.SENDAVAPAY_SDK_KEY    ?? "";
+    const apiSecret = process.env.SENDAVAPAY_WEBHOOK_SECRET ?? "";
     if (!apiKey || !apiSecret) {
       res.status(503).json({ error: "SendavaPay non configuré" });
       return;
@@ -264,8 +264,8 @@ router.post("/v1/payments/sendavapay/confirm", async (req: Request, res: Respons
       return;
     }
 
-    const apiKey    = process.env.SENDAVAPAY_API_KEY    ?? "";
-    const apiSecret = process.env.SENDAVAPAY_API_SECRET ?? "";
+    const apiKey    = process.env.SENDAVAPAY_SDK_KEY    ?? "";
+    const apiSecret = process.env.SENDAVAPAY_WEBHOOK_SECRET ?? "";
     if (!apiKey || !apiSecret) {
       res.status(503).json({ error: "SendavaPay non configuré" });
       return;
@@ -449,10 +449,10 @@ router.post("/v1/webhooks/sendavapay", async (req: Request, res: Response): Prom
 // ─── Admin : solde SendavaPay ─────────────────────────────────────────────────
 router.get("/v1/admin/sendavapay/balance", requireAuth, requireAdmin, async (_req: Request, res: Response): Promise<void> => {
   try {
-    const apiKey    = process.env.SENDAVAPAY_API_KEY    ?? "";
-    const apiSecret = process.env.SENDAVAPAY_API_SECRET ?? "";
+    const apiKey    = process.env.SENDAVAPAY_SDK_KEY    ?? "";
+    const apiSecret = process.env.SENDAVAPAY_WEBHOOK_SECRET ?? "";
     if (!apiKey || !apiSecret) {
-      res.status(503).json({ error: "SENDAVAPAY_API_KEY / SENDAVAPAY_API_SECRET non configurés" });
+      res.status(503).json({ error: "SENDAVAPAY_SDK_KEY / SENDAVAPAY_WEBHOOK_SECRET non configurés" });
       return;
     }
     const data = await sendavaGet("/api/sdk/balance", apiKey, apiSecret);
@@ -466,10 +466,10 @@ router.get("/v1/admin/sendavapay/balance", requireAuth, requireAdmin, async (_re
 // ─── Admin : retrait SendavaPay ───────────────────────────────────────────────
 router.post("/v1/admin/sendavapay/withdraw", requireAuth, requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
-    const apiKey    = process.env.SENDAVAPAY_API_KEY    ?? "";
-    const apiSecret = process.env.SENDAVAPAY_API_SECRET ?? "";
+    const apiKey    = process.env.SENDAVAPAY_SDK_KEY    ?? "";
+    const apiSecret = process.env.SENDAVAPAY_WEBHOOK_SECRET ?? "";
     if (!apiKey || !apiSecret) {
-      res.status(503).json({ error: "SENDAVAPAY_API_KEY / SENDAVAPAY_API_SECRET non configurés" });
+      res.status(503).json({ error: "SENDAVAPAY_SDK_KEY / SENDAVAPAY_WEBHOOK_SECRET non configurés" });
       return;
     }
 

@@ -21,6 +21,7 @@ interface Operator {
   id: string; label: string; logo: string; aggregator: string;
   needsOtp: boolean; needsReturnUrl: boolean;
   paxityOperatorId?: string;
+  atpOperatorId?: string;
   ussdCode?: string;
 }
 interface Country { code: string; name: string; flag: string; prefix: string; currency: string; operators: Operator[]; }
@@ -67,8 +68,8 @@ const ALL_COUNTRIES: Country[] = [
     { id:"ORANGE_SN", label:"Orange Money", logo:imgOrangeMoney, aggregator:"omnipay", needsOtp:false, needsReturnUrl:false },
   ]},
   { code:"TG", name:"Togo", flag:"🇹🇬", prefix:"228", currency:"XOF", operators:[
-    { id:"TOGOCEL_TG", label:"T-Money",    logo:imgTMoney, aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"TMONEYTG" },
-    { id:"MOOV_TG",    label:"Moov Money", logo:imgMoov,   aggregator:"paxity", needsOtp:false, needsReturnUrl:false, paxityOperatorId:"MOOVTG" },
+    { id:"TOGOCEL_TG", label:"T-Money",    logo:imgTMoney, aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_TMONEY_TG" },
+    { id:"MOOV_TG",    label:"Moov Money", logo:imgMoov,   aggregator:"ashtechpay", needsOtp:false, needsReturnUrl:false, atpOperatorId:"ATP_FLOOZ_TG" },
   ]},
 ].sort((a, b) => a.name.localeCompare(b.name, "fr"));
 
@@ -254,6 +255,8 @@ export default function MobileMoneyPage() {
       const gw = gwRef.current;
       const endpoint = gw === "paxity"
         ? `${apiBase}/api/v1/payments/paxity/confirm`
+        : gw === "ashtechpay"
+        ? `${apiBase}/api/v1/payments/ashtechpay/confirm`
         : `${apiBase}/api/v1/payments/omnipay/confirm`;
       const res  = await fetch(endpoint, {
         method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
@@ -305,6 +308,25 @@ export default function MobileMoneyPage() {
         const link = String(tx.link ?? tx.payment_url ?? "");
         if (link) { setPaymentUrl(link); setPayState("wave"); } else { setPayState("push"); }
         if (ref) startPolling(ref);
+      } else if (operator.aggregator === "ashtechpay") {
+        const res  = await fetch(`${apiBase}/api/v1/payments/ashtechpay/initiate`, {
+          method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
+          body: JSON.stringify({
+            amount: amountFcfa, userId: String(user.id),
+            phone: phone.replace(/\D/g, ""),
+            operatorId: operator.atpOperatorId,
+          }),
+        });
+        const json = (await res.json()) as Record<string, unknown>;
+        if (res.status === 202 || json.status === "pending") {
+          const ref = String(json.reference ?? "");
+          setTxRef(ref);
+          const waveUrl = String(json.waveUrl ?? "");
+          if (waveUrl) { setPaymentUrl(waveUrl); setPayState("wave"); } else { setPayState("push"); }
+          if (ref) startPolling(ref);
+        } else {
+          setPayState("error"); setPayError(String(json.message ?? "Paiement refusé."));
+        }
       } else {
         const body: Record<string, unknown> = {
           amount: amountFcfa, userId: String(user.id), phone: phone.replace(/\D/g, ""),
@@ -596,7 +618,7 @@ export default function MobileMoneyPage() {
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
         )}
-        <h1 className="font-extrabold text-base flex-1 text-center pr-8 text-white">Paiement en cours</h1>
+        <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: "#ffffff" }}>Paiement en cours</h1>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-6" style={{ paddingTop: HEADER_H }}>
@@ -667,7 +689,8 @@ export default function MobileMoneyPage() {
               <p className="text-gray-500 text-sm">{payError}</p>
             </div>
             <button onClick={() => setStep("amount")}
-              className="w-full py-4 rounded-full font-black text-white text-lg bg-[#1A3FFF] shadow-lg shadow-blue-500/30">
+              className="w-full py-4 rounded-full font-black text-lg bg-[#1A3FFF] shadow-lg shadow-blue-500/30"
+              style={{ color: "#ffffff" }}>
               Réessayer
             </button>
           </>
