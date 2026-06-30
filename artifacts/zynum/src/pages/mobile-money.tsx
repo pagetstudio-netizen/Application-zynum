@@ -590,7 +590,7 @@ export default function MobileMoneyPage() {
   if (step === "amount") {
     const balance = balanceData?.balance ?? 0;
     return (
-      <div className="flex flex-col bg-white" style={{ minHeight: "100dvh" }}>
+      <div className="flex flex-col" style={{ minHeight: "100dvh", backgroundColor: "#f0f2f5" }}>
         {/* Fixed header */}
         <div className="fixed top-0 left-0 right-0 z-40 flex items-center gap-3 px-4 bg-[#1A3FFF]" style={{ height: HEADER_H }}>
           <button onClick={() => setStep("phone")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
@@ -621,7 +621,7 @@ export default function MobileMoneyPage() {
           </p>
 
           {/* Amount input */}
-          <div className="flex items-center gap-2 h-20 bg-gray-50 rounded-2xl border-2 border-gray-200 px-4 mb-3 focus-within:border-blue-500 transition">
+          <div className="flex items-center gap-2 h-20 bg-white rounded-2xl px-4 mb-3 transition" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.09)" }}>
             <span className="text-xl font-black text-gray-400 shrink-0">{isFcfa ? "FCFA" : "$"}</span>
             <input
               type="number" inputMode="decimal" placeholder="0"
@@ -652,7 +652,7 @@ export default function MobileMoneyPage() {
             })}
           </div>
 
-          <div className="bg-gray-50 rounded-2xl p-4">
+          <div className="bg-white rounded-2xl p-4" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.07)" }}>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">{t("mm_balance")}</span>
               <span className="font-semibold text-gray-900">
@@ -663,7 +663,7 @@ export default function MobileMoneyPage() {
         </div>
 
         {/* Fixed footer */}
-        <div className="fixed bottom-0 left-0 right-0 px-5 pb-8 pt-4 bg-white border-t border-gray-100">
+        <div className="fixed bottom-0 left-0 right-0 px-5 pb-8 pt-4 border-t border-gray-100" style={{ backgroundColor: "#f0f2f5" }}>
           <button
             onClick={handlePayClick}
             disabled={amountFcfa < 300}
@@ -691,7 +691,7 @@ export default function MobileMoneyPage() {
 
   // ── PROCESSING STEP ─────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col bg-white" style={{ minHeight: "100dvh" }}>
+    <div className="flex flex-col" style={{ minHeight: "100dvh", backgroundColor: "#f0f2f5" }}>
       {/* Fixed header */}
       <div className="fixed top-0 left-0 right-0 z-40 flex items-center gap-3 px-4 bg-[#1A3FFF]" style={{ height: HEADER_H }}>
         {payState === "error" && (

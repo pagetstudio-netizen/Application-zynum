@@ -218,7 +218,7 @@ export default function CryptoRecharge() {
   const canGoBack = step === "amount" || step === "success" || step === "failed";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100dvh", background: "#f9fafb", overflow: "hidden", maxWidth: "100vw" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100dvh", background: "#f0f2f5", overflow: "hidden", maxWidth: "100vw" }}>
 
       {/* ── Header ── */}
       <div style={{
