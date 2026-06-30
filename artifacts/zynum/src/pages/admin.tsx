@@ -1213,6 +1213,7 @@ function AdminSettings() {
         support_facebook_enabled: data.settings.support_facebook_enabled ?? "true",
         support_whatsapp_channel: data.settings.support_whatsapp_channel ?? "",
         support_whatsapp_channel_enabled: data.settings.support_whatsapp_channel_enabled ?? "true",
+        support_email_enabled: data.settings.support_email_enabled ?? "true",
         support_channel: data.settings.support_channel ?? "telegram",
         maintenance_mode: data.settings.maintenance_mode ?? "false",
         maintenance_buy: data.settings.maintenance_buy ?? "false",
@@ -1391,6 +1392,30 @@ function AdminSettings() {
               className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm"
             />
           </div>
+        </div>
+
+        {/* Email Support */}
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-white">Bouton Email Support</p>
+            <button
+              onClick={() => setForm({ ...form, support_email_enabled: form.support_email_enabled === "true" ? "false" : "true" })}
+              className={`relative w-11 h-6 rounded-full transition-colors ${form.support_email_enabled === "true" ? "bg-indigo-500" : "bg-white/20"}`}
+            >
+              <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.support_email_enabled === "true" ? "translate-x-6" : "translate-x-1"}`} />
+            </button>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Email du support</label>
+            <input
+              type="email"
+              value={form.support_email ?? ""}
+              onChange={(e) => setForm({ ...form, support_email: e.target.value })}
+              placeholder="support@zynum.net"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Affiché sur la page Centre d'aide. L'email saisi ici remplace aussi le champ "Email du support" dans les informations de la plateforme.</p>
         </div>
       </div>
 

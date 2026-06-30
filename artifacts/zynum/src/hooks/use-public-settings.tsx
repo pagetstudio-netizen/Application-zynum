@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 export interface PublicSettings {
   platform_name?: string;
   support_email?: string;
+  support_email_enabled?: string;
   support_telegram?: string;
   support_whatsapp?: string;
   support_whatsapp_enabled?: string;

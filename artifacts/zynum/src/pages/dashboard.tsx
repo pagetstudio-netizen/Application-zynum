@@ -10,7 +10,7 @@ import {
   ArrowUpRight, ArrowDownLeft, Tag, History, RefreshCw,
   Phone, Globe2, Star, Lock, KeyRound, X, Menu,
   ChevronLeft, Clock, XCircle, Package, CreditCard, SlidersHorizontal,
-  Share2, DollarSign, ArrowDownToLine, Users, Link2, UserPlus,
+  Share2, DollarSign, ArrowDownToLine, Users, Link2, UserPlus, Mail,
 } from "lucide-react";
 import {
   useGetCurrentUser, useLogoutUser, useGetBalance,
@@ -1492,61 +1492,155 @@ function HelpPage({ onBack }: { onBack: () => void }) {
     { q: t("help_q6"), a: t("help_a6") },
   ];
 
+  const whatsappUrl = publicSettings.support_whatsapp || "";
+  const whatsappEnabled = publicSettings.support_whatsapp_enabled !== "false" && !!whatsappUrl;
+  const channelUrl = publicSettings.support_whatsapp_channel || "";
+  const channelEnabled = publicSettings.support_whatsapp_channel_enabled !== "false" && !!channelUrl;
+  const facebookUrl = publicSettings.support_facebook || "";
+  const facebookEnabled = publicSettings.support_facebook_enabled !== "false" && !!facebookUrl;
+  const emailVal = publicSettings.support_email || "support@zynum.net";
+  const emailEnabled = publicSettings.support_email_enabled !== "false";
+
+  const openLink = (url: string) => window.open(url, "_blank", "noopener,noreferrer");
+
+  const contactButtons = [
+    whatsappEnabled && {
+      label: "WhatsApp Support",
+      sub: "Discutez avec notre équipe",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 22, height: 22 }}>
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path d="M12.003 2.003a9.997 9.997 0 0 0-8.649 14.983L2 22l5.14-1.345A9.996 9.996 0 1 0 12.003 2.003zm0 18.333a8.33 8.33 0 0 1-4.243-1.161l-.305-.181-3.051.799.814-2.973-.198-.315a8.333 8.333 0 1 1 6.983 3.831z"/>
+        </svg>
+      ),
+      bg: "#25D366", color: "#ffffff",
+      action: () => openLink(whatsappUrl),
+    },
+    channelEnabled && {
+      label: "Canal WhatsApp",
+      sub: "Rejoignez notre canal officiel",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 22, height: 22 }}>
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path d="M12.003 2.003a9.997 9.997 0 0 0-8.649 14.983L2 22l5.14-1.345A9.996 9.996 0 1 0 12.003 2.003zm0 18.333a8.33 8.33 0 0 1-4.243-1.161l-.305-.181-3.051.799.814-2.973-.198-.315a8.333 8.333 0 1 1 6.983 3.831z"/>
+        </svg>
+      ),
+      bg: "#128C7E", color: "#ffffff",
+      action: () => openLink(channelUrl),
+    },
+    facebookEnabled && {
+      label: "Page Facebook",
+      sub: "Suivez-nous sur Facebook",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 22, height: 22 }}>
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+      ),
+      bg: "#1877F2", color: "#ffffff",
+      action: () => openLink(facebookUrl),
+    },
+    emailEnabled && {
+      label: "Email Support",
+      sub: emailVal,
+      icon: <Mail style={{ width: 22, height: 22 }} />,
+      bg: "#6366F1", color: "#ffffff",
+      action: () => { window.location.href = `mailto:${emailVal}`; },
+    },
+  ].filter(Boolean) as { label: string; sub: string; icon: React.ReactNode; bg: string; color: string; action: () => void }[];
+
   return (
     <SubPage title={t("dash_help_title")} onBack={onBack}>
-      <div className="px-4 pt-5 space-y-4">
+      <div className="pb-8">
 
-
-        {/* FAQ */}
-        <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">{t("dash_faq_title")}</p>
-          {FAQ.map((item, i) => (
-            <div key={i} className={`${i > 0 ? "border-t border-gray-50" : ""}`}>
-              <button
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                className="w-full flex items-center gap-3 px-4 py-4 text-left hover:bg-gray-50 transition-colors"
-              >
-                <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-500" />
-                </div>
-                <p className="flex-1 text-sm font-semibold text-gray-900 leading-snug">{item.q}</p>
-                <ChevronRight className={`w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0 ${openFaq === i ? "rotate-90" : ""}`} />
-              </button>
-              <AnimatePresence>
-                {openFaq === i && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <p className="px-4 pb-4 text-sm text-gray-500 leading-relaxed pl-[52px]">{item.a}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+        {/* ── Bannière WhatsApp ── */}
+        {whatsappEnabled && (
+          <button
+            onClick={() => openLink(whatsappUrl)}
+            style={{ display: "block", width: "100%", padding: "16px 16px 0", background: "none", border: "none", cursor: "pointer" }}
+          >
+            <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 4px 20px rgba(37,211,102,0.25)" }}>
+              <img
+                src="/whatsapp-support-banner.jpg"
+                alt="WhatsApp & service client"
+                style={{ width: "100%", display: "block", objectFit: "cover", maxHeight: 160 }}
+              />
             </div>
-          ))}
-        </div>
+          </button>
+        )}
 
-        {/* Quick links */}
-        <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-          {[
-            { icon: <Shield className="w-4 h-4 text-green-600" />,   label: t("dash_privacy"), color: "bg-green-50", href: "https://zynum.net/privacy" },
-            { icon: <Star className="w-4 h-4 text-yellow-600" />,    label: t("dash_terms"),   color: "bg-yellow-50", href: "https://zynum.net/terms" },
-          ].map((link, i) => (
-            <a
-              key={link.label}
-              href={link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition-colors ${i > 0 ? "border-t border-gray-50" : ""}`}
-            >
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${link.color}`}>{link.icon}</div>
-              <p className="flex-1 text-sm font-semibold text-gray-900">{link.label}</p>
-              <ChevronRight className="w-4 h-4 text-gray-300" />
-            </a>
-          ))}
+        <div className="px-4 pt-5 space-y-4">
+
+          {/* ── Boutons de contact ── */}
+          {contactButtons.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
+                Nous contacter
+              </p>
+              {contactButtons.map((btn) => (
+                <button
+                  key={btn.label}
+                  onClick={btn.action}
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center", gap: 14,
+                    padding: "14px 16px", borderRadius: 18,
+                    background: "#ffffff", border: "1px solid #F3F4F6",
+                    boxShadow: "0 1px 6px rgba(0,0,0,0.06)",
+                    cursor: "pointer", textAlign: "left",
+                  }}
+                >
+                  <div style={{
+                    width: 46, height: 46, borderRadius: 14, flexShrink: 0,
+                    background: btn.bg, color: btn.color,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    {btn.icon}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontWeight: 700, fontSize: 14, color: "#111827", margin: 0 }}>{btn.label}</p>
+                    <p style={{ fontSize: 12, color: "#9CA3AF", margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{btn.sub}</p>
+                  </div>
+                  <ChevronRight style={{ width: 16, height: 16, color: "#D1D5DB", flexShrink: 0 }} />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* ── FAQ ── */}
+          <div>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+              {t("dash_faq_title")}
+            </p>
+            <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+              {FAQ.map((item, i) => (
+                <div key={i} className={`${i > 0 ? "border-t border-gray-50" : ""}`}>
+                  <button
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="w-full flex items-center gap-3 px-4 py-4 text-left hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                      <HelpCircle className="w-3.5 h-3.5 text-blue-500" />
+                    </div>
+                    <p className="flex-1 text-sm font-semibold text-gray-900 leading-snug">{item.q}</p>
+                    <ChevronRight className={`w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0 ${openFaq === i ? "rotate-90" : ""}`} />
+                  </button>
+                  <AnimatePresence>
+                    {openFaq === i && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <p className="px-4 pb-4 text-sm text-gray-500 leading-relaxed pl-[52px]">{item.a}</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
     </SubPage>
