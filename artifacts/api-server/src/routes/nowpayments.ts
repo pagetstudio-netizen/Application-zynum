@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { createHmac } from "crypto";
 import { db, usersTable, transactionsTable } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
-import { notifyDeposit } from "../lib/telegram.js";
+import { notifyDeposit, notifyPaymentAttempt } from "../lib/telegram.js";
 
 const router: IRouter = Router();
 
@@ -100,6 +100,22 @@ router.post("/v1/payments/nowpayments/initiate", async (req: Request, res: Respo
       amountFcfa: fcfa,
       expiresAt,
     });
+
+    // Notifier le groupe Telegram admin de la tentative
+    db.select({ name: usersTable.name }).from(usersTable)
+      .where(eq(usersTable.id, uid)).limit(1)
+      .then(([u]) => {
+        notifyPaymentAttempt({
+          userId:      uid,
+          userName:    u?.name ?? `User#${uid}`,
+          amountFcfa:  fcfa,
+          amountUsd:   priceUsd,
+          reference:   orderId,
+          provider:    "NowPayments",
+          paymentId,
+          payCurrency: payCur,
+        }).catch(() => {});
+      }).catch(() => {});
 
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Erreur interne";

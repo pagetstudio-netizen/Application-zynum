@@ -93,6 +93,43 @@ export async function getBotInfo(): Promise<{ ok: boolean; username?: string; fi
 
 // ─── Notification helpers ─────────────────────────────────────────────────────
 
+export async function notifyPaymentAttempt(opts: {
+  userId: number;
+  userName: string;
+  amountFcfa: number;
+  amountUsd: number;
+  reference: string;
+  provider: "OxaPay" | "NowPayments";
+  trackId?: string;
+  paymentId?: string;
+  payCurrency?: string;
+}): Promise<void> {
+  const chatId = await getChatId();
+  if (!chatId) return;
+  const now = fmtDate(new Date());
+  const lines = [
+    `₿ <b>TENTATIVE PAIEMENT CRYPTO</b>`,
+    ``,
+    `👤 Utilisateur: <b>${opts.userName}</b> (#${opts.userId})`,
+    `💵 Montant: <b>${fmtNum(opts.amountFcfa)} XOF</b> ($${opts.amountUsd.toFixed(2)})`,
+    `🔖 Référence: <code>${opts.reference}</code>`,
+  ];
+  if (opts.provider === "OxaPay" && opts.trackId) {
+    lines.push(`🔑 TrackID OxaPay: <code>${opts.trackId}</code>`);
+  }
+  if (opts.provider === "NowPayments" && opts.paymentId) {
+    lines.push(`🔑 PaymentID NowPayments: <code>${opts.paymentId}</code>`);
+  }
+  if (opts.payCurrency) {
+    lines.push(`💎 Crypto: ${opts.payCurrency.toUpperCase()}`);
+  }
+  lines.push(`🏦 Fournisseur: ${opts.provider}`);
+  lines.push(`📅 Date: ${now}`);
+  lines.push(``);
+  lines.push(`⏳ En attente de confirmation blockchain…`);
+  await sendMessage(chatId, lines.join("\n")).catch(() => {});
+}
+
 export async function notifyDeposit(opts: {
   userId: number;
   userName: string;
