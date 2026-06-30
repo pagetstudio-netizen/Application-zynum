@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, usersTable, ordersTable, transactionsTable, adminSettingsTable, adminMessagesTable, paymentProvidersTable, faqArticlesTable, socialLinksTable, countryOverridesTable, affiliateWithdrawalsTable } from "@workspace/db";
+import { db, usersTable, ordersTable, transactionsTable, adminSettingsTable, adminMessagesTable, paymentProvidersTable, faqArticlesTable, socialLinksTable, countryOverridesTable, affiliateWithdrawalsTable, discountCodesTable } from "@workspace/db";
 import { invalidateFiveSimKeyCache } from "../lib/fivesim.js";
 import { eq, desc, count, sum, and, gte, lte, like, or, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/authMiddleware.js";
@@ -414,6 +414,12 @@ router.get("/v1/settings", async (req, res): Promise<void> => {
   for (const s of settings) {
     if (publicKeys.includes(s.key)) map[s.key] = s.value;
   }
+  const activePromo = await db
+    .select({ id: discountCodesTable.id })
+    .from(discountCodesTable)
+    .where(eq(discountCodesTable.isActive, true))
+    .limit(1);
+  map["has_active_promo_codes"] = activePromo.length > 0 ? "true" : "false";
   res.json({ settings: map });
 });
 
