@@ -1470,23 +1470,6 @@ function ParamsPage({ onBack }: { onBack: () => void }) {
           ))}
         </div>
 
-        {/* ── Informations de l'appareil ── */}
-        <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">
-            {lang === "fr" ? "Informations de l'appareil" : "Device information"}
-          </p>
-          {[
-            { label: lang === "fr" ? "Système"     : "OS",       value: device.os },
-            { label: lang === "fr" ? "Langue sys."  : "Sys. lang", value: device.lang },
-            { label: "Version app",                               value: "1.0.0" },
-          ].map((row, i) => (
-            <div key={row.label} className={`flex items-center justify-between px-4 py-3 ${i > 0 ? "border-t border-gray-50" : ""}`}>
-              <span className="text-sm text-gray-500">{row.label}</span>
-              <span className="text-sm font-semibold text-gray-900">{row.value}</span>
-            </div>
-          ))}
-        </div>
-
       </div>
     </SubPage>
   );
