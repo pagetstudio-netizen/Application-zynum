@@ -67,13 +67,13 @@ router.post("/v1/auth/register", async (req, res): Promise<void> => {
     const passwordHash = hashPassword(password);
     const apiKey = generateApiKey();
     [user] = await db.insert(usersTable).values({
-      name, email, passwordHash, apiKey, emailVerified: true,
+      name, email, passwordHash, apiKey, emailVerified: false,
       referralCode: newReferralCode,
       referredBy: referrerId ?? undefined,
     }).returning();
   } else {
     const passwordHash = hashPassword(password);
-    const updateSet: Record<string, unknown> = { name, passwordHash, emailVerified: true };
+    const updateSet: Record<string, unknown> = { name, passwordHash, emailVerified: false };
     if (!existing.referralCode) updateSet.referralCode = newReferralCode;
     if (!existing.referredBy && referrerId) updateSet.referredBy = referrerId;
     [user] = await db
@@ -83,17 +83,14 @@ router.post("/v1/auth/register", async (req, res): Promise<void> => {
       .returning();
   }
 
+  const { code } = await createEmailCode({ email, userId: user.id, type: "verify_email", expiresInMinutes: 15 });
   try {
-    await sendWelcomeEmail({ to: email, name });
+    await sendVerificationEmail({ to: email, name, code });
   } catch (err) {
-    console.error("Welcome email error:", err);
+    console.error("Verification email error:", err);
   }
 
-  const sessionToken = await createSession(user.id);
-  res.status(201).json({
-    user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, createdAt: user.createdAt },
-    token: sessionToken,
-  });
+  res.status(201).json({ needsVerification: true, email });
 });
 
 // ─── VERIFY EMAIL (code) ─────────────────────────────────────────────────────

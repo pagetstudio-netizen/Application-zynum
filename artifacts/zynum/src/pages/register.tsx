@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Lock, Eye, EyeOff, Check, ChevronLeft, Gift, Mail, User } from "lucide-react";
+import { Loader2, Lock, Eye, EyeOff, Check, ChevronLeft, Gift, Mail, User, ShieldCheck, RefreshCw } from "lucide-react";
 import { useRegisterUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -58,8 +58,15 @@ export default function Register() {
   const [referral, setReferral]               = useState(
     () => new URLSearchParams(window.location.search).get("ref") ?? ""
   );
-  const [errors, setErrors]     = useState<Record<string, string>>({});
+  const [errors, setErrors]           = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState("");
+
+  const [step, setStep]                     = useState<"form" | "verify">("form");
+  const [pendingEmail, setPendingEmail]     = useState("");
+  const [codeDigits, setCodeDigits]         = useState(["", "", "", "", "", ""]);
+  const [verifyLoading, setVerifyLoading]   = useState(false);
+  const [resendLoading, setResendLoading]   = useState(false);
+  const digitRefs                           = useRef<(HTMLInputElement | null)[]>([]);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -77,10 +84,17 @@ export default function Register() {
   const registerMutation = useRegisterUser({
     mutation: {
       onSuccess: (data: any) => {
-        localStorage.setItem("zynum_token", data.token);
-        queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
-        toast({ title: "Compte créé !", description: "Bienvenue sur ZyNum !" });
-        setLocation("/dashboard");
+        if (data.needsVerification) {
+          setPendingEmail(data.email);
+          setStep("verify");
+          return;
+        }
+        if (data.token) {
+          localStorage.setItem("zynum_token", data.token);
+          queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
+          toast({ title: "Compte créé !", description: "Bienvenue sur ZyNum !" });
+          setLocation("/dashboard");
+        }
       },
       onError: (error: any) => {
         const msg =
@@ -108,6 +122,193 @@ export default function Register() {
     } as any);
   };
 
+  const handleDigitChange = (i: number, value: string) => {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    const next = [...codeDigits];
+    next[i] = digit;
+    setCodeDigits(next);
+    if (digit && i < 5) digitRefs.current[i + 1]?.focus();
+  };
+
+  const handleDigitKeyDown = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !codeDigits[i] && i > 0) {
+      digitRefs.current[i - 1]?.focus();
+    }
+  };
+
+  const handleDigitPaste = (e: React.ClipboardEvent) => {
+    const text = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (text.length === 6) {
+      setCodeDigits(text.split(""));
+      digitRefs.current[5]?.focus();
+    }
+  };
+
+  const submitCode = async () => {
+    const code = codeDigits.join("");
+    if (code.length < 6) return;
+    setVerifyLoading(true);
+    try {
+      const res = await fetch("/api/v1/auth/verify-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: pendingEmail, code }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message ?? "Code invalide");
+      localStorage.setItem("zynum_token", data.token);
+      queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
+      toast({ title: "Compte activé !", description: "Bienvenue sur ZyNum !" });
+      setLocation("/dashboard");
+    } catch (err: any) {
+      toast({ title: "Code invalide", description: err.message, variant: "destructive" });
+      setCodeDigits(["", "", "", "", "", ""]);
+      digitRefs.current[0]?.focus();
+    } finally {
+      setVerifyLoading(false);
+    }
+  };
+
+  const resendCode = async () => {
+    setResendLoading(true);
+    try {
+      await fetch("/api/v1/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: pendingEmail }),
+      });
+      toast({ title: "Code renvoyé !", description: `Vérifiez ${pendingEmail}` });
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de renvoyer le code", variant: "destructive" });
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  if (step === "verify") {
+    const codeComplete = codeDigits.every(d => d !== "");
+    return (
+      <div style={{
+        minHeight: "100dvh",
+        background: "linear-gradient(to bottom, #e8f4ff 0%, #c5ddf5 20%, #5b9fd6 55%, #1a5fc8 100%)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}>
+        <div style={{ width: "100%", maxWidth: 420, padding: "0 20px", boxSizing: "border-box" }}>
+
+          <div style={{ display: "flex", alignItems: "center", paddingTop: 52, paddingBottom: 8 }}>
+            <button
+              onClick={() => { setStep("form"); setCodeDigits(["", "", "", "", "", ""]); }}
+              style={{
+                background: "rgba(255,255,255,0.35)", border: "none", borderRadius: 12,
+                width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+              }}
+            >
+              <ChevronLeft style={{ width: 22, height: 22, color: "#1a3a6b" }} />
+            </button>
+            <div style={{ flex: 1, textAlign: "center" }}>
+              <span style={{ fontWeight: 700, fontSize: 17, color: "#1a3a6b" }}>Vérification email</span>
+            </div>
+            <div style={{ width: 40 }} />
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "center", margin: "24px 0 20px" }}>
+            <div style={{
+              width: 80, height: 80, borderRadius: 20,
+              background: "rgba(255,255,255,0.35)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <ShieldCheck style={{ width: 44, height: 44, color: "#1a3a6b" }} />
+            </div>
+          </div>
+
+          <div style={{
+            background: "rgba(255,255,255,0.20)",
+            borderRadius: 20,
+            padding: "24px 20px",
+            marginBottom: 24,
+            textAlign: "center",
+          }}>
+            <p style={{ fontWeight: 700, fontSize: 16, color: "#1a3a6b", margin: "0 0 8px" }}>
+              Code envoyé par email
+            </p>
+            <p style={{ fontSize: 14, color: "rgba(26,58,107,0.75)", margin: 0, lineHeight: 1.5 }}>
+              Entrez le code à 6 chiffres envoyé à<br />
+              <strong style={{ color: "#1a3a6b" }}>{pendingEmail}</strong>
+            </p>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "center", gap: 10, marginBottom: 24 }}>
+            {codeDigits.map((d, i) => (
+              <input
+                key={i}
+                ref={el => { digitRefs.current[i] = el; }}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={d}
+                onChange={e => handleDigitChange(i, e.target.value)}
+                onKeyDown={e => handleDigitKeyDown(i, e)}
+                onPaste={i === 0 ? handleDigitPaste : undefined}
+                autoFocus={i === 0}
+                style={{
+                  width: 48, height: 58,
+                  borderRadius: 14,
+                  border: d ? "2px solid #1a3fc8" : "2px solid rgba(255,255,255,0.5)",
+                  background: d ? "#ffffff" : "rgba(255,255,255,0.35)",
+                  fontSize: 26, fontWeight: 800,
+                  textAlign: "center",
+                  color: "#1a1a2e",
+                  outline: "none",
+                  transition: "all 0.15s",
+                  boxShadow: d ? "0 2px 8px rgba(26,63,200,0.20)" : "none",
+                }}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={submitCode}
+            disabled={!codeComplete || verifyLoading}
+            style={{
+              width: "100%", height: 54, borderRadius: 30,
+              backgroundColor: codeComplete && !verifyLoading ? "#1a3fc8" : "rgba(255,255,255,0.4)",
+              color: codeComplete && !verifyLoading ? "#ffffff" : "rgba(26,58,107,0.5)",
+              fontWeight: 800, fontSize: 16, border: "none",
+              cursor: codeComplete && !verifyLoading ? "pointer" : "not-allowed",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              boxShadow: codeComplete && !verifyLoading ? "0 4px 20px rgba(26,63,200,0.4)" : "none",
+              transition: "all 0.2s",
+              marginBottom: 16,
+            }}
+          >
+            {verifyLoading
+              ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} />
+              : <><Check style={{ width: 18, height: 18 }} /> Activer mon compte</>}
+          </button>
+
+          <div style={{ textAlign: "center" }}>
+            <button
+              onClick={resendCode}
+              disabled={resendLoading}
+              style={{
+                background: "none", border: "none", cursor: resendLoading ? "not-allowed" : "pointer",
+                color: "rgba(255,255,255,0.85)", fontSize: 14,
+                display: "inline-flex", alignItems: "center", gap: 6,
+              }}
+            >
+              {resendLoading
+                ? <Loader2 style={{ width: 14, height: 14, animation: "spin 1s linear infinite" }} />
+                : <RefreshCw style={{ width: 14, height: 14 }} />}
+              Renvoyer le code
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       minHeight: "100dvh",
@@ -118,7 +319,6 @@ export default function Register() {
     }}>
       <div style={{ width: "100%", maxWidth: 420, padding: "0 20px", boxSizing: "border-box" }}>
 
-        {/* Top bar */}
         <div style={{ display: "flex", alignItems: "center", paddingTop: 52, paddingBottom: 8 }}>
           <Link href="/">
             <button style={{
@@ -134,22 +334,16 @@ export default function Register() {
           <div style={{ width: 40 }} />
         </div>
 
-        {/* Logo */}
         <div style={{ display: "flex", justifyContent: "center", margin: "20px 0 28px" }}>
           <div style={{ width: 80, height: 80, borderRadius: 20, overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
             <img src="/logo.jpg" alt="ZyNum" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 
-          {/* Nom complet */}
           <div>
-            <div style={{
-              ...FIELD_WRAP,
-              ...(errors.name ? { border: "1.5px solid #ef4444" } : {}),
-            }}>
+            <div style={{ ...FIELD_WRAP, ...(errors.name ? { border: "1.5px solid #ef4444" } : {}) }}>
               <span style={ICON_LEFT}><User style={{ width: 18, height: 18 }} /></span>
               <input
                 type="text"
@@ -164,12 +358,8 @@ export default function Register() {
             {errors.name && <p style={ERROR_STYLE}>{errors.name}</p>}
           </div>
 
-          {/* Email */}
           <div>
-            <div style={{
-              ...FIELD_WRAP,
-              ...(errors.email ? { border: "1.5px solid #ef4444" } : {}),
-            }}>
+            <div style={{ ...FIELD_WRAP, ...(errors.email ? { border: "1.5px solid #ef4444" } : {}) }}>
               <span style={ICON_LEFT}><Mail style={{ width: 18, height: 18 }} /></span>
               <input
                 type="email"
@@ -183,12 +373,8 @@ export default function Register() {
             {errors.email && <p style={ERROR_STYLE}>{errors.email}</p>}
           </div>
 
-          {/* Mot de passe */}
           <div>
-            <div style={{
-              ...FIELD_WRAP,
-              ...(errors.password ? { border: "1.5px solid #ef4444" } : {}),
-            }}>
+            <div style={{ ...FIELD_WRAP, ...(errors.password ? { border: "1.5px solid #ef4444" } : {}) }}>
               <span style={ICON_LEFT}><Lock style={{ width: 18, height: 18 }} /></span>
               <input
                 type={showPassword ? "text" : "password"}
@@ -209,12 +395,8 @@ export default function Register() {
             {errors.password && <p style={ERROR_STYLE}>{errors.password}</p>}
           </div>
 
-          {/* Confirmer le mot de passe */}
           <div>
-            <div style={{
-              ...FIELD_WRAP,
-              ...(errors.confirm ? { border: "1.5px solid #ef4444" } : {}),
-            }}>
+            <div style={{ ...FIELD_WRAP, ...(errors.confirm ? { border: "1.5px solid #ef4444" } : {}) }}>
               <span style={ICON_LEFT}><Lock style={{ width: 18, height: 18 }} /></span>
               <input
                 type={showConfirm ? "text" : "password"}
@@ -240,7 +422,6 @@ export default function Register() {
             {errors.confirm && <p style={ERROR_STYLE}>{errors.confirm}</p>}
           </div>
 
-          {/* Code de parrainage (optionnel) */}
           <div style={FIELD_WRAP}>
             <span style={ICON_LEFT}><Gift style={{ width: 18, height: 18 }} /></span>
             <input
@@ -253,7 +434,6 @@ export default function Register() {
             />
           </div>
 
-          {/* Erreur globale */}
           {globalError && (
             <div style={{
               background: "rgba(239,68,68,0.15)",
@@ -267,7 +447,6 @@ export default function Register() {
             </div>
           )}
 
-          {/* Bouton submit */}
           <button
             type="submit"
             disabled={registerMutation.isPending}
@@ -289,7 +468,6 @@ export default function Register() {
           </button>
         </form>
 
-        {/* Lien connexion */}
         <div style={{ textAlign: "center", marginTop: 20, marginBottom: 40 }}>
           <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 14 }}>Déjà inscrit ? </span>
           <Link href="/login">

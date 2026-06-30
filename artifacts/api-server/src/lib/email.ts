@@ -86,17 +86,13 @@ function ctaButton(url: string, label: string) {
   return `<a href="${url}" style="display:inline-block;background:linear-gradient(135deg,#ef4444,#dc2626);color:#ffffff;font-weight:700;font-size:15px;padding:14px 32px;border-radius:12px;text-decoration:none;margin:16px 0;letter-spacing:0.2px;">${label}</a>`;
 }
 
-export async function sendVerificationEmail(opts: { to: string; name: string; code: string; token: string }) {
-  const link = `https://zynum.net/api/v1/auth/verify-email-link?token=${opts.token}`;
+export async function sendVerificationEmail(opts: { to: string; name: string; code: string; token?: string }) {
   const body = `
     <h2 style="font-size:22px;font-weight:800;color:#111827;margin:0 0 8px;">Vérifiez votre email ✉️</h2>
     <p style="font-size:15px;color:#6b7280;margin:0 0 24px;">Bonjour <strong>${opts.name}</strong>, entrez ce code pour activer votre compte ZyNum :</p>
     ${codeBox(opts.code)}
-    <p style="font-size:13px;color:#9ca3af;text-align:center;margin:0 0 24px;">Ce code expire dans <strong>15 minutes</strong>.</p>
-    <hr style="border:none;border-top:1px solid #f3f4f6;margin:24px 0;" />
-    <p style="font-size:14px;color:#6b7280;margin:0 0 12px;">Ou cliquez sur le lien ci-dessous pour activer directement :</p>
-    <div style="text-align:center;">${ctaButton(link, "Activer mon compte")}</div>
-    <p style="font-size:12px;color:#d1d5db;margin:16px 0 0;text-align:center;">Si vous n'avez pas créé ce compte, ignorez cet email.</p>
+    <p style="font-size:13px;color:#9ca3af;text-align:center;margin:0 0 8px;">Ce code expire dans <strong>15 minutes</strong>.</p>
+    <p style="font-size:12px;color:#d1d5db;margin:0;text-align:center;">Si vous n'avez pas créé ce compte, ignorez cet email.</p>
   `;
 
   const resend = getResend();
@@ -132,17 +128,13 @@ export async function sendWelcomeEmail(opts: { to: string; name: string }) {
   });
 }
 
-export async function sendPasswordResetEmail(opts: { to: string; name: string; code: string; token: string }) {
-  const link = `https://zynum.net/api/v1/auth/reset-password-link?token=${opts.token}`;
+export async function sendPasswordResetEmail(opts: { to: string; name: string; code: string; token?: string }) {
   const body = `
     <h2 style="font-size:22px;font-weight:800;color:#111827;margin:0 0 8px;">Réinitialisation du mot de passe 🔐</h2>
     <p style="font-size:15px;color:#6b7280;margin:0 0 24px;">Bonjour <strong>${opts.name}</strong>, utilisez ce code pour réinitialiser votre mot de passe :</p>
     ${codeBox(opts.code)}
-    <p style="font-size:13px;color:#9ca3af;text-align:center;margin:0 0 24px;">Ce code expire dans <strong>15 minutes</strong>.</p>
-    <hr style="border:none;border-top:1px solid #f3f4f6;margin:24px 0;" />
-    <p style="font-size:14px;color:#6b7280;margin:0 0 12px;">Ou cliquez sur le lien ci-dessous :</p>
-    <div style="text-align:center;">${ctaButton(link, "Réinitialiser mon mot de passe")}</div>
-    <p style="font-size:12px;color:#d1d5db;margin:16px 0 0;text-align:center;">Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
+    <p style="font-size:13px;color:#9ca3af;text-align:center;margin:0 0 8px;">Ce code expire dans <strong>15 minutes</strong>.</p>
+    <p style="font-size:12px;color:#d1d5db;margin:0;text-align:center;">Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
   `;
 
   const resend = getResend();
