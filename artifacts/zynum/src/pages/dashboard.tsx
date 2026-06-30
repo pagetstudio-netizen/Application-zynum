@@ -794,6 +794,7 @@ function SubPage({ title, onBack, children, rightAction }: { title: string; onBa
 
 // ─── INFOS PAGE ───────────────────────────────────────────────────────────────
 function InfosPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }) {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [name, setName] = useState(user.name);
   const [saving, setSaving] = useState(false);
@@ -807,7 +808,7 @@ function InfosPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }
     navigator.clipboard.writeText(`ZY${user.id.toString().padStart(6, "0")}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
-    toast({ title: "ID copié !", duration: 2000 });
+    toast({ title: t("infos_id_copied"), duration: 2000 });
   };
 
   const saveName = async () => {
@@ -820,15 +821,15 @@ function InfosPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ name: name.trim() }),
       });
-      if (!res.ok) throw new Error("Erreur");
-      toast({ title: "Nom mis à jour !" });
+      if (!res.ok) throw new Error(t("error"));
+      toast({ title: t("infos_name_updated") });
     } catch {
-      toast({ variant: "destructive", title: "Échec", description: "Impossible de mettre à jour le profil" });
+      toast({ variant: "destructive", title: t("error"), description: t("infos_name_error") });
     } finally { setSaving(false); }
   };
 
   return (
-    <SubPage title="Informations personnelles" onBack={onBack}>
+    <SubPage title={t("infos_page_title")} onBack={onBack}>
       <div className="px-4 pt-5 space-y-4">
         {/* Avatar */}
         <div className="flex flex-col items-center py-4">
@@ -839,12 +840,12 @@ function InfosPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }
               className="w-full h-full object-cover"
             />
           </div>
-          <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">Compte vérifié</span>
+          <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">{t("infos_verified_account")}</span>
         </div>
 
         {/* Name field */}
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Nom complet</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t("infos_full_name")}</p>
           <div className="flex gap-2">
             <input
               value={name}
@@ -863,13 +864,13 @@ function InfosPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }
 
         {/* Email */}
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Adresse email</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{t("infos_email_label")}</p>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
               <MessageSquare className="w-4 h-4 text-blue-600" />
             </div>
             <p className="text-sm font-semibold text-gray-900 truncate">{user.email}</p>
-            <span className="shrink-0 text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Vérifié</span>
+            <span className="shrink-0 text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">{t("infos_verified")}</span>
           </div>
         </div>
 
@@ -877,16 +878,16 @@ function InfosPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }
         <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between px-4 py-4 border-b border-gray-50">
             <div>
-              <p className="text-xs text-gray-400 mb-0.5">Identifiant ZyNum</p>
+              <p className="text-xs text-gray-400 mb-0.5">{t("infos_id")}</p>
               <p className="text-sm font-bold text-gray-900 font-mono">ZY{user.id.toString().padStart(6, "0")}</p>
             </div>
             <button onClick={copyId} className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-xl active:scale-90 transition-transform">
               {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              {copied ? "Copié" : "Copier"}
+              {copied ? t("infos_copied") : t("infos_copy")}
             </button>
           </div>
           <div className="px-4 py-4">
-            <p className="text-xs text-gray-400 mb-0.5">Membre depuis</p>
+            <p className="text-xs text-gray-400 mb-0.5">{t("infos_member_since")}</p>
             <p className="text-sm font-bold text-gray-900">{memberSince}</p>
           </div>
         </div>
@@ -897,6 +898,7 @@ function InfosPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }
 
 // ─── SECURITY PAGE ────────────────────────────────────────────────────────────
 function SecurityPage({ onBack }: { onBack: () => void }) {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [showPwd, setShowPwd] = useState(false);
   const [currentPwd, setCurrentPwd] = useState("");
@@ -906,8 +908,8 @@ function SecurityPage({ onBack }: { onBack: () => void }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPwd.length < 8) { toast({ variant: "destructive", title: "Trop court", description: "8 caractères minimum" }); return; }
-    if (newPwd !== confirmPwd) { toast({ variant: "destructive", title: "Erreur", description: "Les mots de passe ne correspondent pas" }); return; }
+    if (newPwd.length < 8) { toast({ variant: "destructive", title: t("security_pwd_short_title"), description: t("security_pwd_short_desc") }); return; }
+    if (newPwd !== confirmPwd) { toast({ variant: "destructive", title: t("security_pwd_mismatch_title"), description: t("security_pwd_mismatch_desc") }); return; }
     setLoading(true);
     try {
       const token = localStorage.getItem("zynum_token");
@@ -917,34 +919,34 @@ function SecurityPage({ onBack }: { onBack: () => void }) {
         body: JSON.stringify({ currentPassword: currentPwd, newPassword: newPwd }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Erreur");
-      toast({ title: "Mot de passe modifié !" });
+      if (!res.ok) throw new Error(data.message || t("error"));
+      toast({ title: t("security_pwd_success") });
       setCurrentPwd(""); setNewPwd(""); setConfirmPwd("");
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Échec", description: err.message });
+      toast({ variant: "destructive", title: t("error"), description: err.message });
     } finally { setLoading(false); }
   };
 
   const fields = [
-    { val: currentPwd, set: setCurrentPwd, ph: "Mot de passe actuel",    icon: <Lock className="w-4 h-4" /> },
-    { val: newPwd,     set: setNewPwd,     ph: "Nouveau mot de passe",    icon: <KeyRound className="w-4 h-4" /> },
-    { val: confirmPwd, set: setConfirmPwd, ph: "Confirmer le mot de passe", icon: <KeyRound className="w-4 h-4" /> },
+    { val: currentPwd, set: setCurrentPwd, ph: t("security_current_pwd"), icon: <Lock className="w-4 h-4" /> },
+    { val: newPwd,     set: setNewPwd,     ph: t("security_new_pwd"),     icon: <KeyRound className="w-4 h-4" /> },
+    { val: confirmPwd, set: setConfirmPwd, ph: t("security_confirm_pwd"), icon: <KeyRound className="w-4 h-4" /> },
   ];
 
   return (
-    <SubPage title="Sécurité" onBack={onBack}>
+    <SubPage title={t("security_page_title")} onBack={onBack}>
       <div className="px-4 pt-5 space-y-4">
         {/* Security notice */}
         <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-start gap-3">
           <Shield className="w-5 h-5 text-orange-500 mt-0.5 shrink-0" />
           <p className="text-xs text-orange-700 leading-relaxed">
-            Utilisez un mot de passe fort d'au moins 8 caractères avec des lettres, chiffres et symboles.
+            {t("security_notice")}
           </p>
         </div>
 
         {/* Password form */}
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-sm font-bold text-gray-900 mb-4">Changer le mot de passe</p>
+          <p className="text-sm font-bold text-gray-900 mb-4">{t("security_change_pwd")}</p>
           <form onSubmit={handleSubmit} className="space-y-3">
             {fields.map(f => (
               <div key={f.ph} className="relative">
@@ -964,14 +966,14 @@ function SecurityPage({ onBack }: { onBack: () => void }) {
               className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showPwd ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              {showPwd ? "Masquer" : "Afficher"} les mots de passe
+              {showPwd ? t("security_hide_pwd") : t("security_show_pwd")} {t("security_pwd_label")}
             </button>
             <button
               type="submit"
               disabled={loading || !currentPwd || !newPwd || !confirmPwd}
               className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm disabled:opacity-50 active:scale-95 transition-all"
             >
-              {loading ? "Modification en cours..." : "Enregistrer le nouveau mot de passe"}
+              {loading ? t("security_saving") : t("security_save_btn")}
             </button>
           </form>
         </div>
@@ -984,11 +986,11 @@ function SecurityPage({ onBack }: { onBack: () => void }) {
                 <Shield className="w-4 h-4 text-indigo-600" />
               </div>
               <div>
-                <p className="text-sm font-bold text-gray-900">Authentification 2FA</p>
-                <p className="text-xs text-gray-400">Double vérification à la connexion</p>
+                <p className="text-sm font-bold text-gray-900">{t("security_2fa_title")}</p>
+                <p className="text-xs text-gray-400">{t("security_2fa_desc")}</p>
               </div>
             </div>
-            <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-lg">Bientôt</span>
+            <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-lg">{t("security_coming_soon")}</span>
           </div>
         </div>
       </div>
@@ -998,6 +1000,7 @@ function SecurityPage({ onBack }: { onBack: () => void }) {
 
 // ─── REFERRAL PAGE ────────────────────────────────────────────────────────────
 function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }) {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const RATE = 620;
 
@@ -1027,16 +1030,16 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
     navigator.clipboard.writeText(refCode);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
-    toast({ title: "Code copié !", duration: 2000 });
+    toast({ title: t("referral_copy_toast"), duration: 2000 });
   };
 
   const shareCode = () => {
-    const text = `Rejoins ZyNum et obtiens des numéros virtuels pour tes SMS OTP ! Utilise mon code de parrainage : ${refCode}\n${refLink}`;
+    const text = `${t("referral_share_text")}${refCode}\n${refLink}`;
     if (navigator.share) {
-      navigator.share({ title: "Mon code ZyNum", text }).catch(() => {});
+      navigator.share({ title: t("referral_share_title"), text }).catch(() => {});
     } else {
       navigator.clipboard.writeText(refLink);
-      toast({ title: "Lien copié !", description: "Partagez-le avec vos contacts.", duration: 2000 });
+      toast({ title: t("referral_link_copied"), description: t("referral_link_copied_desc"), duration: 2000 });
     }
   };
 
@@ -1045,7 +1048,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
   const pointsBonus  = Math.round(balanceUsd * RATE);
 
   return (
-    <SubPage title="Code de parrainage" onBack={onBack} rightAction={
+    <SubPage title={t("referral_page_title")} onBack={onBack} rightAction={
       <button onClick={load} style={{ padding: 6, background: "none", border: "none", cursor: "pointer" }}>
         <RefreshCw style={{ width: 18, height: 18, color: "#2563EB" }} />
       </button>
@@ -1057,10 +1060,10 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
           {/* Illustration */}
           <div style={{ fontSize: 56, marginBottom: 16, lineHeight: 1 }}>🎁</div>
           <h2 style={{ fontSize: 20, fontWeight: 800, color: "#0F172A", margin: "0 0 8px", lineHeight: 1.3 }}>
-            Parrainez vos amis et vos proches pour profiter de nombreux avantages !
+            {t("referral_hero_title")}
           </h2>
           <p style={{ fontSize: 13, color: "#4B7FC4", margin: 0, fontWeight: 500 }}>
-            Gagnez 10% de commission sur chaque achat de vos filleuls
+            {t("referral_hero_sub")}
           </p>
         </div>
 
@@ -1073,7 +1076,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
               <div style={{ width: 36, height: 36, borderRadius: 10, background: "#E0F2FE", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Gift style={{ width: 18, height: 18, color: "#0284C7" }} />
               </div>
-              <span style={{ fontWeight: 700, fontSize: 15, color: "#1E293B" }}>Mon code de parrainage</span>
+              <span style={{ fontWeight: 700, fontSize: 15, color: "#1E293B" }}>{t("referral_code_title")}</span>
             </div>
 
             {/* Code box + copy button */}
@@ -1119,7 +1122,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
               }}
             >
               <Share2 style={{ width: 18, height: 18 }} />
-              Partager mon code
+              {t("referral_share_btn")}
             </button>
           </div>
 
@@ -1130,7 +1133,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
               <div style={{ width: 44, height: 44, borderRadius: 14, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}>
                 <Users style={{ width: 22, height: 22, color: "#2563EB" }} />
               </div>
-              <p style={{ fontSize: 12, color: "#94A3B8", fontWeight: 600, margin: "0 0 4px" }}>Filleuls</p>
+              <p style={{ fontSize: 12, color: "#94A3B8", fontWeight: 600, margin: "0 0 4px" }}>{t("referral_filleuls")}</p>
               <p style={{ fontSize: 26, fontWeight: 900, color: "#2563EB", margin: 0 }}>
                 {loadingStats ? "—" : filleuls}
               </p>
@@ -1152,7 +1155,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
               <div style={{ width: 44, height: 44, borderRadius: 14, background: "#FFF7ED", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}>
                 <Star style={{ width: 22, height: 22, color: "#F97316" }} />
               </div>
-              <p style={{ fontSize: 12, color: "#94A3B8", fontWeight: 600, margin: "0 0 4px" }}>Points Bonus</p>
+              <p style={{ fontSize: 12, color: "#94A3B8", fontWeight: 600, margin: "0 0 4px" }}>{t("referral_bonus")}</p>
               <p style={{ fontSize: 26, fontWeight: 900, color: "#F97316", margin: 0 }}>
                 {loadingStats ? "—" : pointsBonus.toLocaleString("fr-FR")}
               </p>
@@ -1171,16 +1174,16 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
             }}
           >
             <ArrowDownToLine style={{ width: 18, height: 18 }} />
-            Demander un retrait
+            {t("referral_withdraw_btn")}
           </button>
 
           {/* ── How it works ── */}
           <div style={{ background: "#fff", borderRadius: 20, padding: "18px 16px", boxShadow: "0 2px 10px rgba(0,0,0,0.06)" }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 1, margin: "0 0 16px" }}>Comment ça marche</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 1, margin: "0 0 16px" }}>{t("referral_how_title")}</p>
             {[
-              { emoji: "🔗", color: "#4F46E5", bg: "#EEF2FF", title: "Partagez votre code", desc: "Envoyez-le à vos amis, famille ou contacts" },
-              { emoji: "👤", color: "#059669", bg: "#ECFDF5", title: "Ils s'inscrivent", desc: "Vos filleuls créent un compte avec votre code" },
-              { emoji: "💰", color: "#D97706", bg: "#FFFBEB", title: "Vous recevez 10%", desc: "Commission créditée instantanément sur votre solde" },
+              { emoji: "🔗", color: "#4F46E5", bg: "#EEF2FF", title: t("referral_step1_title"), desc: t("referral_step1_desc") },
+              { emoji: "👤", color: "#059669", bg: "#ECFDF5", title: t("referral_step2_title"), desc: t("referral_step2_desc") },
+              { emoji: "💰", color: "#D97706", bg: "#FFFBEB", title: t("referral_step3_title"), desc: t("referral_step3_desc") },
             ].map((step, i, arr) => (
               <div key={step.title} style={{ display: "flex", gap: 12 }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -1216,15 +1219,14 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
             <div style={{ padding: "16px 20px 20px", textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>💸</div>
               <h3 style={{ fontWeight: 800, fontSize: 18, color: "#0F172A", margin: "0 0 10px" }}>
-                Demande de retrait
+                {t("withdraw_title")}
               </h3>
               <p style={{ fontSize: 14, color: "#64748B", margin: "0 0 20px", lineHeight: 1.6 }}>
-                Le retrait de vos commissions s'effectue via le site{" "}
-                <span style={{ fontWeight: 800, color: "#2563EB" }}>ZyNum.net</span>.
+                {t("withdraw_desc")}
               </p>
               <div style={{ background: "#EFF6FF", borderRadius: 16, padding: "14px 16px", marginBottom: 20, textAlign: "left" }}>
                 <p style={{ fontSize: 13, color: "#1D4ED8", margin: 0, lineHeight: 1.6, fontWeight: 500 }}>
-                  📌 Connectez-vous sur <strong>zynum.net</strong>, accédez à votre compte et utilisez la section <strong>Retrait</strong> pour demander le virement de vos commissions.
+                  {t("withdraw_info")}
                 </p>
               </div>
               <button
@@ -1235,7 +1237,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
                   color: "#fff", fontWeight: 800, fontSize: 15,
                 }}
               >
-                Compris
+                {t("withdraw_understood")}
               </button>
             </div>
           </div>

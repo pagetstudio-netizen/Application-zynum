@@ -5,6 +5,7 @@ import { useGetCurrentUser, useGetBalance, getGetBalanceQueryKey } from "@worksp
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrency } from "@/hooks/use-currency";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 
 import imgMTN         from "@assets/mtn_(1)_1763835082904-BVdEqpuz-1_1774832430292.png";
 import imgOrangeMoney from "@assets/images_1774832430265.png";
@@ -124,6 +125,7 @@ function OtpModal({
 }: {
   operator: Operator; amountFcfa: number; onConfirm: (otp: string) => void; onCancel: () => void;
 }) {
+  const { t } = useLanguage();
   const [otp, setOtp] = useState("");
   const [copied, setCopied] = useState(false);
   const ussd = operator.ussdCode ?? "#144#";
@@ -133,7 +135,7 @@ function OtpModal({
     navigator.clipboard.writeText(ussd);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    snack({ title: "Code USSD copié !", duration: 2000 });
+    snack({ title: t("mm_ussd_toast"), duration: 2000 });
   }
 
   return (
@@ -147,7 +149,7 @@ function OtpModal({
 
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-extrabold text-gray-900">Confirmation OTP</h2>
+          <h2 className="text-lg font-extrabold text-gray-900">{t("mm_otp_title")}</h2>
           <button onClick={onCancel} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
             <X className="w-4 h-4 text-gray-500" />
           </button>
@@ -159,11 +161,11 @@ function OtpModal({
             <img src={operator.logo} alt={operator.label} className="w-9 h-9 object-contain" />
           </div>
           <div>
-            <p className="text-xs text-gray-500">Opérateur</p>
+            <p className="text-xs text-gray-500">{t("mm_operator")}</p>
             <p className="font-bold text-gray-900">{operator.label}</p>
           </div>
           <div className="ml-auto text-right">
-            <p className="text-xs text-gray-500">Montant</p>
+            <p className="text-xs text-gray-500">{t("mm_amount_label")}</p>
             <p className="font-bold text-blue-700">{amountFcfa.toLocaleString("fr-FR")} FCFA</p>
           </div>
         </div>
@@ -171,7 +173,7 @@ function OtpModal({
         {/* USSD instruction */}
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 mb-4">
           <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-2">
-            📲 Étape 1 — Composez ce code USSD
+            {t("mm_ussd_step1")}
           </p>
           <div className="flex items-center justify-between gap-3 bg-white rounded-xl px-4 py-3 border border-amber-200">
             <span className="font-mono text-xl font-black text-gray-900 tracking-widest">{ussd}</span>
@@ -181,16 +183,16 @@ function OtpModal({
               style={{ background: copied ? "#ECFDF5" : "#EFF6FF", color: copied ? "#059669" : "#2563EB" }}
             >
               {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              {copied ? "Copié !" : "Copier"}
+              {copied ? t("mm_ussd_copied") : t("mm_ussd_copy")}
             </button>
           </div>
-          <p className="text-xs text-amber-600 mt-2">Composez ce code pour générer votre OTP {operator.label}.</p>
+          <p className="text-xs text-amber-600 mt-2">{t("mm_ussd_hint")}</p>
         </div>
 
         {/* OTP input */}
         <div className="mb-5">
           <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">
-            📩 Étape 2 — Saisissez le code OTP reçu
+            {t("mm_otp_step2")}
           </label>
           <input
             type="text"
@@ -210,13 +212,13 @@ function OtpModal({
           className="w-full py-4 rounded-2xl font-black text-white text-base mb-3 shadow-lg shadow-blue-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ background: "linear-gradient(135deg, #2563EB, #4F46E5)" }}
         >
-          Confirmer le paiement
+          {t("mm_otp_confirm")}
         </button>
         <button
           onClick={onCancel}
           className="w-full py-3 rounded-2xl font-semibold text-gray-500 text-sm border border-gray-200 hover:bg-gray-50 transition-all"
         >
-          Annuler
+          {t("mm_cancel")}
         </button>
       </div>
     </div>
@@ -226,6 +228,7 @@ function OtpModal({
 export default function MobileMoneyPage() {
   const [, navigate]  = useLocation();
   const { toast }     = useToast();
+  const { t }         = useLanguage();
   const { currency }  = useCurrency();
   const queryClient   = useQueryClient();
 
@@ -284,7 +287,7 @@ export default function MobileMoneyPage() {
   function goToAmount() {
     const digits = phone.replace(/\D/g, "");
     if (digits.length < 5) {
-      toast({ variant: "destructive", title: "Numéro invalide", description: "Entrez un numéro de téléphone valide." });
+      toast({ variant: "destructive", title: t("mm_invalid_phone"), description: t("mm_invalid_phone_desc") });
       return;
     }
     setStep("amount");
@@ -397,8 +400,8 @@ export default function MobileMoneyPage() {
   }
 
   function handlePayClick() {
-    if (!user) { toast({ variant: "destructive", title: "Non connecté" }); return; }
-    if (amountFcfa < 300) { toast({ variant: "destructive", title: "Minimum 300 FCFA" }); return; }
+    if (!user) { toast({ variant: "destructive", title: t("error") }); return; }
+    if (amountFcfa < 300) { toast({ variant: "destructive", title: t("mm_min_amount") }); return; }
     if (operator.needsOtp) {
       setShowOtpModal(true);
     } else {
@@ -415,14 +418,14 @@ export default function MobileMoneyPage() {
             <button onClick={() => setStep("phone")} className="p-2 -ml-2 rounded-xl active:bg-blue-700 transition-colors">
               <ChevronLeft className="w-6 h-6 text-force-white" />
             </button>
-            <h1 className="text-lg font-black text-force-white">Sélectionnez votre pays</h1>
+            <h1 className="text-lg font-black text-force-white">{t("mm_select_country")}</h1>
           </div>
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-force-white" style={{ opacity: 0.8 }} />
             <input
               ref={cpInputRef}
               type="text"
-              placeholder="Rechercher un pays..."
+              placeholder={t("mm_search_country")}
               value={cpQuery}
               onChange={e => setCpQuery(e.target.value)}
               className="w-full h-11 pl-12 pr-4 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-white/40 search-input-white"
@@ -436,7 +439,7 @@ export default function MobileMoneyPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-8" style={{ paddingTop: 120 }}>
-          {cpFiltered.length === 0 && <p className="text-center text-gray-400 py-10">Aucun pays trouvé</p>}
+          {cpFiltered.length === 0 && <p className="text-center text-gray-400 py-10">{t("mm_no_country")}</p>}
           {cpFiltered.map(c => (
             <button
               key={c.code}
@@ -465,16 +468,16 @@ export default function MobileMoneyPage() {
           <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
-          <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: '#ffffff' }}>Recharge Mobile Money</h1>
+          <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: '#ffffff' }}>{t("mm_page_title")}</h1>
         </div>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-32" style={{ paddingTop: HEADER_H + 16 }}>
           <p className="text-gray-500 text-sm mb-5 leading-relaxed">
-            Saisissez votre numéro et choisissez votre opérateur.
+            {t("mm_phone_hint")}
           </p>
 
           {/* Country + phone */}
-          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Numéro de téléphone</label>
+          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">{t("mm_phone_label")}</label>
           <div className="flex gap-2 mb-6">
             <button
               onClick={() => { setCpQuery(""); setStep("country"); }}
@@ -487,7 +490,7 @@ export default function MobileMoneyPage() {
             <input
               type="tel"
               inputMode="numeric"
-              placeholder={`Numéro Mobile Money`}
+              placeholder={t("mm_phone_placeholder")}
               value={phone}
               onChange={e => setPhone(e.target.value)}
               className="flex-1 h-14 px-4 rounded-2xl border-2 border-gray-200 bg-white text-gray-900 text-base font-semibold placeholder:text-gray-300 placeholder:font-normal focus:outline-none focus:border-blue-500 transition"
@@ -495,7 +498,7 @@ export default function MobileMoneyPage() {
           </div>
 
           {/* Operators */}
-          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 block">Opérateur Mobile Money</label>
+          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 block">{t("mm_operator_label")}</label>
           <div className="grid grid-cols-2 gap-3 mb-5">
             {country.operators.map(op => (
               <button
@@ -516,7 +519,7 @@ export default function MobileMoneyPage() {
                 </span>
                 {op.needsOtp && (
                   <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                    OTP requis
+                    {t("mm_otp_required")}
                   </span>
                 )}
               </button>
@@ -528,9 +531,9 @@ export default function MobileMoneyPage() {
             <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200">
               <Phone className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-bold text-amber-800 mb-0.5">Code OTP requis</p>
+                <p className="text-sm font-bold text-amber-800 mb-0.5">{t("mm_otp_required_title")}</p>
                 <p className="text-xs text-amber-700">
-                  Après avoir cliqué sur "Suivante", un code USSD vous sera fourni pour générer votre OTP {operator.label}.
+                  {t("mm_otp_required_desc")}
                 </p>
               </div>
             </div>
@@ -544,7 +547,7 @@ export default function MobileMoneyPage() {
             className="w-full py-4 rounded-full font-black text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-transform bg-[#1A3FFF]"
             style={{ color: '#ffffff' }}
           >
-            Suivante
+            {t("mm_next")}
           </button>
         </div>
       </div>
@@ -561,7 +564,7 @@ export default function MobileMoneyPage() {
           <button onClick={() => setStep("phone")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
-          <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: '#ffffff' }}>Montant à recharger</h1>
+          <h1 className="font-extrabold text-base flex-1 text-center pr-8" style={{ color: '#ffffff' }}>{t("mm_amount_title")}</h1>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-32" style={{ paddingTop: HEADER_H + 16 }}>
@@ -571,18 +574,18 @@ export default function MobileMoneyPage() {
               <img src={operator.logo} alt={operator.label} className="w-9 h-9 object-contain" />
             </div>
             <div>
-              <p className="text-xs text-gray-400">Opérateur sélectionné</p>
+              <p className="text-xs text-gray-400">{t("mm_operator_selected")}</p>
               <p className="font-bold text-gray-900 text-sm">{operator.label} — {country.name}</p>
             </div>
             <div className="ml-auto">
-              <p className="text-xs text-gray-400">Numéro</p>
+              <p className="text-xs text-gray-400">{t("mm_number")}</p>
               <p className="font-bold text-gray-900 text-sm">+{country.prefix} {phone}</p>
             </div>
           </div>
 
-          <h2 className="text-2xl font-black text-gray-900 mb-1">Montant</h2>
+          <h2 className="text-2xl font-black text-gray-900 mb-1">{t("mm_amount_h")}</h2>
           <p className="text-gray-400 text-sm mb-4">
-            {isFcfa ? "Entrez le montant en FCFA à recharger." : "Enter the amount in USD to top up."}
+            {isFcfa ? t("mm_balance") : t("mm_amount_usd")}
           </p>
 
           {/* Amount input */}
@@ -619,7 +622,7 @@ export default function MobileMoneyPage() {
 
           <div className="bg-gray-50 rounded-2xl p-4">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Solde actuel</span>
+              <span className="text-gray-500">{t("mm_balance")}</span>
               <span className="font-semibold text-gray-900">
                 {isFcfa ? `${Math.round(balance * FCFA_PER_USD).toLocaleString("fr-FR")} FCFA` : `$${balance.toFixed(2)}`}
               </span>
@@ -636,8 +639,8 @@ export default function MobileMoneyPage() {
             style={{ color: '#ffffff' }}
           >
             {amountFcfa > 0
-              ? `Payer ${isFcfa ? `${amountFcfa.toLocaleString("fr-FR")} FCFA` : `$${(amountFcfa / FCFA_PER_USD).toFixed(2)}`}`
-              : "Payer"}
+              ? `${t("mm_pay")} ${isFcfa ? `${amountFcfa.toLocaleString("fr-FR")} FCFA` : `$${(amountFcfa / FCFA_PER_USD).toFixed(2)}`}`
+              : t("mm_pay")}
           </button>
         </div>
 
@@ -664,7 +667,7 @@ export default function MobileMoneyPage() {
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
         )}
-        <h1 className="font-extrabold text-base flex-1 text-center pr-8 text-force-white">Paiement en cours</h1>
+        <h1 className="font-extrabold text-base flex-1 text-center pr-8 text-force-white">{t("mm_payment_progress")}</h1>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-6" style={{ paddingTop: HEADER_H }}>
@@ -674,8 +677,8 @@ export default function MobileMoneyPage() {
               <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
             </div>
             <div>
-              <p className="font-black text-gray-900 text-xl mb-2">Paiement en cours…</p>
-              <p className="text-gray-400 text-sm">Veuillez patienter</p>
+              <p className="font-black text-gray-900 text-xl mb-2">{t("mm_payment_loading")}</p>
+              <p className="text-gray-400 text-sm">{t("mm_wait")}</p>
             </div>
           </>
         )}
@@ -690,18 +693,18 @@ export default function MobileMoneyPage() {
             </div>
             <div>
               <p className="font-black text-gray-900 text-xl mb-2">
-                {payState === "wave" ? "Finalisez le paiement" : "Paiement en cours"}
+                {payState === "wave" ? t("mm_finalize") : t("mm_push_waiting")}
               </p>
               <p className="text-gray-500 text-sm leading-relaxed">
                 {payState === "wave"
-                  ? `Cliquez ci-dessous pour finaliser votre paiement de ${amountFcfa.toLocaleString("fr-FR")} FCFA.`
-                  : "Une invite a été envoyée sur votre téléphone. Confirmez le paiement."}
+                  ? `${t("mm_pay")} — ${amountFcfa.toLocaleString("fr-FR")} FCFA`
+                  : t("mm_push_desc")}
               </p>
             </div>
             {payState === "wave" && paymentUrl && (
               <a href={paymentUrl} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#1A3FFF] text-white font-bold shadow-lg shadow-blue-200">
-                <ExternalLink className="w-4 h-4" /> Payer maintenant
+                <ExternalLink className="w-4 h-4" /> {t("mm_pay_now")}
               </a>
             )}
             <div className="flex items-center gap-2">
@@ -715,7 +718,7 @@ export default function MobileMoneyPage() {
                 onClick={() => { stopPolling(); navigate("/recharge"); }}
                 className="mt-2 w-full py-4 rounded-full font-black text-base bg-white border-2 border-blue-200 text-blue-600 active:scale-95 transition-all"
               >
-                Retourner à la recharge
+                {t("mm_return_recharge")}
               </button>
             )}
           </>
@@ -727,8 +730,8 @@ export default function MobileMoneyPage() {
               <CheckCircle2 className="w-14 h-14 text-green-500" />
             </div>
             <div>
-              <p className="font-black text-gray-900 text-2xl mb-2">Paiement réussi !</p>
-              <p className="text-gray-500 text-sm">{amountFcfa.toLocaleString("fr-FR")} FCFA ajoutés à votre solde.</p>
+              <p className="font-black text-gray-900 text-2xl mb-2">{t("mm_success")}</p>
+              <p className="text-gray-500 text-sm">{amountFcfa.toLocaleString("fr-FR")} FCFA</p>
             </div>
           </>
         )}
@@ -739,12 +742,12 @@ export default function MobileMoneyPage() {
               <AlertCircle className="w-14 h-14 text-red-500" />
             </div>
             <div>
-              <p className="font-black text-gray-900 text-xl mb-2">Paiement échoué</p>
+              <p className="font-black text-gray-900 text-xl mb-2">{t("mm_error_title")}</p>
               <p className="text-gray-500 text-sm">{payError}</p>
             </div>
             <button onClick={() => setStep("amount")}
               className="w-full py-4 rounded-full font-black text-lg bg-[#1A3FFF] shadow-lg shadow-blue-500/30 text-force-white">
-              Réessayer
+              {t("mm_retry")}
             </button>
           </>
         )}

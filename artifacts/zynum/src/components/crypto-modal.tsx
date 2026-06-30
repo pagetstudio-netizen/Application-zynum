@@ -3,6 +3,7 @@ import { X, Copy, Check, Loader2, CheckCircle2, AlertCircle, Clock, ExternalLink
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetBalanceQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 
 const FCFA_PER_USD = 620;
 const PRESETS_FCFA = [1000, 2000, 5000, 10000, 20000, 50000];
@@ -39,6 +40,7 @@ interface Props {
 
 export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
   const { toast }    = useToast();
+  const { t }        = useLanguage();
   const queryClient  = useQueryClient();
 
   const [provider,     setProvider]     = useState<Provider>("nowpayments");
@@ -266,11 +268,11 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <img src="/crypto-icon.png" alt="Crypto" style={{ width: 30, height: 30, objectFit: "contain" }} />
             <div>
-              <p style={{ fontWeight: 800, color: "#111827", fontSize: 15, margin: 0 }}>Payer en Crypto</p>
+              <p style={{ fontWeight: 800, color: "#111827", fontSize: 15, margin: 0 }}>{t("crypto_title")}</p>
               <p style={{ fontSize: 11, color: "#6b7280", margin: 0 }}>
                 {isPaying && (npData ?? opData)
-                  ? `⏱ Expire dans ${formatTime(timeLeft)}`
-                  : "Bitcoin · USDT · ETH et plus"}
+                  ? `⏱ ${t("crypto_expires_in")} ${formatTime(timeLeft)}`
+                  : t("crypto_currencies")}
               </p>
             </div>
           </div>
@@ -290,7 +292,7 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
             {(!oxapayEnabled && !nowpaymentsEnabled) ? (
               <div style={{ background: "#fef2f2", borderRadius: 12, padding: "12px 14px", marginBottom: 20, textAlign: "center" }}>
                 <p style={{ fontSize: 13, color: "#dc2626", fontWeight: 600, margin: 0 }}>
-                  ⚠️ Aucune passerelle crypto disponible pour le moment.
+                  {t("crypto_no_gateway")}
                 </p>
               </div>
             ) : (
@@ -316,7 +318,7 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
                         {p.label}
                         {p.badge && provider === p.id && (
                           <span style={{ display: "block", fontSize: 9, color: "#10b981", fontWeight: 800, marginTop: 1 }}>
-                            {p.badge}
+                            {p.id === "nowpayments" ? t("crypto_recommended") : p.badge}
                           </span>
                         )}
                       </button>
@@ -334,7 +336,7 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
             {/* NowPayments: currency selector */}
             {provider === "nowpayments" && (
               <>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8, marginTop: 0 }}>Crypto monnaie</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8, marginTop: 0 }}>{t("crypto_currency_label")}</p>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 18 }}>
                   {NP_CURRENCIES.map(c => (
                     <button
@@ -360,13 +362,13 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
               <div style={{ background: "#eff6ff", borderRadius: 12, padding: "10px 14px", marginBottom: 16, display: "flex", gap: 8 }}>
                 <span style={{ fontSize: 16 }}>ℹ️</span>
                 <p style={{ fontSize: 12, color: "#1d4ed8", margin: 0, lineHeight: 1.5 }}>
-                  La page de paiement OxaPay s'affichera ici — vous y verrez l'adresse et le QR code.
+                  {t("crypto_oxapay_info")}
                 </p>
               </div>
             )}
 
             {/* Amount presets */}
-            <p style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8, marginTop: 0 }}>Montant (FCFA)</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8, marginTop: 0 }}>{t("crypto_amount_label")}</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 7, marginBottom: 10 }}>
               {PRESETS_FCFA.map(a => (
                 <button
@@ -390,7 +392,7 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
               <span style={{ fontSize: 12, fontWeight: 600, color: "#9ca3af" }}>FCFA</span>
               <input
                 type="number"
-                placeholder="Autre montant"
+                placeholder={t("crypto_custom_amount")}
                 value={customInput}
                 onChange={e => setCustomInput(e.target.value)}
                 style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: 15, fontWeight: 700, color: "#111827" }}
@@ -400,7 +402,7 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
             {/* USD preview */}
             <div style={{ background: "#f0fdf4", borderRadius: 11, padding: "10px 14px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: 13, color: "#6b7280" }}>
-                {provider === "nowpayments" ? `≈ en ${selectedCur.label} (${selectedCur.sub})` : "Équivalent USD"}
+                {provider === "nowpayments" ? `≈ en ${selectedCur.label} (${selectedCur.sub})` : t("crypto_equiv_usd")}
               </span>
               <span style={{ fontSize: 16, fontWeight: 800, color: "#059669" }}>${amountUsd}</span>
             </div>
@@ -418,10 +420,10 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
               }}
             >
               {loading
-                ? <><Loader2 style={{ width: 18, height: 18, animation: "spin 1s linear infinite" }} /> Génération de l'adresse…</>
+                ? <><Loader2 style={{ width: 18, height: 18, animation: "spin 1s linear infinite" }} /> {t("crypto_generating")}</>
                 : provider === "nowpayments"
                   ? `Générer l'adresse ${selectedCur.label} →`
-                  : "Ouvrir la page OxaPay →"}
+                  : t("crypto_oxapay_open")}
             </button>
           </div>
         )}
@@ -438,14 +440,14 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                 <Clock style={{ width: 15, height: 15, color: timeLeft < 300 ? "#ef4444" : "#f59e0b" }} />
-                <span style={{ fontSize: 12, fontWeight: 600, color: timeLeft < 300 ? "#dc2626" : "#92400e" }}>Expire dans</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: timeLeft < 300 ? "#dc2626" : "#92400e" }}>{t("crypto_expires_in")}</span>
               </div>
               <span style={{ fontWeight: 800, fontSize: 15, color: timeLeft < 300 ? "#dc2626" : "#92400e", fontVariantNumeric: "tabular-nums" }}>{formatTime(timeLeft)}</span>
             </div>
 
             {/* Amount card */}
             <div style={{ background: "#f0fdf4", borderRadius: 16, padding: 16, marginBottom: 18, textAlign: "center" }}>
-              <p style={{ fontSize: 12, color: "#6b7280", margin: "0 0 4px" }}>Envoyer exactement</p>
+              <p style={{ fontSize: 12, color: "#6b7280", margin: "0 0 4px" }}>{t("crypto_send_exactly")}</p>
               <p style={{ fontSize: 28, fontWeight: 900, color: "#111827", margin: "0 0 4px" }}>
                 {npData.payAmount} <span style={{ color: selectedCur.color, fontSize: 20 }}>{selectedCur.label}</span>
               </p>
@@ -456,7 +458,7 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
 
             {/* Network badge */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>Réseau</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>{t("crypto_network")}</p>
               <span style={{ background: "#f3f4f6", borderRadius: 8, padding: "4px 10px", fontSize: 12, fontWeight: 700, color: "#374151" }}>
                 {npData.network || selectedCur.sub}
               </span>
@@ -474,7 +476,7 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
             </div>
 
             {/* Address */}
-            <p style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 7 }}>Adresse de paiement</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 7 }}>{t("crypto_pay_address")}</p>
             <div style={{
               display: "flex", alignItems: "center", gap: 8,
               background: "#f9fafb", borderRadius: 12, padding: "11px 14px",
@@ -492,8 +494,8 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
                 }}
               >
                 {copied
-                  ? <><Check style={{ width: 14, height: 14, color: "#059669" }} /><span style={{ fontSize: 11, fontWeight: 700, color: "#059669" }}>Copié</span></>
-                  : <><Copy style={{ width: 14, height: 14, color: "#6b7280" }} /><span style={{ fontSize: 11, fontWeight: 700, color: "#6b7280" }}>Copier</span></>}
+                  ? <><Check style={{ width: 14, height: 14, color: "#059669" }} /><span style={{ fontSize: 11, fontWeight: 700, color: "#059669" }}>{t("crypto_copied")}</span></>
+                  : <><Copy style={{ width: 14, height: 14, color: "#6b7280" }} /><span style={{ fontSize: 11, fontWeight: 700, color: "#6b7280" }}>{t("crypto_copy")}</span></>}
               </button>
             </div>
 
@@ -501,7 +503,7 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
             <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#eff6ff", borderRadius: 12, padding: "12px 14px" }}>
               <Loader2 style={{ width: 15, height: 15, color: "#3b82f6", animation: "spin 1s linear infinite", flexShrink: 0 }} />
               <p style={{ fontSize: 12, color: "#1d4ed8", fontWeight: 500, margin: 0, lineHeight: 1.5 }}>
-                En attente de votre paiement… La page se met à jour automatiquement dès confirmation.
+                {t("crypto_waiting")}
               </p>
             </div>
           </div>
@@ -524,9 +526,9 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
               <ExternalLink style={{ width: 32, height: 32, color: "#f97316" }} />
             </div>
             <div>
-              <p style={{ fontWeight: 900, fontSize: 18, color: "#111827", margin: "0 0 6px" }}>Finaliser sur OxaPay</p>
+              <p style={{ fontWeight: 900, fontSize: 18, color: "#111827", margin: "0 0 6px" }}>{t("crypto_oxapay_finalize")}</p>
               <p style={{ fontSize: 13, color: "#6b7280", margin: 0, lineHeight: 1.5 }}>
-                Cliquez sur le bouton ci-dessous pour ouvrir la page de paiement OxaPay sécurisée. Votre solde sera crédité automatiquement après confirmation.
+                {t("crypto_oxapay_desc")}
               </p>
             </div>
             <a
@@ -541,11 +543,11 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
               }}
             >
               <ExternalLink style={{ width: 16, height: 16 }} />
-              Cliquez pour effectuer le paiement
+              {t("crypto_oxapay_btn")}
             </a>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <Loader2 style={{ width: 13, height: 13, color: "#9ca3af", animation: "spin 1s linear infinite" }} />
-              <span style={{ fontSize: 12, color: "#9ca3af" }}>En attente de votre paiement… ({formatTime(timeLeft)})</span>
+              <span style={{ fontSize: 12, color: "#9ca3af" }}>{t("crypto_oxapay_waiting")} ({formatTime(timeLeft)})</span>
             </div>
           </div>
         )}
@@ -557,14 +559,14 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
               <CheckCircle2 style={{ width: 44, height: 44, color: "#059669" }} />
             </div>
             <div>
-              <h2 style={{ fontWeight: 900, fontSize: 22, color: "#111827", margin: "0 0 8px" }}>Paiement confirmé !</h2>
-              <p style={{ fontSize: 14, color: "#6b7280", margin: 0 }}>Votre solde a été crédité avec succès.</p>
+              <h2 style={{ fontWeight: 900, fontSize: 22, color: "#111827", margin: "0 0 8px" }}>{t("crypto_success_title")}</h2>
+              <p style={{ fontSize: 14, color: "#6b7280", margin: 0 }}>{t("crypto_success_desc")}</p>
             </div>
             <button
               onClick={() => { stopAll(); onClose(); }}
               style={{ width: "100%", height: 52, borderRadius: 16, background: "#059669", color: "#fff", fontWeight: 800, fontSize: 15, border: "none", cursor: "pointer" }}
             >
-              Fermer
+              {t("crypto_close")}
             </button>
           </div>
         )}
@@ -576,20 +578,20 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
               <AlertCircle style={{ width: 44, height: 44, color: "#dc2626" }} />
             </div>
             <div>
-              <h2 style={{ fontWeight: 900, fontSize: 22, color: "#111827", margin: "0 0 8px" }}>Paiement expiré</h2>
-              <p style={{ fontSize: 14, color: "#6b7280", margin: 0 }}>La session a expiré. Recommencez pour générer une nouvelle adresse.</p>
+              <h2 style={{ fontWeight: 900, fontSize: 22, color: "#111827", margin: "0 0 8px" }}>{t("crypto_failed_title")}</h2>
+              <p style={{ fontSize: 14, color: "#6b7280", margin: 0 }}>{t("crypto_failed_desc")}</p>
             </div>
             <button
               onClick={reset}
               style={{ width: "100%", height: 52, borderRadius: 16, background: "#f97316", color: "#fff", fontWeight: 800, fontSize: 15, border: "none", cursor: "pointer" }}
             >
-              Réessayer
+              {t("crypto_retry")}
             </button>
             <button
               onClick={() => { stopAll(); onClose(); }}
               style={{ background: "none", border: "none", color: "#9ca3af", fontSize: 14, cursor: "pointer" }}
             >
-              Fermer
+              {t("crypto_close")}
             </button>
           </div>
         )}

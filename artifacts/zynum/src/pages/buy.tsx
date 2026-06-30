@@ -157,16 +157,16 @@ function StepPage({ children, dir = 1 }: { children: React.ReactNode; dir?: numb
   );
 }
 
-const STEP_TITLES: Record<BuyStep, string> = {
-  service:  "Choisir un service",
-  country:  "Choisir un pays",
-  operator: "Choisir un opérateur",
-  preview:  "Confirmation",
-  active:   "Code de vérification",
-};
-
 export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbedded?: boolean; onStepChange?: (title: string) => void }) {
   const { t } = useLanguage();
+
+  const STEP_TITLES: Record<BuyStep, string> = {
+    service:  t("buy_step_title_service"),
+    country:  t("buy_step_title_country"),
+    operator: t("buy_step_title_operator"),
+    preview:  t("buy_step_title_preview"),
+    active:   t("buy_step_title_active"),
+  };
   const { currency } = useCurrency();
   const { toast } = useToast();
   const [, setLocation] = useLocation();

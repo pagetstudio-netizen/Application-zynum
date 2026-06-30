@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, Bell, Megaphone, Gift, Info, Star } from "lucide-react";
+import { useLanguage } from "@/hooks/use-language";
 
 const API = "/api";
 const DISMISS_KEY = "zynum_dismissed_popups";
@@ -52,6 +53,7 @@ export function useNotifications() {
 }
 
 export function NotificationBanner() {
+  const { t } = useLanguage();
   const { notifs } = useNotifications();
   const [dismissed, setDismissed] = useState<number[]>(() => getDismissed());
 
@@ -141,7 +143,7 @@ export function NotificationBanner() {
                     onClick={handleLink}
                     className="w-full py-3.5 rounded-2xl bg-white font-bold text-gray-900 text-sm flex items-center justify-center gap-2 active:opacity-90 transition-opacity"
                   >
-                    {current.linkLabel ?? "Voir plus"}
+                    {current.linkLabel ?? t("notif_see_more")}
                     {current.linkUrl.startsWith("http") && <ExternalLink className="w-4 h-4" />}
                   </button>
                 </div>
