@@ -185,9 +185,12 @@ export default function CryptoRecharge() {
     }
   };
 
+  const minFcfa = 300;
+  const minUsd  = (minFcfa / FCFA_PER_USD).toFixed(2);
+
   const handlePay = () => {
-    if (amountFcfa < 300) {
-      toast({ title: "Montant minimum", description: "300 FCFA minimum requis", variant: "destructive" });
+    if (amountFcfa < minFcfa) {
+      toast({ title: t("crypto_min_amount"), description: `${minFcfa} FCFA (~$${minUsd})`, variant: "destructive" });
       return;
     }
     if (provider === "nowpayments") initiateNowPayments();
@@ -215,7 +218,7 @@ export default function CryptoRecharge() {
   const canGoBack = step === "amount" || step === "success" || step === "failed";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100dvh", background: "#f9fafb", overflow: "hidden" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100dvh", background: "#f9fafb", overflow: "hidden", maxWidth: "100vw" }}>
 
       {/* ── Header ── */}
       <div style={{
@@ -246,7 +249,7 @@ export default function CryptoRecharge() {
       </div>
 
       {/* ── Scrollable body ── */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px 16px 40px" }}>
+      <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "20px 16px 40px" }}>
 
         {/* ══════ STEP: amount ══════ */}
         {step === "amount" && (
@@ -303,7 +306,7 @@ export default function CryptoRecharge() {
                     <p style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10, marginTop: 0 }}>
                       {t("crypto_currency_label")}
                     </p>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 24 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 24 }}>
                       {NP_CURRENCIES.map(c => (
                         <button
                           key={c.id}
@@ -345,7 +348,7 @@ export default function CryptoRecharge() {
                   marginBottom: 14, transition: "border-color 0.2s",
                   boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
                 }}>
-                  <p style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, margin: "0 0 6px" }}>Montant en FCFA</p>
+                  <p style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, margin: "0 0 6px" }}>{t("crypto_amount_fcfa_label")}</p>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <input
                       type="number"
@@ -380,27 +383,28 @@ export default function CryptoRecharge() {
 
                 {/* Min amount notice */}
                 <p style={{ fontSize: 12, color: "#9ca3af", textAlign: "center", margin: "0 0 20px" }}>
-                  Montant minimum : <strong style={{ color: "#374151" }}>300 FCFA</strong>
+                  {t("crypto_min_amount")} : <strong style={{ color: "#374151" }}>{minFcfa} FCFA</strong>
+                  <span style={{ color: "#9ca3af" }}> (~${minUsd})</span>
                 </p>
 
                 {/* CTA */}
                 <button
                   onClick={handlePay}
-                  disabled={loading || amountFcfa < 300}
+                  disabled={loading || amountFcfa < minFcfa}
                   style={{
                     width: "100%", height: 58, borderRadius: 18,
-                    background: loading || amountFcfa < 300 ? "#d1d5db" : "#f97316",
+                    background: loading || amountFcfa < minFcfa ? "#d1d5db" : "#f97316",
                     color: "#fff", fontWeight: 800, fontSize: 16, border: "none",
-                    cursor: loading || amountFcfa < 300 ? "not-allowed" : "pointer",
+                    cursor: loading || amountFcfa < minFcfa ? "not-allowed" : "pointer",
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
                     transition: "all 0.15s",
-                    boxShadow: amountFcfa >= 300 && !loading ? "0 4px 18px rgba(249,115,22,0.35)" : "none",
+                    boxShadow: amountFcfa >= minFcfa && !loading ? "0 4px 18px rgba(249,115,22,0.35)" : "none",
                   }}
                 >
                   {loading
                     ? <><Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} /> {t("crypto_generating")}</>
                     : provider === "nowpayments"
-                      ? `Générer l'adresse ${selectedCur.label} →`
+                      ? `${t("crypto_generate_address")} ${selectedCur.label} →`
                       : t("crypto_oxapay_open")}
                 </button>
               </>
@@ -554,7 +558,7 @@ export default function CryptoRecharge() {
                 background: "#059669", color: "#fff", fontWeight: 800, fontSize: 16, border: "none", cursor: "pointer",
               }}
             >
-              Retour à la recharge
+              {t("crypto_back_recharge")}
             </button>
           </div>
         )}
@@ -582,7 +586,7 @@ export default function CryptoRecharge() {
               onClick={() => { stopAll(); navigate("/recharge"); }}
               style={{ background: "none", border: "none", color: "#9ca3af", fontSize: 15, cursor: "pointer", marginTop: 4 }}
             >
-              Retour à la recharge
+              {t("crypto_back_recharge")}
             </button>
           </div>
         )}

@@ -721,6 +721,10 @@ export const translations = {
     crypto_failed_title: "Paiement expiré",
     crypto_failed_desc: "La session a expiré. Recommencez pour générer une nouvelle adresse.",
     crypto_retry: "Réessayer",
+    crypto_amount_fcfa_label: "Montant en FCFA",
+    crypto_min_amount: "Montant minimum",
+    crypto_back_recharge: "Retour à la recharge",
+    crypto_generate_address: "Générer l'adresse",
 
     // ── Dashboard ─────────────────────────────────────────────────────
     dash_recharge_title: "Recharge de compte",
@@ -1610,6 +1614,10 @@ export const translations = {
     crypto_failed_title: "Payment expired",
     crypto_failed_desc: "The session has expired. Start again to generate a new address.",
     crypto_retry: "Try again",
+    crypto_amount_fcfa_label: "Amount in FCFA",
+    crypto_min_amount: "Minimum amount",
+    crypto_back_recharge: "Back to recharge",
+    crypto_generate_address: "Generate address",
 
     // ── Dashboard ─────────────────────────────────────────────────────
     dash_recharge_title: "Top up account",
