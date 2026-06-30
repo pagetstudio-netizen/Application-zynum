@@ -1470,25 +1470,6 @@ function ParamsPage({ onBack }: { onBack: () => void }) {
           ))}
         </div>
 
-        {/* ── Notifications ── */}
-        <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">
-            {lang === "fr" ? "Notifications" : "Notifications"}
-          </p>
-          {notifItems.map((n, i) => (
-            <div
-              key={n.key}
-              className={`flex items-center gap-3 px-4 py-3.5 ${i > 0 ? "border-t border-gray-50" : ""}`}
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900">{n.label}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{n.sub}</p>
-              </div>
-              <ToggleSwitch on={!!notifs[n.key]} onToggle={() => toggleNotif(n.key)} />
-            </div>
-          ))}
-        </div>
-
         {/* ── Informations de l'appareil ── */}
         <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">
@@ -1496,8 +1477,6 @@ function ParamsPage({ onBack }: { onBack: () => void }) {
           </p>
           {[
             { label: lang === "fr" ? "Système"     : "OS",       value: device.os },
-            { label: lang === "fr" ? "Navigateur"  : "Browser",  value: device.browser },
-            { label: lang === "fr" ? "Résolution"  : "Screen",   value: device.screen },
             { label: lang === "fr" ? "Langue sys."  : "Sys. lang", value: device.lang },
             { label: "Version app",                               value: "1.0.0" },
           ].map((row, i) => (
