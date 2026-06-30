@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, Copy, Check, X, Clock, ChevronRight,
-  Smartphone, Package, SlidersHorizontal, Loader2,
+  Smartphone, SlidersHorizontal, Loader2,
   TrendingUp, Zap, Globe2, ShoppingBag, ArrowRight,
 } from "lucide-react";
+import { NoData } from "@/components/ui/no-data";
 import {
   useGetOrderHistory,
   useGetCurrentUser,
@@ -301,16 +302,10 @@ function EmptyState({ filter }: { filter: FilterKey }) {
     : "Aucune commande annulée.";
 
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
-      <div
-        className="w-20 h-20 rounded-3xl flex items-center justify-center mb-5 shadow-lg"
-        style={{ background: "linear-gradient(135deg, #EFF6FF, #DBEAFE)" }}
-      >
-        <Package className="w-9 h-9 text-blue-400" />
-      </div>
-      <h3 className="font-extrabold text-gray-800 text-lg mb-2">Aucun achat trouvé</h3>
-      <p className="text-sm text-gray-400 mb-6">{msg}</p>
-      {filter === "all" && (
+    <NoData
+      title="Aucun achat trouvé"
+      description={msg}
+      action={filter === "all" ? (
         <button
           onClick={() => window.dispatchEvent(new CustomEvent("zynum:goto-tab", { detail: "numeros" }))}
           className="flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold text-white shadow-lg shadow-blue-500/30"
@@ -318,8 +313,8 @@ function EmptyState({ filter }: { filter: FilterKey }) {
         >
           Acheter un numéro <ArrowRight className="w-4 h-4" />
         </button>
-      )}
-    </div>
+      ) : undefined}
+    />
   );
 }
 

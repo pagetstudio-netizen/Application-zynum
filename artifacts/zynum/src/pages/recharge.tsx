@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
-  ChevronLeft, Eye, EyeOff, Plus, ArrowDownLeft, History, Clock,
+  ChevronLeft, Eye, EyeOff, Plus, ArrowDownLeft, Clock,
 } from "lucide-react";
+import { NoData } from "@/components/ui/no-data";
 import { useGetBalance, useGetCurrentUser, getGetBalanceQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrency } from "@/hooks/use-currency";
@@ -220,12 +221,11 @@ export default function Recharge() {
         {txLoading ? (
           <div className="text-center py-8 text-gray-400 text-sm">Chargement…</div>
         ) : visibleTx.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-10 text-center">
-            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-              <History className="w-6 h-6 text-gray-400" />
-            </div>
-            <p className="text-sm font-semibold text-gray-500">Aucune transaction</p>
-            <p className="text-xs text-gray-400 mt-1">Vos recharges et retraits apparaîtront ici</p>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <NoData
+              title="Aucune transaction"
+              description="Vos recharges et retraits apparaîtront ici"
+            />
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-50">

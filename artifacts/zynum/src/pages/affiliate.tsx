@@ -4,6 +4,7 @@ import {
   Copy, Check, Users, DollarSign, Clock,
   ArrowDownToLine, RefreshCw, ChevronRight, AlertCircle,
 } from "lucide-react";
+import { NoData } from "@/components/ui/no-data";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/hooks/use-currency";
 
@@ -400,11 +401,10 @@ export default function AffiliatePage() {
         </div>
 
         {referrals.length === 0 ? (
-          <div className="py-12 text-center">
-            <Users className="w-10 h-10 mx-auto mb-3 text-gray-200" />
-            <p className="text-sm text-gray-400 font-medium">Aucun filleul pour l'instant</p>
-            <p className="text-xs text-gray-400 mt-1">Partagez votre lien pour commencer à gagner !</p>
-          </div>
+          <NoData
+            title="Aucun filleul pour l'instant"
+            description="Partagez votre lien pour commencer à gagner !"
+          />
         ) : (
           <div className="divide-y divide-gray-100">
             {referrals.map((r) => (
