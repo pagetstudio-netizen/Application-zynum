@@ -496,3 +496,20 @@ html.light .bg-clip-text.from-white {
   background-size: 200% 100%;
   animation: img-shimmer 1.4s ease-in-out infinite;
 }
+
+/* ── Auth pages — inputs must be solid white ─────────────────────────────── */
+.auth-input {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #1a1a2e !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.auth-input::placeholder {
+  color: #9ca3af !important;
+}
+.auth-input option {
+  background-color: #ffffff;
+  color: #1a1a2e;
+}
+/* ─────────────────────────────────────────────────────────────────────────── */

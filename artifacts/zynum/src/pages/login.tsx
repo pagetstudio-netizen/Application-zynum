@@ -1,39 +1,40 @@
 import React, { useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Lock, Eye, EyeOff, ChevronLeft, ChevronDown, Mail } from "lucide-react";
+import { Loader2, Lock, Eye, EyeOff, ChevronLeft, Mail } from "lucide-react";
 import { useLoginUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 
-const COUNTRIES = [
-  { name: "Cameroun", code: "CM", dial: "+237" },
-  { name: "Côte d'Ivoire", code: "CI", dial: "+225" },
-  { name: "Sénégal", code: "SN", dial: "+221" },
-  { name: "Mali", code: "ML", dial: "+223" },
-  { name: "Burkina Faso", code: "BF", dial: "+226" },
-  { name: "Niger", code: "NE", dial: "+227" },
-  { name: "Tchad", code: "TD", dial: "+235" },
-  { name: "Gabon", code: "GA", dial: "+241" },
-  { name: "Congo", code: "CG", dial: "+242" },
-  { name: "RD Congo", code: "CD", dial: "+243" },
-  { name: "Guinée", code: "GN", dial: "+224" },
-  { name: "Togo", code: "TG", dial: "+228" },
-  { name: "Bénin", code: "BJ", dial: "+229" },
-  { name: "France", code: "FR", dial: "+33" },
-  { name: "Maroc", code: "MA", dial: "+212" },
-];
-
-const INPUT_STYLE: React.CSSProperties = {
+const FIELD_WRAP: React.CSSProperties = {
+  position: "relative",
+  width: "100%",
   height: 54,
   borderRadius: 14,
+  backgroundColor: "#ffffff",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+  display: "flex",
+  alignItems: "center",
+};
+
+const NAKED_INPUT: React.CSSProperties = {
+  flex: 1,
+  height: "100%",
+  background: "transparent",
   border: "none",
-  background: "#ffffff",
+  outline: "none",
   fontSize: 15,
   color: "#1a1a2e",
-  outline: "none",
-  boxSizing: "border-box" as const,
-  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-  width: "100%",
+  paddingRight: 14,
+};
+
+const ICON_LEFT: React.CSSProperties = {
+  width: 48,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexShrink: 0,
+  color: "#9ca3af",
+  pointerEvents: "none",
 };
 
 type Step = "credentials" | "verify_2fa";
@@ -44,7 +45,6 @@ export default function Login() {
   const queryClient = useQueryClient();
 
   const [step, setStep] = useState<Step>("credentials");
-  const [country, setCountry] = useState("CM");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -54,7 +54,6 @@ export default function Login() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const codeRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const selectedCountry = COUNTRIES.find(c => c.code === country) ?? COUNTRIES[0];
 
   const loginMutation = useLoginUser({
     mutation: {
@@ -131,7 +130,7 @@ export default function Login() {
   return (
     <div style={{
       minHeight: "100dvh",
-      background: "linear-gradient(to bottom, #f0f7ff 0%, #d0e8f8 25%, #4a90d9 60%, #1a5fc8 100%)",
+      background: "linear-gradient(to bottom, #e8f4ff 0%, #c5ddf5 20%, #5b9fd6 55%, #1a5fc8 100%)",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -173,37 +172,33 @@ export default function Login() {
           <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 
             {/* Email */}
-            <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: 15, top: "50%", transform: "translateY(-50%)", color: "#9ca3af", display: "flex", pointerEvents: "none" }}>
-                <Mail style={{ width: 18, height: 18 }} />
-              </span>
+            <div style={FIELD_WRAP}>
+              <span style={ICON_LEFT}><Mail style={{ width: 18, height: 18 }} /></span>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="Adresse email"
                 autoComplete="email"
-                style={{ ...INPUT_STYLE, paddingLeft: 48, paddingRight: 16 }}
+                style={NAKED_INPUT}
               />
             </div>
 
             {/* Mot de passe */}
-            <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: 15, top: "50%", transform: "translateY(-50%)", color: "#9ca3af", display: "flex", pointerEvents: "none" }}>
-                <Lock style={{ width: 18, height: 18 }} />
-              </span>
+            <div style={FIELD_WRAP}>
+              <span style={ICON_LEFT}><Lock style={{ width: 18, height: 18 }} /></span>
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Mot de passe"
                 autoComplete="current-password"
-                style={{ ...INPUT_STYLE, paddingLeft: 48, paddingRight: 48 }}
+                style={NAKED_INPUT}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(s => !s)}
-                style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af", display: "flex" }}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", display: "flex", padding: "0 14px 0 0" }}
               >
                 {showPassword ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
               </button>
@@ -218,7 +213,7 @@ export default function Login() {
                     width: 18, height: 18, borderRadius: 4,
                     border: "2px solid",
                     borderColor: remember ? "#1a3fc8" : "rgba(255,255,255,0.7)",
-                    background: remember ? "#1a3fc8" : "rgba(255,255,255,0.3)",
+                    backgroundColor: remember ? "#1a3fc8" : "rgba(255,255,255,0.3)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     transition: "all 0.15s",
                   }}
@@ -249,7 +244,7 @@ export default function Login() {
               disabled={loginMutation.isPending}
               style={{
                 width: "100%", height: 54, borderRadius: 30,
-                background: "#1a3fc8", color: "#fff",
+                backgroundColor: "#1a3fc8", color: "#ffffff",
                 fontWeight: 800, fontSize: 16, border: "none",
                 cursor: loginMutation.isPending ? "not-allowed" : "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -274,24 +269,24 @@ export default function Login() {
 
             <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
               {codeDigits.map((d, i) => (
-                <input
-                  key={i}
-                  ref={el => { codeRefs.current[i] = el; }}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={d}
-                  onChange={e => handleCodeChange(i, e.target.value)}
-                  onKeyDown={e => handleCodeKey(i, e)}
-                  style={{
-                    width: 48, height: 56, borderRadius: 14,
-                    background: "#ffffff",
-                    border: "2px solid rgba(26,63,200,0.2)",
-                    color: "#1a1a2e", fontSize: 22, fontWeight: 900,
-                    textAlign: "center", outline: "none",
-                    boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-                  }}
-                />
+                <div key={i} style={{ width: 48, height: 56, borderRadius: 14, backgroundColor: "#ffffff", boxShadow: "0 2px 8px rgba(0,0,0,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <input
+                    ref={el => { codeRefs.current[i] = el; }}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={d}
+                    onChange={e => handleCodeChange(i, e.target.value)}
+                    onKeyDown={e => handleCodeKey(i, e)}
+                    style={{
+                      width: "100%", height: "100%",
+                      background: "transparent",
+                      border: "none",
+                      color: "#1a1a2e", fontSize: 22, fontWeight: 900,
+                      textAlign: "center", outline: "none",
+                    }}
+                  />
+                </div>
               ))}
             </div>
 
@@ -306,7 +301,7 @@ export default function Login() {
               disabled={isVerifying || codeDigits.join("").length !== 6}
               style={{
                 width: "100%", height: 54, borderRadius: 30,
-                background: "#1a3fc8", color: "#fff",
+                backgroundColor: "#1a3fc8", color: "#ffffff",
                 fontWeight: 800, fontSize: 16, border: "none",
                 cursor: (isVerifying || codeDigits.join("").length !== 6) ? "not-allowed" : "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -321,7 +316,7 @@ export default function Login() {
 
         {/* Register link */}
         <div style={{ textAlign: "center", marginTop: 24, marginBottom: 40 }}>
-          <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}>Pas encore de compte ? </span>
+          <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 14 }}>Pas encore de compte ? </span>
           <Link href="/register">
             <span style={{ color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>S'inscrire</span>
           </Link>

@@ -2,19 +2,36 @@ import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { ChevronLeft, Mail, Loader2, CheckCircle2, ArrowRight } from "lucide-react";
 
-const INPUT_STYLE: React.CSSProperties = {
+const FIELD_WRAP: React.CSSProperties = {
+  position: "relative",
   width: "100%",
   height: 54,
   borderRadius: 14,
+  backgroundColor: "#ffffff",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+  display: "flex",
+  alignItems: "center",
+};
+
+const NAKED_INPUT: React.CSSProperties = {
+  flex: 1,
+  height: "100%",
+  background: "transparent",
   border: "none",
-  background: "#ffffff",
-  paddingLeft: 48,
-  paddingRight: 16,
+  outline: "none",
   fontSize: 15,
   color: "#1a1a2e",
-  outline: "none",
-  boxSizing: "border-box" as const,
-  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+  paddingRight: 14,
+};
+
+const ICON_LEFT: React.CSSProperties = {
+  width: 48,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexShrink: 0,
+  color: "#9ca3af",
+  pointerEvents: "none",
 };
 
 export default function ForgotPassword() {
@@ -48,7 +65,7 @@ export default function ForgotPassword() {
   return (
     <div style={{
       minHeight: "100dvh",
-      background: "linear-gradient(to bottom, #f0f7ff 0%, #d0e8f8 25%, #4a90d9 60%, #1a5fc8 100%)",
+      background: "linear-gradient(to bottom, #e8f4ff 0%, #c5ddf5 20%, #5b9fd6 55%, #1a5fc8 100%)",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -87,10 +104,8 @@ export default function ForgotPassword() {
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <div style={{ position: "relative" }}>
-                <span style={{ position: "absolute", left: 15, top: "50%", transform: "translateY(-50%)", color: "#9ca3af", display: "flex", pointerEvents: "none" }}>
-                  <Mail style={{ width: 18, height: 18 }} />
-                </span>
+              <div style={FIELD_WRAP}>
+                <span style={ICON_LEFT}><Mail style={{ width: 18, height: 18 }} /></span>
                 <input
                   type="email"
                   value={email}
@@ -98,7 +113,7 @@ export default function ForgotPassword() {
                   placeholder="Adresse email"
                   autoComplete="email"
                   autoFocus
-                  style={INPUT_STYLE}
+                  style={NAKED_INPUT}
                 />
               </div>
 
@@ -113,7 +128,7 @@ export default function ForgotPassword() {
                 disabled={loading || !email}
                 style={{
                   width: "100%", height: 54, borderRadius: 30,
-                  background: "#1a3fc8", color: "#fff",
+                  backgroundColor: "#1a3fc8", color: "#ffffff",
                   fontWeight: 800, fontSize: 16, border: "none",
                   cursor: (loading || !email) ? "not-allowed" : "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
@@ -131,7 +146,7 @@ export default function ForgotPassword() {
               <button
                 type="button"
                 onClick={() => navigate("/reset-password")}
-                style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontSize: 13, textAlign: "center", marginTop: 4 }}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", fontSize: 13, textAlign: "center", marginTop: 4 }}
               >
                 J'ai déjà un code →
               </button>
@@ -139,7 +154,7 @@ export default function ForgotPassword() {
           </>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 20 }}>
-            <div style={{ width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: 80, height: 80, borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <CheckCircle2 style={{ width: 40, height: 40, color: "#ffffff" }} />
             </div>
             <div>
@@ -154,7 +169,7 @@ export default function ForgotPassword() {
               onClick={() => navigate(`/reset-password?email=${encodeURIComponent(email)}`)}
               style={{
                 width: "100%", height: 54, borderRadius: 30,
-                background: "#1a3fc8", color: "#fff",
+                backgroundColor: "#1a3fc8", color: "#ffffff",
                 fontWeight: 800, fontSize: 16, border: "none",
                 cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
@@ -165,7 +180,7 @@ export default function ForgotPassword() {
             </button>
             <button
               onClick={() => { setSent(false); setEmail(""); }}
-              style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontSize: 13 }}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", fontSize: 13 }}
             >
               Renvoyer l'email
             </button>
@@ -174,7 +189,7 @@ export default function ForgotPassword() {
 
         <div style={{ textAlign: "center", marginTop: 32, marginBottom: 40 }}>
           <Link href="/login">
-            <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, cursor: "pointer" }}>← Retour à la connexion</span>
+            <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, cursor: "pointer" }}>← Retour à la connexion</span>
           </Link>
         </div>
       </div>

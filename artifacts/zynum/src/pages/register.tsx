@@ -1,38 +1,57 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Lock, Eye, EyeOff, Mail, Check, ChevronLeft, Gift } from "lucide-react";
+import { Loader2, Lock, Eye, EyeOff, Check, ChevronLeft, ChevronDown, Gift, Phone } from "lucide-react";
 import { useRegisterUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 
+const COUNTRIES = [
+  { name: "Cameroun", code: "CM", dial: "+237" },
+  { name: "Côte d'Ivoire", code: "CI", dial: "+225" },
+  { name: "Sénégal", code: "SN", dial: "+221" },
+  { name: "Mali", code: "ML", dial: "+223" },
+  { name: "Burkina Faso", code: "BF", dial: "+226" },
+  { name: "Niger", code: "NE", dial: "+227" },
+  { name: "Tchad", code: "TD", dial: "+235" },
+  { name: "Gabon", code: "GA", dial: "+241" },
+  { name: "Congo", code: "CG", dial: "+242" },
+  { name: "RD Congo", code: "CD", dial: "+243" },
+  { name: "Guinée", code: "GN", dial: "+224" },
+  { name: "Togo", code: "TG", dial: "+228" },
+  { name: "Bénin", code: "BJ", dial: "+229" },
+  { name: "France", code: "FR", dial: "+33" },
+  { name: "Maroc", code: "MA", dial: "+212" },
+];
 
-const INPUT_STYLE: React.CSSProperties = {
+const FIELD_WRAP: React.CSSProperties = {
+  position: "relative",
   width: "100%",
   height: 54,
   borderRadius: 14,
+  backgroundColor: "#ffffff",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+  display: "flex",
+  alignItems: "center",
+};
+
+const NAKED_INPUT: React.CSSProperties = {
+  flex: 1,
+  height: "100%",
+  background: "transparent",
   border: "none",
-  background: "#ffffff",
-  paddingLeft: 48,
-  paddingRight: 16,
+  outline: "none",
   fontSize: 15,
   color: "#1a1a2e",
-  outline: "none",
-  boxSizing: "border-box",
-  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+  paddingRight: 14,
 };
 
-const ICON_WRAP: React.CSSProperties = {
-  position: "relative",
-  width: "100%",
-};
-
-const ICON_POS: React.CSSProperties = {
-  position: "absolute",
-  left: 15,
-  top: "50%",
-  transform: "translateY(-50%)",
-  color: "#9ca3af",
+const ICON_LEFT: React.CSSProperties = {
+  width: 48,
   display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexShrink: 0,
+  color: "#9ca3af",
   pointerEvents: "none",
 };
 
@@ -48,7 +67,8 @@ export default function Register() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [email, setEmail] = useState("");
+  const [country, setCountry] = useState("CM");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -58,10 +78,12 @@ export default function Register() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState("");
 
+  const selectedCountry = COUNTRIES.find(c => c.code === country) ?? COUNTRIES[0];
+
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!email) e.email = "L'email est requis";
-    else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Email invalide";
+    if (!phone) e.phone = "Le numéro de téléphone est requis";
+    else if (phone.replace(/\s/g, "").length < 6) e.phone = "Numéro de téléphone invalide";
     if (!password) e.password = "Le mot de passe est requis";
     else if (password.length < 6) e.password = "Au moins 6 caractères";
     if (!confirmPassword) e.confirm = "Confirmez le mot de passe";
@@ -90,15 +112,23 @@ export default function Register() {
     e.preventDefault();
     setGlobalError("");
     if (!validate()) return;
+    const fullPhone = `${selectedCountry.dial}${phone.replace(/\s/g, "")}`;
     registerMutation.mutate({
-      data: { name: email.split("@")[0], email, password, confirmPassword, ...(referral ? { referralCode: referral } : {}) },
+      data: {
+        name: phone.replace(/\s/g, ""),
+        email: `${phone.replace(/\s/g, "")}@zynum.local`,
+        phone: fullPhone,
+        password,
+        confirmPassword,
+        ...(referral ? { referralCode: referral } : {}),
+      },
     } as any);
   };
 
   return (
     <div style={{
       minHeight: "100dvh",
-      background: "linear-gradient(to bottom, #f0f7ff 0%, #d0e8f8 25%, #4a90d9 60%, #1a5fc8 100%)",
+      background: "linear-gradient(to bottom, #e8f4ff 0%, #c5ddf5 20%, #5b9fd6 55%, #1a5fc8 100%)",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -128,55 +158,88 @@ export default function Register() {
         {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 
-          {/* Pays */}
+          {/* Pays — select wrapper */}
           <div>
-            <div style={ICON_WRAP}>
-              <span style={ICON_POS}>🌍</span>
+            <div style={{ ...FIELD_WRAP, paddingRight: 14 }}>
               <select
                 value={country}
                 onChange={e => setCountry(e.target.value)}
-                style={{ ...INPUT_STYLE, paddingLeft: 44, appearance: "none", cursor: "pointer" }}
+                style={{
+                  flex: 1,
+                  height: "100%",
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  fontSize: 15,
+                  color: "#1a1a2e",
+                  fontWeight: 600,
+                  paddingLeft: 16,
+                  cursor: "pointer",
+                  appearance: "none",
+                  WebkitAppearance: "none",
+                }}
               >
                 {COUNTRIES.map(c => (
                   <option key={c.code} value={c.code}>{c.name} ({c.dial})</option>
                 ))}
               </select>
-              <ChevronDown style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", width: 18, height: 18, color: "#9ca3af", pointerEvents: "none" }} />
+              <ChevronDown style={{ width: 18, height: 18, color: "#9ca3af", flexShrink: 0, pointerEvents: "none" }} />
             </div>
           </div>
 
-          {/* Email */}
+          {/* Téléphone */}
           <div>
-            <div style={ICON_WRAP}>
-              <span style={ICON_POS}><Mail style={{ width: 18, height: 18 }} /></span>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="Adresse email"
-                autoComplete="email"
-                style={{ ...INPUT_STYLE, borderColor: errors.email ? "#ef4444" : "transparent", border: errors.email ? "1.5px solid #ef4444" : "none" }}
-              />
+            <div style={{ display: "flex", gap: 8 }}>
+              {/* Badge indicatif */}
+              <div style={{
+                height: 54,
+                borderRadius: 14,
+                backgroundColor: "#ffffff",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "0 16px",
+                fontWeight: 700,
+                color: "#1a1a2e",
+                fontSize: 15,
+                flexShrink: 0,
+                whiteSpace: "nowrap",
+              }}>
+                {selectedCountry.dial}
+              </div>
+              {/* Input numéro */}
+              <div style={{ ...FIELD_WRAP, flex: 1, borderColor: errors.phone ? "#ef4444" : undefined, border: errors.phone ? "1.5px solid #ef4444" : undefined }}>
+                <span style={ICON_LEFT}><Phone style={{ width: 18, height: 18 }} /></span>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value.replace(/[^\d\s]/g, ""))}
+                  placeholder="Numéro de téléphone"
+                  autoComplete="tel"
+                  style={NAKED_INPUT}
+                />
+              </div>
             </div>
-            {errors.email && <p style={ERROR_STYLE}>{errors.email}</p>}
+            {errors.phone && <p style={ERROR_STYLE}>{errors.phone}</p>}
           </div>
 
           {/* Mot de passe */}
           <div>
-            <div style={{ ...ICON_WRAP, position: "relative" }}>
-              <span style={ICON_POS}><Lock style={{ width: 18, height: 18 }} /></span>
+            <div style={{ ...FIELD_WRAP, borderColor: errors.password ? "#ef4444" : undefined, border: errors.password ? "1.5px solid #ef4444" : undefined }}>
+              <span style={ICON_LEFT}><Lock style={{ width: 18, height: 18 }} /></span>
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Mot de passe"
                 autoComplete="new-password"
-                style={{ ...INPUT_STYLE, paddingRight: 48, border: errors.password ? "1.5px solid #ef4444" : "none" }}
+                style={NAKED_INPUT}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(s => !s)}
-                style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af", display: "flex" }}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", display: "flex", padding: "0 14px 0 0" }}
               >
                 {showPassword ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
               </button>
@@ -186,17 +249,17 @@ export default function Register() {
 
           {/* Confirmer le mot de passe */}
           <div>
-            <div style={{ ...ICON_WRAP, position: "relative" }}>
-              <span style={ICON_POS}><Lock style={{ width: 18, height: 18 }} /></span>
+            <div style={{ ...FIELD_WRAP, borderColor: errors.confirm ? "#ef4444" : undefined, border: errors.confirm ? "1.5px solid #ef4444" : undefined }}>
+              <span style={ICON_LEFT}><Lock style={{ width: 18, height: 18 }} /></span>
               <input
                 type={showConfirm ? "text" : "password"}
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 placeholder="Répéter le mot de passe"
                 autoComplete="new-password"
-                style={{ ...INPUT_STYLE, paddingRight: 48, border: errors.confirm ? "1.5px solid #ef4444" : "none" }}
+                style={NAKED_INPUT}
               />
-              <div style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, paddingRight: 14 }}>
                 {confirmPassword && confirmPassword === password && (
                   <Check style={{ width: 16, height: 16, color: "#22c55e" }} />
                 )}
@@ -213,17 +276,15 @@ export default function Register() {
           </div>
 
           {/* Code de parrainage */}
-          <div>
-            <div style={ICON_WRAP}>
-              <span style={ICON_POS}><Gift style={{ width: 18, height: 18 }} /></span>
-              <input
-                type="text"
-                value={referral}
-                onChange={e => setReferral(e.target.value)}
-                placeholder="Code de parrainage (optionnel)"
-                style={INPUT_STYLE}
-              />
-            </div>
+          <div style={FIELD_WRAP}>
+            <span style={ICON_LEFT}><Gift style={{ width: 18, height: 18 }} /></span>
+            <input
+              type="text"
+              value={referral}
+              onChange={e => setReferral(e.target.value)}
+              placeholder="Code de parrainage (optionnel)"
+              style={NAKED_INPUT}
+            />
           </div>
 
           {/* Global error */}
@@ -239,7 +300,7 @@ export default function Register() {
             disabled={registerMutation.isPending}
             style={{
               width: "100%", height: 54, borderRadius: 30,
-              background: "#1a3fc8", color: "#fff",
+              backgroundColor: "#1a3fc8", color: "#ffffff",
               fontWeight: 800, fontSize: 16, border: "none",
               cursor: registerMutation.isPending ? "not-allowed" : "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -257,7 +318,7 @@ export default function Register() {
 
         {/* Login link */}
         <div style={{ textAlign: "center", marginTop: 20, marginBottom: 40 }}>
-          <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}>Déjà inscrit ? </span>
+          <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 14 }}>Déjà inscrit ? </span>
           <Link href="/login">
             <span style={{ color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>Connectez-vous</span>
           </Link>
