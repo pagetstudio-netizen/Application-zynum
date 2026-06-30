@@ -507,34 +507,45 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
           </div>
         )}
 
-        {/* ══════════════════ STEP: pending — OxaPay iframe ══════════════════ */}
+        {/* ══════════════════ STEP: pending — OxaPay ══════════════════ */}
         {step === "pending" && provider === "oxapay" && opData && (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: "60dvh" }}>
-            <div style={{ height: 4, background: "#f3f4f6", flexShrink: 0, position: "relative", overflow: "hidden" }}>
+          <div style={{ padding: "32px 20px 28px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 20 }}>
+            {/* Timer bar */}
+            <div style={{ width: "100%", height: 4, background: "#f3f4f6", borderRadius: 2, overflow: "hidden" }}>
               <div style={{
-                position: "absolute", top: 0, left: 0, height: "100%",
+                height: "100%",
                 background: timeLeft < 300 ? "#ef4444" : "#f97316",
                 width: `${(timeLeft / (30 * 60)) * 100}%`,
                 transition: "width 1s linear",
+                borderRadius: 2,
               }} />
             </div>
-            <iframe
-              src={opData.payLink}
-              title="OxaPay Payment"
-              style={{ flex: 1, border: "none", width: "100%", background: "#fff" }}
-              allow="clipboard-write"
-            />
-            <div style={{ padding: "10px 20px", borderTop: "1px solid #f3f4f6", flexShrink: 0, display: "flex", gap: 10, alignItems: "center" }}>
-              <Loader2 style={{ width: 13, height: 13, color: "#9ca3af", animation: "spin 1s linear infinite", flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: "#9ca3af", flex: 1 }}>En attente de votre paiement… ({formatTime(timeLeft)})</span>
-              <a
-                href={opData.payLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, fontWeight: 700, color: "#3b82f6", textDecoration: "none" }}
-              >
-                <ExternalLink style={{ width: 11, height: 11 }} /> Ouvrir
-              </a>
+            <div style={{ width: 72, height: 72, borderRadius: "50%", background: "#fff7ed", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <ExternalLink style={{ width: 32, height: 32, color: "#f97316" }} />
+            </div>
+            <div>
+              <p style={{ fontWeight: 900, fontSize: 18, color: "#111827", margin: "0 0 6px" }}>Finaliser sur OxaPay</p>
+              <p style={{ fontSize: 13, color: "#6b7280", margin: 0, lineHeight: 1.5 }}>
+                Cliquez sur le bouton ci-dessous pour ouvrir la page de paiement OxaPay sécurisée. Votre solde sera crédité automatiquement après confirmation.
+              </p>
+            </div>
+            <a
+              href={opData.payLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                width: "100%", height: 52, borderRadius: 16,
+                background: "#f97316", color: "#fff",
+                fontWeight: 800, fontSize: 15, textDecoration: "none",
+              }}
+            >
+              <ExternalLink style={{ width: 16, height: 16 }} />
+              Cliquez pour effectuer le paiement
+            </a>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Loader2 style={{ width: 13, height: 13, color: "#9ca3af", animation: "spin 1s linear infinite" }} />
+              <span style={{ fontSize: 12, color: "#9ca3af" }}>En attente de votre paiement… ({formatTime(timeLeft)})</span>
             </div>
           </div>
         )}

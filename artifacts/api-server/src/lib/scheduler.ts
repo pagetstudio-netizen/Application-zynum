@@ -49,11 +49,11 @@ async function cancelExpiredOrders() {
   }
 }
 
-const THREE_MIN_MS = 3 * 60 * 1000;
+const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
 
 async function expireStalePayments() {
   try {
-    const cutoff = new Date(Date.now() - THREE_MIN_MS);
+    const cutoff = new Date(Date.now() - THREE_HOURS_MS);
     const result = await db
       .update(transactionsTable)
       .set({ status: "failed" })
