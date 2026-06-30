@@ -89,12 +89,6 @@ function BlockingPage({ config }: { config: VersionConfig }) {
           </a>
         )}
 
-        <a
-          href="/admin"
-          style={{ fontSize: 11, color: "#D1D5DB", textDecoration: "none", marginTop: 8 }}
-        >
-          Accès administrateur
-        </a>
       </div>
     </div>
   );
