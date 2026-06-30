@@ -16,6 +16,7 @@ import discountsRouter from "./discounts.js";
 import telegramRouter from "./telegram.js";
 import affiliateRouter from "./affiliate.js";
 import oxapayRouter from "./oxapay.js";
+import nowpaymentsRouter from "./nowpayments.js";
 
 const router: IRouter = Router();
 
@@ -36,5 +37,6 @@ router.use(discountsRouter);
 router.use(telegramRouter);
 router.use(affiliateRouter);
 router.use(oxapayRouter);
+router.use(nowpaymentsRouter);
 
 export default router;

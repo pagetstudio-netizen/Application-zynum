@@ -12,7 +12,7 @@ import { useCurrency } from "@/hooks/use-currency";
 import { useToast } from "@/hooks/use-toast";
 import { OmnipayModal } from "@/components/omnipay-modal";
 import { PaxityModal } from "@/components/paxity-modal";
-import { OxapayModal } from "@/components/oxapay-modal";
+import { CryptoModal } from "@/components/crypto-modal";
 import imgTMoneyOp from "@assets/images_(1)_1774832430242.png";
 import imgMoovOp   from "@assets/moov_(1)_1763835082986-GKkwwfPK_1774832019539.png";
 import imgAirtelOp from "@assets/Airtel_logo-01_1774832430216.png";
@@ -35,17 +35,17 @@ export default function Recharge() {
   const queryClient  = useQueryClient();
   const { currency } = useCurrency();
 
-  const { data: userData }    = useGetCurrentUser({ query: { retry: false } });
+  const { data: userData }    = useGetCurrentUser({ query: { retry: false } as any });
   const { data: balanceData, refetch: refetchBalance } =
-    useGetBalance({ query: { retry: false } });
+    useGetBalance({ query: { retry: false } as any });
 
   const [showBal,       setShowBal]       = useState(true);
   const [amount,        setAmount]        = useState(5000);
   const [customInput,   setCustomInput]   = useState("");
-  const [pendingMethod, setPendingMethod] = useState<"mobile" | "card" | null>(null);
+  const [pendingMethod, setPendingMethod] = useState<"mobile" | null>(null);
   const [omnipayOpen,   setOmnipayOpen]   = useState(false);
   const [paxityOpen,    setPaxityOpen]    = useState(false);
-  const [oxapayOpen,    setOxapayOpen]    = useState(false);
+  const [cryptoOpen,    setCryptoOpen]    = useState(false);
   const [transactions,  setTransactions]  = useState<Tx[]>([]);
   const [txLoading,     setTxLoading]     = useState(true);
 
@@ -57,7 +57,7 @@ export default function Recharge() {
       : `$${balance.toFixed(2)}`
     : "••••••";
 
-  useEffect(() => {
+  const fetchTx = () => {
     const token = localStorage.getItem("zynum_token");
     fetch("/api/v1/transactions", {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -66,13 +66,15 @@ export default function Recharge() {
       .then(r => r.ok ? r.json() : { transactions: [] })
       .then(d => { setTransactions(d.transactions ?? []); setTxLoading(false); })
       .catch(() => setTxLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { fetchTx(); }, []);
 
   const effectiveAmount = customInput ? Math.round(parseFloat(customInput)) : amount;
 
-  const handleMethodClick = (method: "mobile" | "card") => {
-    if (method === "mobile") navigate("/recharge/mobile");
-    else navigate("/recharge/card");
+  const handleConfirm = () => {
+    setPendingMethod(null);
+    setOmnipayOpen(true);
   };
 
   const handleSuccess = () => {
@@ -80,14 +82,7 @@ export default function Recharge() {
     setTimeout(() => {
       refetchBalance();
       queryClient.invalidateQueries({ queryKey: getGetBalanceQueryKey() });
-      const token = localStorage.getItem("zynum_token");
-      fetch("/api/v1/transactions", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        credentials: "include",
-      })
-        .then(r => r.ok ? r.json() : { transactions: [] })
-        .then(d => setTransactions(d.transactions ?? []))
-        .catch(() => {});
+      fetchTx();
     }, 3000);
   };
 
@@ -123,12 +118,13 @@ export default function Recharge() {
               <span className="font-extrabold text-[#1a2b8c] text-lg tracking-tight">ZyNum</span>
             </div>
             <div className="text-right">
-              <p className="text-xs font-semibold text-white mb-0.5">Solde du compte</p>
+              <p className="text-xs font-semibold text-white mb-0.5" style={{ color: "#ffffff" }}>Solde du compte</p>
               <div className="flex items-center gap-1.5 justify-end">
-                <p className="text-xl font-black text-white tracking-tight">{displayBal}</p>
+                <p className="text-xl font-black tracking-tight" style={{ color: "#ffffff" }}>{displayBal}</p>
                 <button
                   onClick={() => setShowBal(s => !s)}
-                  className="text-white/80 hover:text-white transition-colors"
+                  className="hover:text-white transition-colors"
+                  style={{ color: "rgba(255,255,255,0.8)" }}
                 >
                   {showBal ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                 </button>
@@ -141,7 +137,7 @@ export default function Recharge() {
         <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
           {/* Mobile Money */}
           <button
-            onClick={() => handleMethodClick("mobile")}
+            onClick={() => navigate("/recharge/mobile")}
             className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
           >
             <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via mobile Money</span>
@@ -157,7 +153,7 @@ export default function Recharge() {
 
           {/* Crypto payment */}
           <button
-            onClick={() => setOxapayOpen(true)}
+            onClick={() => setCryptoOpen(true)}
             className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
           >
             <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via Crypto monnaie</span>
@@ -219,7 +215,7 @@ export default function Recharge() {
         )}
       </div>
 
-      {/* Amount picker bottom sheet */}
+      {/* Mobile money amount picker (bottom sheet) */}
       <AnimatePresence>
         {pendingMethod && (
           <>
@@ -237,14 +233,10 @@ export default function Recharge() {
             >
               <div className="px-5 pt-4 pb-4 border-b border-gray-100">
                 <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
-                <p className="font-bold text-gray-900 text-base">
-                  {pendingMethod === "mobile" ? "💳 Montant — Mobile Money" : "💳 Montant — Carte bancaire"}
-                </p>
+                <p className="font-bold text-gray-900 text-base">💳 Montant — Mobile Money</p>
                 <p className="text-xs text-gray-400 mt-1">Minimum 300 FCFA</p>
               </div>
-
               <div className="px-5 pt-4 space-y-4">
-                {/* Preset amounts */}
                 <div className="grid grid-cols-3 gap-2">
                   {RECHARGE_PRESETS.map(a => (
                     <button
@@ -260,8 +252,6 @@ export default function Recharge() {
                     </button>
                   ))}
                 </div>
-
-                {/* Custom amount input */}
                 <div className="flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-3 border border-gray-200">
                   <span className="text-sm font-semibold text-gray-400 shrink-0">FCFA</span>
                   <input
@@ -272,8 +262,6 @@ export default function Recharge() {
                     className="flex-1 bg-transparent text-gray-900 font-bold text-base focus:outline-none placeholder:text-gray-300"
                   />
                 </div>
-
-                {/* Confirm button */}
                 <button
                   onClick={handleConfirm}
                   className="w-full py-4 rounded-2xl font-bold text-white text-base active:scale-95 transition-transform shadow-lg"
@@ -310,9 +298,9 @@ export default function Recharge() {
         />
       )}
       {user && (
-        <OxapayModal
-          open={oxapayOpen}
-          onClose={() => setOxapayOpen(false)}
+        <CryptoModal
+          open={cryptoOpen}
+          onClose={() => setCryptoOpen(false)}
           userId={user.id}
           onSuccess={handleSuccess}
         />
