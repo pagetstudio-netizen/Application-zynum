@@ -85,7 +85,7 @@ export default function ResetPassword() {
   return (
     <div style={{
       minHeight: "100dvh",
-      background: "linear-gradient(to bottom, #e8f4fd 0%, #c9e3f8 20%, #4a90d9 60%, #1a5fc8 100%)",
+      background: "linear-gradient(to bottom, #f0f7ff 0%, #d0e8f8 25%, #4a90d9 60%, #1a5fc8 100%)",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
