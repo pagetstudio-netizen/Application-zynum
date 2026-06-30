@@ -1,31 +1,10 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Lock, Eye, EyeOff, Mail, Check, ChevronLeft, Gift, ChevronDown } from "lucide-react";
+import { Loader2, Lock, Eye, EyeOff, Mail, Check, ChevronLeft, Gift } from "lucide-react";
 import { useRegisterUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 
-const COUNTRIES = [
-  { name: "Cameroun", code: "CM", dial: "+237" },
-  { name: "Côte d'Ivoire", code: "CI", dial: "+225" },
-  { name: "Sénégal", code: "SN", dial: "+221" },
-  { name: "Mali", code: "ML", dial: "+223" },
-  { name: "Burkina Faso", code: "BF", dial: "+226" },
-  { name: "Niger", code: "NE", dial: "+227" },
-  { name: "Tchad", code: "TD", dial: "+235" },
-  { name: "Gabon", code: "GA", dial: "+241" },
-  { name: "Congo", code: "CG", dial: "+242" },
-  { name: "RD Congo", code: "CD", dial: "+243" },
-  { name: "Guinée", code: "GN", dial: "+224" },
-  { name: "Togo", code: "TG", dial: "+228" },
-  { name: "Bénin", code: "BJ", dial: "+229" },
-  { name: "Madagascar", code: "MG", dial: "+261" },
-  { name: "France", code: "FR", dial: "+33" },
-  { name: "Belgique", code: "BE", dial: "+32" },
-  { name: "Maroc", code: "MA", dial: "+212" },
-  { name: "Algérie", code: "DZ", dial: "+213" },
-  { name: "Tunisie", code: "TN", dial: "+216" },
-];
 
 const INPUT_STYLE: React.CSSProperties = {
   width: "100%",
@@ -69,7 +48,6 @@ export default function Register() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [country, setCountry] = useState("CM");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -79,8 +57,6 @@ export default function Register() {
   const [referral, setReferral] = useState(referralCode);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState("");
-
-  const selectedCountry = COUNTRIES.find(c => c.code === country) ?? COUNTRIES[0];
 
   const validate = () => {
     const e: Record<string, string> = {};
