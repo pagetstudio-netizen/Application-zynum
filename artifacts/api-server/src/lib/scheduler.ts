@@ -1,4 +1,4 @@
-import { db, ordersTable, usersTable } from "@workspace/db";
+import { db, ordersTable, usersTable, transactionsTable } from "@workspace/db";
 import { eq, and, isNull, inArray, lt, sql } from "drizzle-orm";
 import { cancelOrder } from "./fivesim.js";
 
@@ -49,9 +49,35 @@ async function cancelExpiredOrders() {
   }
 }
 
+const THREE_MIN_MS = 3 * 60 * 1000;
+
+async function expireStalePayments() {
+  try {
+    const cutoff = new Date(Date.now() - THREE_MIN_MS);
+    const result = await db
+      .update(transactionsTable)
+      .set({ status: "failed" })
+      .where(
+        and(
+          eq(transactionsTable.status, "pending"),
+          eq(transactionsTable.type, "recharge"),
+          lt(transactionsTable.createdAt, cutoff),
+        ),
+      )
+      .returning({ id: transactionsTable.id });
+    if (result.length > 0) {
+      console.log(`[Scheduler] ${result.length} paiement(s) expiré(s) → failed`);
+    }
+  } catch (err) {
+    console.error("[Scheduler] Erreur expiration paiements:", err);
+  }
+}
+
 export function scheduleAutoCancel() {
   // Run immediately on startup, then every 60 seconds
   cancelExpiredOrders();
+  expireStalePayments();
   setInterval(cancelExpiredOrders, 60_000);
+  setInterval(expireStalePayments, 60_000);
   console.log("[Scheduler] Auto-cancel des commandes expirées activé (toutes les 60s)");
 }

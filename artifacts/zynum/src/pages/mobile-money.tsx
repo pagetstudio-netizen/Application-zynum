@@ -674,8 +674,8 @@ export default function MobileMoneyPage() {
               <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
             </div>
             <div>
-              <p className="font-black text-gray-900 text-xl mb-2">Traitement en cours…</p>
-              <p className="text-gray-400 text-sm">Connexion à l'opérateur</p>
+              <p className="font-black text-gray-900 text-xl mb-2">Paiement en cours…</p>
+              <p className="text-gray-400 text-sm">Veuillez patienter</p>
             </div>
           </>
         )}
@@ -690,12 +690,12 @@ export default function MobileMoneyPage() {
             </div>
             <div>
               <p className="font-black text-gray-900 text-xl mb-2">
-                {payState === "wave" ? "Finalisez le paiement" : "En attente de confirmation"}
+                {payState === "wave" ? "Finalisez le paiement" : "Paiement en cours"}
               </p>
               <p className="text-gray-500 text-sm leading-relaxed">
                 {payState === "wave"
                   ? `Cliquez ci-dessous pour finaliser votre paiement de ${amountFcfa.toLocaleString("fr-FR")} FCFA.`
-                  : "Vérifiez votre téléphone et confirmez le paiement."}
+                  : "Une invite a été envoyée sur votre téléphone. Confirmez le paiement."}
               </p>
             </div>
             {payState === "wave" && paymentUrl && (
@@ -710,6 +710,14 @@ export default function MobileMoneyPage() {
                   style={{ animationDelay: `${i * 0.2}s` }} />
               ))}
             </div>
+            {payState === "push" && (
+              <button
+                onClick={() => { stopPolling(); navigate("/recharge"); }}
+                className="mt-2 w-full py-4 rounded-full font-black text-base bg-white border-2 border-blue-200 text-blue-600 active:scale-95 transition-all"
+              >
+                Retourner à la recharge
+              </button>
+            )}
           </>
         )}
 

@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
-  ChevronLeft, Eye, EyeOff, Plus, ArrowDownLeft, History,
+  ChevronLeft, Eye, EyeOff, Plus, ArrowDownLeft, History, Clock,
 } from "lucide-react";
 import { useGetBalance, useGetCurrentUser, getGetBalanceQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -48,6 +48,7 @@ export default function Recharge() {
   const [cryptoOpen,    setCryptoOpen]    = useState(false);
   const [transactions,  setTransactions]  = useState<Tx[]>([]);
   const [txLoading,     setTxLoading]     = useState(true);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const user    = userData as { id: number; name: string; email: string } | undefined;
   const balance = balanceData?.balance ?? 0;
@@ -64,11 +65,41 @@ export default function Recharge() {
       credentials: "include",
     })
       .then(r => r.ok ? r.json() : { transactions: [] })
-      .then(d => { setTransactions(d.transactions ?? []); setTxLoading(false); })
+      .then(d => {
+        const txList: Tx[] = d.transactions ?? [];
+        setTransactions(txList);
+        setTxLoading(false);
+        // Refresh balance if any pending → completed transition happened
+        const hasPending = txList.some(tx => tx.status === "pending" && tx.type === "recharge");
+        if (!hasPending && pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+          refetchBalance();
+          queryClient.invalidateQueries({ queryKey: getGetBalanceQueryKey() });
+        }
+      })
       .catch(() => setTxLoading(false));
   };
 
-  useEffect(() => { fetchTx(); }, []);
+  useEffect(() => {
+    fetchTx();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-poll every 5s when there are pending recharge transactions
+  useEffect(() => {
+    const hasPending = transactions.some(tx => tx.status === "pending" && tx.type === "recharge");
+    if (hasPending && !pollIntervalRef.current) {
+      pollIntervalRef.current = setInterval(fetchTx, 5000);
+    } else if (!hasPending && pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+    return () => {
+      if (pollIntervalRef.current) { clearInterval(pollIntervalRef.current); pollIntervalRef.current = null; }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transactions]);
 
   const effectiveAmount = customInput ? Math.round(parseFloat(customInput)) : amount;
 
@@ -86,8 +117,12 @@ export default function Recharge() {
     }, 3000);
   };
 
+  const pendingRechargeTx = transactions.filter(tx =>
+    tx.status === "pending" && tx.type === "recharge"
+  );
+
   const visibleTx = transactions.filter(tx =>
-    tx.status === "completed" &&
+    (tx.status === "completed" || tx.status === "pending" || tx.status === "failed") &&
     (tx.type === "recharge" || tx.type === "affiliate_withdrawal" || tx.type === "withdrawal" || tx.type === "bonus")
   );
 
@@ -104,6 +139,19 @@ export default function Recharge() {
         </button>
         <h1 className="font-extrabold text-gray-900 text-lg flex-1">Recharge de compte</h1>
       </div>
+
+      {/* Paiement en cours banner */}
+      {pendingRechargeTx.length > 0 && (
+        <div className="shrink-0 mx-4 mt-3 rounded-2xl bg-blue-50 border border-blue-200 px-4 py-3 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+            <div className="w-4 h-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-blue-700">Paiement en cours</p>
+            <p className="text-xs text-blue-500">En attente de confirmation de l'opérateur…</p>
+          </div>
+        </div>
+      )}
 
       {/* Fixed top section */}
       <div className="shrink-0 px-4 pt-4 pb-0 space-y-4 bg-gray-50">
@@ -183,6 +231,8 @@ export default function Recharge() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-50">
             {visibleTx.map(tx => {
               const isCredit = tx.type === "recharge" || tx.type === "bonus";
+              const isPending = tx.status === "pending";
+              const isFailed  = tx.status === "failed";
               const amountFcfa = tx.amountFcfa ?? Math.round((tx.amountUsd ?? 0) * FCFA_PER_USD);
               const date    = tx.createdAt ? new Date(tx.createdAt) : null;
               const dateStr = date ? format(date, "dd MMM · HH:mm", { locale: fr }) : "";
@@ -195,17 +245,29 @@ export default function Recharge() {
               return (
                 <div key={tx.id} className="flex items-center gap-3 px-4 py-3.5">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                    isCredit ? "bg-blue-500" : "bg-orange-500"
+                    isPending ? "bg-blue-100" : isFailed ? "bg-red-100" : isCredit ? "bg-blue-500" : "bg-orange-500"
                   }`}>
-                    {isCredit
+                    {isPending
+                      ? <div className="w-4 h-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+                      : isFailed
+                      ? <Clock className="w-4 h-4 text-red-400" />
+                      : isCredit
                       ? <Plus className="w-4 h-4 text-white" />
                       : <ArrowDownLeft className="w-4 h-4 text-white" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900 text-sm truncate">{label}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-semibold text-gray-900 text-sm truncate">{label}</p>
+                      {isPending && (
+                        <span className="shrink-0 text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full">En cours</span>
+                      )}
+                      {isFailed && (
+                        <span className="shrink-0 text-[10px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full">Échoué</span>
+                      )}
+                    </div>
                     <p className="text-xs text-gray-400">{dateStr}</p>
                   </div>
-                  <span className={`font-bold text-sm shrink-0 ${isCredit ? "text-green-600" : "text-red-500"}`}>
+                  <span className={`font-bold text-sm shrink-0 ${isPending ? "text-gray-400" : isFailed ? "text-red-400 line-through" : isCredit ? "text-green-600" : "text-red-500"}`}>
                     {isCredit ? "+" : "−"}{amountFcfa.toLocaleString("fr-FR")} FCFA
                   </span>
                 </div>
