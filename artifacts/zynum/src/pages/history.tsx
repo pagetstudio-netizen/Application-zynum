@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, Copy, Check, X, Clock, ChevronRight,
-  Smartphone, SlidersHorizontal, Loader2,
+  Smartphone, Loader2,
   TrendingUp, Zap, Globe2, ShoppingBag, ArrowRight,
 } from "lucide-react";
 import { NoData } from "@/components/ui/no-data";
@@ -13,26 +13,11 @@ import {
 } from "@workspace/api-client-react";
 import { useCurrency } from "@/hooks/use-currency";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 
 const DURATION = 360;
 
 type FilterKey = "all" | "received" | "pending" | "canceled";
-
-const FILTERS: { key: FilterKey; label: string }[] = [
-  { key: "all",      label: "Tous" },
-  { key: "received", label: "Reçus" },
-  { key: "pending",  label: "En attente" },
-  { key: "canceled", label: "Annulés" },
-];
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
-  RECEIVED: { label: "SMS reçu",    color: "#059669", bg: "#ECFDF5", border: "#A7F3D0", dot: "#10B981" },
-  FINISHED: { label: "SMS reçu",    color: "#059669", bg: "#ECFDF5", border: "#A7F3D0", dot: "#10B981" },
-  PENDING:  { label: "En attente",  color: "#D97706", bg: "#FFFBEB", border: "#FDE68A", dot: "#F59E0B" },
-  CANCELED: { label: "Annulé",      color: "#6B7280", bg: "#F9FAFB", border: "#E5E7EB", dot: "#9CA3AF" },
-  TIMEOUT:  { label: "Expiré",      color: "#6B7280", bg: "#F9FAFB", border: "#E5E7EB", dot: "#9CA3AF" },
-  BANNED:   { label: "Annulé",      color: "#6B7280", bg: "#F9FAFB", border: "#E5E7EB", dot: "#9CA3AF" },
-};
 
 function matchesFilter(status: string, filter: FilterKey): boolean {
   if (filter === "all") return true;
@@ -63,12 +48,13 @@ function useCountdown(createdAt: string, active: boolean) {
 function CopyButton({ text, label }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const { t } = useLanguage();
   const handle = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast({ title: label ? `${label} copié !` : "Copié !", duration: 2000 });
+    toast({ title: label ? `${label} ${t("hist_copied")}` : t("hist_copied"), duration: 2000 });
   };
   return (
     <button
@@ -77,7 +63,7 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
       style={{ backgroundColor: "#F0F4FF", color: "#2563EB" }}
     >
       {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-      {label ?? (copied ? "Copié !" : "Copier")}
+      {label ?? (copied ? t("hist_copied") : t("hist_copy_code_btn"))}
     </button>
   );
 }
@@ -107,6 +93,17 @@ function OrderCard({ order, onCancel, canceling, currency }: {
   canceling: boolean;
   currency: string;
 }) {
+  const { t } = useLanguage();
+
+  const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; dot: string }> = {
+    RECEIVED: { label: t("history_status_received"), color: "#059669", bg: "#ECFDF5", border: "#A7F3D0", dot: "#10B981" },
+    FINISHED: { label: t("history_status_received"), color: "#059669", bg: "#ECFDF5", border: "#A7F3D0", dot: "#10B981" },
+    PENDING:  { label: t("history_status_pending"),  color: "#D97706", bg: "#FFFBEB", border: "#FDE68A", dot: "#F59E0B" },
+    CANCELED: { label: t("history_status_canceled"), color: "#6B7280", bg: "#F9FAFB", border: "#E5E7EB", dot: "#9CA3AF" },
+    TIMEOUT:  { label: t("history_status_timeout"),  color: "#6B7280", bg: "#F9FAFB", border: "#E5E7EB", dot: "#9CA3AF" },
+    BANNED:   { label: t("history_status_canceled"), color: "#6B7280", bg: "#F9FAFB", border: "#E5E7EB", dot: "#9CA3AF" },
+  };
+
   const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.CANCELED;
   const isActive = order.status === "PENDING";
   const isReceived = order.status === "RECEIVED" || order.status === "FINISHED";
@@ -132,7 +129,6 @@ function OrderCard({ order, onCancel, canceling, currency }: {
       className="bg-white rounded-2xl overflow-hidden mx-4"
       style={{ boxShadow: "0 1px 8px rgba(0,0,0,0.07)", border: "1px solid #F1F5F9" }}
     >
-      {/* Top row */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3">
         <ServiceIcon icon={order.serviceIcon} color={order.serviceColor} name={order.serviceName} size={44} />
         <div className="flex-1 min-w-0">
@@ -148,14 +144,13 @@ function OrderCard({ order, onCancel, canceling, currency }: {
           </div>
           <p className="text-xs text-gray-400 mt-0.5">{order.countryName}</p>
         </div>
-        {/* Right side: OTP box / countdown / refund */}
         <div className="shrink-0 text-right">
           {isReceived && order.smsCode ? (
             <div
               className="px-3 py-1.5 rounded-xl text-center"
               style={{ backgroundColor: "#ECFDF5", border: "1.5px solid #6EE7B7" }}
             >
-              <p className="text-[10px] font-semibold text-green-600 mb-0.5">Code OTP</p>
+              <p className="text-[10px] font-semibold text-green-600 mb-0.5">{t("hist_otp_label")}</p>
               <p className="text-base font-black text-green-700 font-mono tracking-wider">{order.smsCode}</p>
             </div>
           ) : isActive ? (
@@ -163,7 +158,7 @@ function OrderCard({ order, onCancel, canceling, currency }: {
               className="px-3 py-1.5 rounded-xl text-center"
               style={{ backgroundColor: "#FFFBEB", border: "1.5px solid #FDE68A" }}
             >
-              <p className="text-[10px] font-semibold text-amber-600 mb-0.5">Temps restant</p>
+              <p className="text-[10px] font-semibold text-amber-600 mb-0.5">{t("hist_time_remaining")}</p>
               <p className="text-base font-black text-amber-700 font-mono">{mm}:{ss}</p>
             </div>
           ) : isCanceled ? (
@@ -171,19 +166,17 @@ function OrderCard({ order, onCancel, canceling, currency }: {
               className="px-3 py-1.5 rounded-xl text-center"
               style={{ backgroundColor: "#F0FFF4", border: "1.5px solid #C3FAD5" }}
             >
-              <p className="text-[10px] font-semibold text-emerald-600 mb-0.5">Remboursement</p>
+              <p className="text-[10px] font-semibold text-emerald-600 mb-0.5">{t("hist_refund_label")}</p>
               <p className="text-sm font-black text-emerald-700">{refundDisplay}</p>
             </div>
           ) : null}
         </div>
       </div>
 
-      {/* Phone number */}
       <div className="px-4 pb-2">
         <p className="text-base font-black text-gray-900 font-mono tracking-wide">{order.phone}</p>
       </div>
 
-      {/* Date + price */}
       <div className="flex items-center justify-between px-4 pb-3">
         <div className="flex items-center gap-1.5 text-xs text-gray-400">
           <Clock className="w-3.5 h-3.5" />
@@ -192,14 +185,13 @@ function OrderCard({ order, onCancel, canceling, currency }: {
         <span className="text-xs font-bold text-gray-700">{priceDisplay}</span>
       </div>
 
-      {/* Action buttons */}
       {(isReceived || isActive) && (
         <div className="flex gap-2 px-4 pb-4">
           {isReceived && order.phone && (
-            <CopyButton text={order.phone} label="Copier le numéro" />
+            <CopyButton text={order.phone} label={t("hist_copy_number")} />
           )}
           {isReceived && order.smsCode && (
-            <CopyButton text={order.smsCode} label="Copier le code" />
+            <CopyButton text={order.smsCode} label={t("hist_copy_code_btn")} />
           )}
           {isActive && (
             <button
@@ -209,7 +201,7 @@ function OrderCard({ order, onCancel, canceling, currency }: {
               style={{ backgroundColor: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA" }}
             >
               {canceling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
-              Annuler
+              {t("hist_cancel_btn")}
             </button>
           )}
         </div>
@@ -219,6 +211,7 @@ function OrderCard({ order, onCancel, canceling, currency }: {
 }
 
 function SummaryCard({ orders, currency }: { orders: any[]; currency: string }) {
+  const { t } = useLanguage();
   const total    = orders.length;
   const received = orders.filter(o => o.status === "RECEIVED" || o.status === "FINISHED").length;
   const canceled = orders.filter(o => ["CANCELED","TIMEOUT","BANNED"].includes(o.status)).length;
@@ -228,10 +221,10 @@ function SummaryCard({ orders, currency }: { orders: any[]; currency: string }) 
     : `$${spent.toFixed(2)}`;
 
   const stats = [
-    { label: "Total achats", value: String(total), color: "#2563EB", bg: "#EFF6FF" },
-    { label: "SMS reçus",    value: String(received), color: "#059669", bg: "#ECFDF5" },
-    { label: "Annulés",      value: String(canceled), color: "#DC2626", bg: "#FEF2F2" },
-    { label: "Dépensé",      value: spentDisplay,   color: "#7C3AED", bg: "#F5F3FF" },
+    { label: t("hist_stat_total"),    value: String(total),    color: "#2563EB", bg: "#EFF6FF" },
+    { label: t("hist_stat_received"), value: String(received), color: "#059669", bg: "#ECFDF5" },
+    { label: t("hist_stat_canceled"), value: String(canceled), color: "#DC2626", bg: "#FEF2F2" },
+    { label: t("hist_stat_spent"),    value: spentDisplay,     color: "#7C3AED", bg: "#F5F3FF" },
   ];
 
   return (
@@ -240,13 +233,13 @@ function SummaryCard({ orders, currency }: { orders: any[]; currency: string }) 
       style={{ background: "white", boxShadow: "0 1px 8px rgba(0,0,0,0.07)", border: "1px solid #F1F5F9" }}
     >
       <div className="grid grid-cols-4 gap-2">
-        {stats.map((s) => (
+        {stats.map((s, i) => (
           <div key={s.label} className="flex flex-col items-center gap-1">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-0.5" style={{ backgroundColor: s.bg }}>
-              {s.label === "Total achats" && <ShoppingBag className="w-4 h-4" style={{ color: s.color }} />}
-              {s.label === "SMS reçus"    && <Check className="w-4 h-4" style={{ color: s.color }} />}
-              {s.label === "Annulés"      && <X className="w-4 h-4" style={{ color: s.color }} />}
-              {s.label === "Dépensé"      && <Smartphone className="w-4 h-4" style={{ color: s.color }} />}
+              {i === 0 && <ShoppingBag className="w-4 h-4" style={{ color: s.color }} />}
+              {i === 1 && <Check className="w-4 h-4" style={{ color: s.color }} />}
+              {i === 2 && <X className="w-4 h-4" style={{ color: s.color }} />}
+              {i === 3 && <Smartphone className="w-4 h-4" style={{ color: s.color }} />}
             </div>
             <p className="text-sm font-black text-gray-900">{s.value}</p>
             <p className="text-[10px] text-gray-400 text-center leading-tight">{s.label}</p>
@@ -258,6 +251,7 @@ function SummaryCard({ orders, currency }: { orders: any[]; currency: string }) 
 }
 
 function StatsBar({ orders }: { orders: any[] }) {
+  const { t } = useLanguage();
   const received = orders.filter(o => o.status === "RECEIVED" || o.status === "FINISHED");
   const rate = orders.length ? Math.round((received.length / orders.length) * 1000) / 10 : 0;
   const countries = new Set(orders.map(o => o.country).filter(Boolean)).size;
@@ -273,21 +267,21 @@ function StatsBar({ orders }: { orders: any[] }) {
             <TrendingUp className="w-4 h-4 text-blue-600" />
           </div>
           <p className="text-sm font-black text-gray-900">{rate}%</p>
-          <p className="text-[10px] text-gray-400 leading-tight">Taux de réussite</p>
+          <p className="text-[10px] text-gray-400 leading-tight">{t("hist_stat_rate")}</p>
         </div>
         <div>
           <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center mx-auto mb-1">
             <Zap className="w-4 h-4 text-green-600" />
           </div>
           <p className="text-sm font-black text-gray-900">~30 sec</p>
-          <p className="text-[10px] text-gray-400 leading-tight">Temps moyen</p>
+          <p className="text-[10px] text-gray-400 leading-tight">{t("hist_stat_avg_time")}</p>
         </div>
         <div>
           <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center mx-auto mb-1">
             <Globe2 className="w-4 h-4 text-purple-600" />
           </div>
           <p className="text-sm font-black text-gray-900">{countries}</p>
-          <p className="text-[10px] text-gray-400 leading-tight">Pays utilisés</p>
+          <p className="text-[10px] text-gray-400 leading-tight">{t("hist_stat_countries")}</p>
         </div>
       </div>
     </div>
@@ -295,23 +289,25 @@ function StatsBar({ orders }: { orders: any[] }) {
 }
 
 function EmptyState({ filter }: { filter: FilterKey }) {
-  const msg = filter === "all"
-    ? "Vous n'avez pas encore acheté de numéro."
-    : filter === "received" ? "Aucun SMS reçu pour l'instant."
-    : filter === "pending"  ? "Aucune commande en attente."
-    : "Aucune commande annulée.";
+  const { t } = useLanguage();
+
+  const msg =
+    filter === "all"      ? t("hist_empty_all") :
+    filter === "received" ? t("hist_empty_received") :
+    filter === "pending"  ? t("hist_empty_pending") :
+                            t("hist_empty_canceled");
 
   return (
     <NoData
-      title="Aucun achat trouvé"
+      title={t("hist_empty_title")}
       description={msg}
       action={filter === "all" ? (
         <button
           onClick={() => window.dispatchEvent(new CustomEvent("zynum:goto-tab", { detail: "numeros" }))}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold text-white shadow-lg shadow-blue-500/30"
+          className="flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold text-white"
           style={{ background: "linear-gradient(135deg, #2563EB, #4F46E5)" }}
         >
-          Acheter un numéro <ArrowRight className="w-4 h-4" />
+          {t("hist_buy_btn")} <ArrowRight className="w-4 h-4" />
         </button>
       ) : undefined}
     />
@@ -327,6 +323,14 @@ export default function OrderHistory({
 } = {}) {
   const { currency } = useCurrency();
   const { toast } = useToast();
+  const { t } = useLanguage();
+
+  const FILTERS: { key: FilterKey; label: string }[] = [
+    { key: "all",      label: t("hist_filter_btn_all") },
+    { key: "received", label: t("hist_filter_btn_received") },
+    { key: "pending",  label: t("hist_filter_btn_pending") },
+    { key: "canceled", label: t("hist_filter_btn_canceled") },
+  ];
 
   const [internalFilter, setInternalFilter] = useState<FilterKey>("all");
   const filter    = externalFilter    ?? internalFilter;
@@ -369,9 +373,9 @@ export default function OrderHistory({
     mutation: {
       onSuccess: (data) => {
         setAllOrders(prev => prev.map(o => o.id === data.order.id ? data.order : o));
-        toast({ title: "Commande annulée", description: "Le remboursement a été effectué." });
+        toast({ title: t("hist_cancel_success"), description: t("hist_cancel_refund_desc") });
       },
-      onError: () => toast({ variant: "destructive", title: "Erreur", description: "Impossible d'annuler." }),
+      onError: () => toast({ variant: "destructive", title: t("history_cancel"), description: t("hist_cancel_error") }),
     },
   });
 
@@ -401,7 +405,7 @@ export default function OrderHistory({
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Rechercher un numéro, un service ou un pays..."
+            placeholder={t("hist_search_ph")}
             className="w-full pl-10 pr-4 h-12 rounded-2xl text-sm bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all"
           />
           {search && (
@@ -438,18 +442,16 @@ export default function OrderHistory({
             <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center">
               <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
             </div>
-            <p className="text-xs text-gray-400">Chargement…</p>
+            <p className="text-xs text-gray-400">{t("hist_loading")}</p>
           </div>
         </div>
       ) : (
         <div className="flex flex-col gap-3 pt-4">
 
-          {/* Summary card */}
           {allOrders.length > 0 && filter === "all" && !search && (
             <SummaryCard orders={allOrders} currency={currency} />
           )}
 
-          {/* Orders list */}
           {filtered.length === 0 ? (
             <EmptyState filter={filter} />
           ) : (
@@ -468,14 +470,12 @@ export default function OrderHistory({
             </AnimatePresence>
           )}
 
-          {/* Stats bar */}
           {allOrders.length > 0 && !search && filter === "all" && (
             <div className="mt-1">
               <StatsBar orders={allOrders} />
             </div>
           )}
 
-          {/* Load more */}
           {hasMore && !search && (
             <div className="flex justify-center pb-4 pt-2">
               <button
@@ -484,7 +484,7 @@ export default function OrderHistory({
                 className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold text-blue-600 border border-blue-200 bg-white hover:bg-blue-50 transition-all disabled:opacity-50"
               >
                 {isFetching ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />}
-                Charger plus
+                {t("hist_load_more")}
               </button>
             </div>
           )}
