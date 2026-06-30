@@ -288,7 +288,6 @@ router.get("/v1/admin/crypto-payments", ...auth, async (req, res): Promise<void>
     createdAt: transactionsTable.createdAt,
     userName:  usersTable.name,
     userEmail: usersTable.email,
-    userPhone: usersTable.phone,
   })
     .from(transactionsTable)
     .leftJoin(usersTable, eq(transactionsTable.userId, usersTable.id))
