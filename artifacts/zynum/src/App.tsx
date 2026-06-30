@@ -18,6 +18,7 @@ import CardPayment from "@/pages/card-payment";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import Admin from "@/pages/admin";
+import HelpCenter from "@/pages/aide";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -76,6 +77,7 @@ function Router() {
         <Route path="/forgot-password" component={ForgotPassword} />
         <Route path="/reset-password" component={ResetPassword} />
         <Route path="/admin" component={Admin} />
+        <Route path="/aide" component={HelpCenter} />
         <Route path="/history"><Redirect to="/dashboard" /></Route>
         <Route component={NotFound} />
       </Switch>

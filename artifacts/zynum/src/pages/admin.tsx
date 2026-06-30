@@ -1208,6 +1208,11 @@ function AdminSettings() {
         support_email: data.settings.support_email ?? "",
         support_telegram: data.settings.support_telegram ?? "",
         support_whatsapp: data.settings.support_whatsapp ?? "",
+        support_whatsapp_enabled: data.settings.support_whatsapp_enabled ?? "true",
+        support_facebook: data.settings.support_facebook ?? "",
+        support_facebook_enabled: data.settings.support_facebook_enabled ?? "true",
+        support_whatsapp_channel: data.settings.support_whatsapp_channel ?? "",
+        support_whatsapp_channel_enabled: data.settings.support_whatsapp_channel_enabled ?? "true",
         support_channel: data.settings.support_channel ?? "telegram",
         maintenance_mode: data.settings.maintenance_mode ?? "false",
         maintenance_buy: data.settings.maintenance_buy ?? "false",
@@ -1308,7 +1313,85 @@ function AdminSettings() {
           </select>
         </div>
         <Field k="support_telegram" label="Lien Telegram" />
-        <Field k="support_whatsapp" label="Lien WhatsApp" />
+        <Field k="support_whatsapp" label="Lien WhatsApp support (ex: https://wa.me/2250XXXXXXXX)" />
+      </div>
+
+      {/* ── Centre d'aide — boutons de contact ── */}
+      <div className="rounded-2xl border border-green-500/20 bg-green-500/5 p-6 space-y-4">
+        <h3 className="font-bold text-white flex items-center gap-2">
+          <HelpCircle className="w-5 h-5 text-green-400" /> Centre d'aide — Boutons de contact
+        </h3>
+        <p className="text-xs text-muted-foreground">Configurez les boutons visibles sur la page Centre d'aide. Désactivez un bouton pour le masquer sans supprimer le lien.</p>
+
+        {/* WhatsApp support */}
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-white">Bouton WhatsApp support</p>
+            <button
+              onClick={() => setForm({ ...form, support_whatsapp_enabled: form.support_whatsapp_enabled === "true" ? "false" : "true" })}
+              className={`relative w-11 h-6 rounded-full transition-colors ${form.support_whatsapp_enabled === "true" ? "bg-green-500" : "bg-white/20"}`}
+            >
+              <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.support_whatsapp_enabled === "true" ? "translate-x-6" : "translate-x-1"}`} />
+            </button>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Lien WhatsApp</label>
+            <input
+              type="text"
+              value={form.support_whatsapp ?? ""}
+              onChange={(e) => setForm({ ...form, support_whatsapp: e.target.value })}
+              placeholder="https://wa.me/2250XXXXXXXX"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Ce lien est aussi utilisé sur la bannière WhatsApp en haut de la page.</p>
+        </div>
+
+        {/* WhatsApp Channel */}
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-white">Bouton Canal WhatsApp</p>
+            <button
+              onClick={() => setForm({ ...form, support_whatsapp_channel_enabled: form.support_whatsapp_channel_enabled === "true" ? "false" : "true" })}
+              className={`relative w-11 h-6 rounded-full transition-colors ${form.support_whatsapp_channel_enabled === "true" ? "bg-green-500" : "bg-white/20"}`}
+            >
+              <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.support_whatsapp_channel_enabled === "true" ? "translate-x-6" : "translate-x-1"}`} />
+            </button>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Lien Canal WhatsApp</label>
+            <input
+              type="text"
+              value={form.support_whatsapp_channel ?? ""}
+              onChange={(e) => setForm({ ...form, support_whatsapp_channel: e.target.value })}
+              placeholder="https://whatsapp.com/channel/..."
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm"
+            />
+          </div>
+        </div>
+
+        {/* Facebook */}
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-white">Bouton Page Facebook</p>
+            <button
+              onClick={() => setForm({ ...form, support_facebook_enabled: form.support_facebook_enabled === "true" ? "false" : "true" })}
+              className={`relative w-11 h-6 rounded-full transition-colors ${form.support_facebook_enabled === "true" ? "bg-blue-500" : "bg-white/20"}`}
+            >
+              <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.support_facebook_enabled === "true" ? "translate-x-6" : "translate-x-1"}`} />
+            </button>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Lien Page Facebook</label>
+            <input
+              type="text"
+              value={form.support_facebook ?? ""}
+              onChange={(e) => setForm({ ...form, support_facebook: e.target.value })}
+              placeholder="https://facebook.com/zynum"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="rounded-2xl border border-white/10 bg-card/40 p-6 space-y-4">

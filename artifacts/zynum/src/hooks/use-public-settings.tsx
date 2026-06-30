@@ -5,6 +5,11 @@ export interface PublicSettings {
   support_email?: string;
   support_telegram?: string;
   support_whatsapp?: string;
+  support_whatsapp_enabled?: string;
+  support_facebook?: string;
+  support_facebook_enabled?: string;
+  support_whatsapp_channel?: string;
+  support_whatsapp_channel_enabled?: string;
   maintenance_mode?: string;
   maintenance_buy?: string;
   commission_type?: string;
@@ -18,7 +23,8 @@ export function usePublicSettings() {
     queryFn: async () => {
       const res = await fetch("/api/v1/settings");
       if (!res.ok) return {};
-      return res.json();
+      const json = await res.json();
+      return (json.settings ?? json) as PublicSettings;
     },
     staleTime: 5 * 60 * 1000,
   });
