@@ -1802,6 +1802,75 @@ function AdminOmniPay() {
 /* ═══════════════════════════════════════════════════════════════════════════
    SECTION: PAYMENT PROVIDERS
 ══════════════════════════════════════════════════════════════════════════════ */
+/* ─── CRYPTO PROVIDER TOGGLES ───────────────────────────────────────────── */
+function AdminCryptoToggles() {
+  const { toast } = useToast();
+  const { data: settingsData, loading, refetch } = useAdminFetch<{ settings: Record<string, string> }>("/v1/admin/settings", []);
+  const [saving, setSaving] = useState<string | null>(null);
+
+  const settings = settingsData?.settings ?? {};
+  const oxapayEnabled     = settings["oxapay_enabled"] !== "false";
+  const nowpaymentsEnabled = settings["nowpayments_enabled"] !== "false";
+
+  const toggle = async (key: string, current: boolean) => {
+    setSaving(key);
+    try {
+      await adminPost("/v1/admin/settings", { key, value: current ? "false" : "true" });
+      toast({ title: current ? "Désactivé" : "Activé", description: key === "oxapay_enabled" ? "OxaPay mis à jour" : "NowPayments mis à jour" });
+      refetch();
+    } catch {
+      toast({ variant: "destructive", title: "Erreur", description: "Impossible de sauvegarder" });
+    } finally { setSaving(null); }
+  };
+
+  const providers = [
+    { key: "oxapay_enabled",      label: "OxaPay",      desc: "Paiement via adresse crypto OxaPay (iframe)", enabled: oxapayEnabled,      emoji: "🔶" },
+    { key: "nowpayments_enabled", label: "NowPayments", desc: "Paiement USDT, BTC, ETH, LTC, TRX (QR code)", enabled: nowpaymentsEnabled, emoji: "₿" },
+  ];
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-card/40 overflow-hidden mb-6">
+      <div className="px-5 py-4 border-b border-white/10 flex items-center gap-3">
+        <span className="text-lg">₿</span>
+        <h3 className="font-semibold text-white">Passerelles Crypto</h3>
+        <span className="text-xs text-muted-foreground ml-auto">Activer / désactiver les boutons dans le modal de recharge</span>
+      </div>
+      {loading ? (
+        <div className="flex justify-center py-6"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
+      ) : (
+        <div className="divide-y divide-white/5">
+          {providers.map(p => (
+            <div key={p.key} className="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <span className="text-2xl">{p.emoji}</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-white">{p.label}</p>
+                  <p className="text-xs text-muted-foreground truncate">{p.desc}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => toggle(p.key, p.enabled)}
+                disabled={saving === p.key}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl border font-semibold text-sm transition-all shrink-0 ${
+                  p.enabled
+                    ? "bg-green-500/15 text-green-400 border-green-500/30 hover:bg-green-500/25"
+                    : "bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20"
+                }`}
+              >
+                {saving === p.key
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : p.enabled
+                    ? <><ToggleRight className="w-4 h-4" /> Activé</>
+                    : <><ToggleLeft className="w-4 h-4" /> Désactivé</>}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AdminPayments() {
   const { toast } = useToast();
   const { data, loading, refetch } = useAdminFetch<any>("/v1/admin/payment-providers", []);
@@ -1834,6 +1903,8 @@ function AdminPayments() {
 
   return (
     <div className="space-y-6">
+      <AdminCryptoToggles />
+
       <AdminOmniPay />
 
       <div className="flex items-center gap-3 mb-1">
@@ -2880,41 +2951,82 @@ const ADMIN_NAV: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<AdminTab>("stats");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const current = ADMIN_NAV.find((n) => n.id === activeTab);
 
+  const selectTab = (id: AdminTab) => { setActiveTab(id); setMobileMenuOpen(false); };
+
   return (
-    <div className="space-y-0">
+    <div className="w-full min-w-0 overflow-hidden">
       {/* Admin header */}
-      <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl border border-primary/20 bg-primary/5">
-        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center"><Shield className="w-5 h-5 text-primary" /></div>
-        <div>
-          <h2 className="text-lg font-bold text-white">Panneau Administrateur</h2>
-          <p className="text-xs text-muted-foreground">Gestion complète de la plateforme ZyNum</p>
+      <div className="flex items-center gap-3 mb-4 p-3 sm:p-4 rounded-2xl border border-primary/20 bg-primary/5">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+          <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
         </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base sm:text-lg font-bold text-white leading-tight">Panneau Admin</h2>
+          <p className="text-xs text-muted-foreground hidden sm:block">Gestion complète de la plateforme ZyNum</p>
+        </div>
+        {/* Mobile: current tab label */}
+        <button
+          onClick={() => setMobileMenuOpen(v => !v)}
+          className="sm:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs font-semibold shrink-0"
+        >
+          {current?.icon}
+          <span className="max-w-[80px] truncate">{current?.label}</span>
+          <ChevronRight className={`w-3 h-3 transition-transform ${mobileMenuOpen ? "rotate-90" : ""}`} />
+        </button>
       </div>
 
-      {/* Tab nav — horizontal scroll */}
-      <div className="flex gap-1 overflow-x-auto pb-1 mb-6 scrollbar-none">
+      {/* Mobile menu dropdown */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+            className="sm:hidden overflow-hidden mb-4 rounded-2xl border border-white/10 bg-card/60 backdrop-blur"
+          >
+            <div className="grid grid-cols-2 gap-1 p-2">
+              {ADMIN_NAV.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => selectTab(item.id)}
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium text-left transition-all ${
+                    activeTab === item.id
+                      ? "bg-primary text-white"
+                      : "text-muted-foreground hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  {item.icon}
+                  <span className="truncate">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop Tab nav — horizontal scroll */}
+      <div className="hidden sm:flex gap-1 overflow-x-auto pb-1 mb-5 scrollbar-none">
         {ADMIN_NAV.map((item) => (
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
               activeTab === item.id
                 ? "bg-primary text-white shadow-lg shadow-primary/20"
                 : "text-muted-foreground hover:text-white hover:bg-white/5 border border-transparent"
             }`}
           >
             {item.icon}
-            {item.label}
+            <span className="hidden md:inline">{item.label}</span>
           </button>
         ))}
       </div>
 
       {/* Section title */}
-      <div className="flex items-center gap-2 mb-5">
-        <div className="text-primary">{current?.icon}</div>
-        <h3 className="text-base font-bold text-white">{current?.label}</h3>
+      <div className="flex items-center gap-2 mb-4">
+        <div className="text-primary shrink-0">{current?.icon}</div>
+        <h3 className="text-sm sm:text-base font-bold text-white truncate">{current?.label}</h3>
       </div>
 
       {/* Content */}

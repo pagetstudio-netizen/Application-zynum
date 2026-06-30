@@ -51,6 +51,25 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
   const [timeLeft,     setTimeLeft]     = useState(60 * 60);   // 60 min NowPayments
   const [npData,       setNpData]       = useState<NpData | null>(null);
   const [opData,       setOpData]       = useState<OpData | null>(null);
+  const [oxapayEnabled,     setOxapayEnabled]     = useState(true);
+  const [nowpaymentsEnabled, setNowpaymentsEnabled] = useState(true);
+
+  // Fetch which providers are enabled by admin
+  useEffect(() => {
+    fetch("/api/v1/settings")
+      .then(r => r.json())
+      .then((d: { settings?: Record<string, string> }) => {
+        const s = d.settings ?? {};
+        const oxEnabled = s["oxapay_enabled"] !== "false";
+        const npEnabled = s["nowpayments_enabled"] !== "false";
+        setOxapayEnabled(oxEnabled);
+        setNowpaymentsEnabled(npEnabled);
+        // Auto-select an enabled provider
+        if (!npEnabled && oxEnabled) setProvider("oxapay");
+        if (!oxEnabled && npEnabled) setProvider("nowpayments");
+      })
+      .catch(() => {});
+  }, [open]);
 
   const pollRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -267,32 +286,50 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
         {step === "amount" && (
           <div style={{ overflowY: "auto", padding: "16px 20px 36px" }}>
 
-            {/* Provider tabs */}
-            <div style={{ display: "flex", background: "#f3f4f6", borderRadius: 12, padding: 4, marginBottom: 20, gap: 4 }}>
-              {([
-                { id: "nowpayments" as Provider, label: "NowPayments", badge: "Recommandé" },
-                { id: "oxapay"      as Provider, label: "OxaPay",      badge: null },
-              ] as { id: Provider; label: string; badge: string | null }[]).map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => setProvider(p.id)}
-                  style={{
-                    flex: 1, padding: "8px 4px", borderRadius: 9, border: "none", cursor: "pointer",
-                    fontWeight: 700, fontSize: 12, transition: "all 0.15s",
-                    background: provider === p.id ? "#fff" : "transparent",
-                    color: provider === p.id ? "#111827" : "#9ca3af",
-                    boxShadow: provider === p.id ? "0 1px 4px rgba(0,0,0,0.10)" : "none",
-                  }}
-                >
-                  {p.label}
-                  {p.badge && provider === p.id && (
-                    <span style={{ display: "block", fontSize: 9, color: "#10b981", fontWeight: 800, marginTop: 1 }}>
-                      {p.badge}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
+            {/* Provider tabs — only show enabled providers */}
+            {(!oxapayEnabled && !nowpaymentsEnabled) ? (
+              <div style={{ background: "#fef2f2", borderRadius: 12, padding: "12px 14px", marginBottom: 20, textAlign: "center" }}>
+                <p style={{ fontSize: 13, color: "#dc2626", fontWeight: 600, margin: 0 }}>
+                  ⚠️ Aucune passerelle crypto disponible pour le moment.
+                </p>
+              </div>
+            ) : (
+              (() => {
+                const tabs = [
+                  { id: "nowpayments" as Provider, label: "NowPayments", badge: "Recommandé", enabled: nowpaymentsEnabled },
+                  { id: "oxapay"      as Provider, label: "OxaPay",      badge: null,          enabled: oxapayEnabled },
+                ].filter(p => p.enabled);
+                return tabs.length > 1 ? (
+                  <div style={{ display: "flex", background: "#f3f4f6", borderRadius: 12, padding: 4, marginBottom: 20, gap: 4 }}>
+                    {tabs.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => setProvider(p.id)}
+                        style={{
+                          flex: 1, padding: "8px 4px", borderRadius: 9, border: "none", cursor: "pointer",
+                          fontWeight: 700, fontSize: 12, transition: "all 0.15s",
+                          background: provider === p.id ? "#fff" : "transparent",
+                          color: provider === p.id ? "#111827" : "#9ca3af",
+                          boxShadow: provider === p.id ? "0 1px 4px rgba(0,0,0,0.10)" : "none",
+                        }}
+                      >
+                        {p.label}
+                        {p.badge && provider === p.id && (
+                          <span style={{ display: "block", fontSize: 9, color: "#10b981", fontWeight: 800, marginTop: 1 }}>
+                            {p.badge}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ background: "#f0fdf4", borderRadius: 12, padding: "10px 14px", marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 16 }}>✅</span>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: "#059669", margin: 0 }}>{tabs[0]?.label}</p>
+                  </div>
+                );
+              })()
+            )}
 
             {/* NowPayments: currency selector */}
             {provider === "nowpayments" && (
