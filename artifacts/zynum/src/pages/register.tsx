@@ -1,86 +1,98 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, User, Lock, Eye, EyeOff, Mail, Globe2, Check } from "lucide-react";
+import { Loader2, Lock, Eye, EyeOff, Mail, Check, ChevronLeft, Gift, ChevronDown } from "lucide-react";
 import { useRegisterUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from "@/hooks/use-language";
 
-const BG = "/auth-bg.png";
+const COUNTRIES = [
+  { name: "Cameroun", code: "CM", dial: "+237" },
+  { name: "Côte d'Ivoire", code: "CI", dial: "+225" },
+  { name: "Sénégal", code: "SN", dial: "+221" },
+  { name: "Mali", code: "ML", dial: "+223" },
+  { name: "Burkina Faso", code: "BF", dial: "+226" },
+  { name: "Niger", code: "NE", dial: "+227" },
+  { name: "Tchad", code: "TD", dial: "+235" },
+  { name: "Gabon", code: "GA", dial: "+241" },
+  { name: "Congo", code: "CG", dial: "+242" },
+  { name: "RD Congo", code: "CD", dial: "+243" },
+  { name: "Guinée", code: "GN", dial: "+224" },
+  { name: "Togo", code: "TG", dial: "+228" },
+  { name: "Bénin", code: "BJ", dial: "+229" },
+  { name: "Madagascar", code: "MG", dial: "+261" },
+  { name: "France", code: "FR", dial: "+33" },
+  { name: "Belgique", code: "BE", dial: "+32" },
+  { name: "Maroc", code: "MA", dial: "+212" },
+  { name: "Algérie", code: "DZ", dial: "+213" },
+  { name: "Tunisie", code: "TN", dial: "+216" },
+];
 
-const BTN_PRIMARY: React.CSSProperties = {
-  width: "100%", height: 54, borderRadius: 30,
-  background: "#1A3FFF", color: "#ffffff",
-  fontWeight: 900, fontSize: 16, border: "none",
-  cursor: "pointer", display: "flex", alignItems: "center",
-  justifyContent: "center", gap: 8,
-  boxShadow: "0 6px 32px rgba(26,63,255,0.45)",
-  transition: "opacity 0.15s",
+const INPUT_STYLE: React.CSSProperties = {
+  width: "100%",
+  height: 54,
+  borderRadius: 14,
+  border: "none",
+  background: "#ffffff",
+  paddingLeft: 48,
+  paddingRight: 16,
+  fontSize: 15,
+  color: "#1a1a2e",
+  outline: "none",
+  boxSizing: "border-box",
+  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
 };
-const BTN_OUTLINE: React.CSSProperties = {
-  width: "100%", height: 54, borderRadius: 30,
-  background: "rgba(255,255,255,0.12)",
-  border: "2px solid rgba(255,255,255,0.7)",
-  color: "#ffffff", fontWeight: 800, fontSize: 15,
-  cursor: "pointer", display: "flex", alignItems: "center",
-  justifyContent: "center", gap: 8,
-  transition: "opacity 0.15s",
+
+const ICON_WRAP: React.CSSProperties = {
+  position: "relative",
+  width: "100%",
 };
-const LABEL: React.CSSProperties = {
-  color: "rgba(255,255,255,0.7)", fontSize: 11,
-  fontWeight: 700, textTransform: "uppercase",
-  letterSpacing: "0.08em", display: "block", marginBottom: 6,
+
+const ICON_POS: React.CSSProperties = {
+  position: "absolute",
+  left: 15,
+  top: "50%",
+  transform: "translateY(-50%)",
+  color: "#9ca3af",
+  display: "flex",
+  pointerEvents: "none",
+};
+
+const ERROR_STYLE: React.CSSProperties = {
+  color: "#ef4444",
+  fontSize: 12,
+  marginTop: 4,
+  fontWeight: 500,
 };
 
 export default function Register() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { lang, setLang } = useLanguage();
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [country, setCountry] = useState("CM");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [acceptTerms, setAcceptTerms] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [referralCode] = useState(() => new URLSearchParams(window.location.search).get("ref") ?? "");
+  const [referral, setReferral] = useState(referralCode);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [globalError, setGlobalError] = useState("");
 
-  const [referralCode] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get("ref") ?? "";
-  });
+  const selectedCountry = COUNTRIES.find(c => c.code === country) ?? COUNTRIES[0];
 
-  const T = {
-    title:    lang === "fr" ? "Créer un compte" : "Create account",
-    subtitle: lang === "fr" ? "Rejoignez ZyNum gratuitement" : "Join ZyNum for free",
-    fname:    lang === "fr" ? "Prénom" : "First name",
-    lname:    lang === "fr" ? "Nom" : "Last name",
-    email:    "Email",
-    password: lang === "fr" ? "Mot de passe" : "Password",
-    confirm:  lang === "fr" ? "Confirmer le mot de passe" : "Confirm password",
-    terms1:   lang === "fr" ? "J'accepte les " : "I accept the ",
-    terms2:   lang === "fr" ? "conditions d'utilisation" : "terms of use",
-    terms3:   lang === "fr" ? " et la " : " and the ",
-    terms4:   lang === "fr" ? "politique de confidentialité" : "privacy policy",
-    submit:   lang === "fr" ? "S'inscrire maintenant" : "Register now",
-    hasAcct:  lang === "fr" ? "Déjà un compte ? Se connecter" : "Already have an account? Login",
-    langBtn:  lang === "fr" ? "English" : "Français",
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!email) e.email = "L'email est requis";
+    else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Email invalide";
+    if (!password) e.password = "Le mot de passe est requis";
+    else if (password.length < 6) e.password = "Au moins 6 caractères";
+    if (!confirmPassword) e.confirm = "Confirmez le mot de passe";
+    else if (confirmPassword !== password) e.confirm = "Les mots de passe ne correspondent pas";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
-
-  const pwdStrength = (() => {
-    if (!password) return 0;
-    let s = 0;
-    if (password.length >= 8) s++;
-    if (/[A-Z]/.test(password)) s++;
-    if (/[0-9]/.test(password)) s++;
-    if (/[^A-Za-z0-9]/.test(password)) s++;
-    return s;
-  })();
-  const strengthColor = ["rgba(255,255,255,0.2)", "rgba(239,68,68,0.8)", "rgba(251,146,60,0.8)", "rgba(250,204,21,0.8)", "rgba(34,197,94,0.9)"][pwdStrength];
-  const strengthLabel = ["", lang === "fr" ? "Faible" : "Weak", lang === "fr" ? "Moyen" : "Fair", lang === "fr" ? "Bien" : "Good", lang === "fr" ? "Fort" : "Strong"][pwdStrength];
 
   const registerMutation = useRegisterUser({
     mutation: {
@@ -92,203 +104,187 @@ export default function Register() {
       },
       onError: (error: any) => {
         const msg = error?.response?.data?.message || error?.data?.message || "Une erreur s'est produite";
-        setErrorMsg(msg);
+        setGlobalError(msg);
         toast({ title: "Erreur d'inscription", description: msg, variant: "destructive", duration: 3500 });
       },
     },
   });
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg("");
-    if (!firstName || !email || !password) { const m = "Veuillez remplir tous les champs"; setErrorMsg(m); toast({ title: "Champs manquants", description: m, variant: "destructive", duration: 3000 }); return; }
-    if (password !== confirmPassword) { const m = "Les mots de passe ne correspondent pas"; setErrorMsg(m); toast({ title: "Erreur", description: m, variant: "destructive", duration: 3000 }); return; }
-    if (password.length < 8) { const m = "Le mot de passe doit contenir au moins 8 caractères"; setErrorMsg(m); toast({ title: "Mot de passe trop court", description: m, variant: "destructive", duration: 3000 }); return; }
-    if (!acceptTerms) { const m = "Veuillez accepter les conditions d'utilisation"; setErrorMsg(m); toast({ title: "Conditions requises", description: m, variant: "destructive", duration: 3000 }); return; }
-    const name = `${firstName} ${lastName}`.trim();
-    registerMutation.mutate({ data: { name, email, password, confirmPassword } } as any);
+    setGlobalError("");
+    if (!validate()) return;
+    registerMutation.mutate({
+      data: { name: email.split("@")[0], email, password, confirmPassword, ...(referral ? { referralCode: referral } : {}) },
+    } as any);
   };
 
   return (
-    <div style={{ height: "100dvh", position: "relative", overflow: "hidden" }}>
-      {/* Background */}
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 0,
-        backgroundImage: `url(${BG})`,
-        backgroundSize: "cover", backgroundPosition: "center",
-      }} />
-      <div style={{ position: "fixed", inset: 0, zIndex: 1, background: "rgba(8,12,40,0.62)" }} />
+    <div style={{
+      minHeight: "100dvh",
+      background: "linear-gradient(to bottom, #e8f4fd 0%, #c9e3f8 20%, #4a90d9 60%, #1a5fc8 100%)",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    }}>
+      <div style={{ width: "100%", maxWidth: 420, padding: "0 20px", boxSizing: "border-box" }}>
 
-      {/* Fixed layout — top bar + scrollable form */}
-      <div style={{ position: "relative", zIndex: 2, height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-
-        {/* Top bar — fixed, no scroll */}
-        <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "52px 20px 16px" }}>
+        {/* Top bar */}
+        <div style={{ display: "flex", alignItems: "center", paddingTop: 52, paddingBottom: 8 }}>
           <Link href="/">
-            <button style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 12, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            <button style={{ background: "rgba(255,255,255,0.35)", border: "none", borderRadius: 12, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <ChevronLeft style={{ width: 22, height: 22, color: "#1a3a6b" }} />
             </button>
           </Link>
-
-          {/* Logo */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, overflow: "hidden", border: "2px solid rgba(255,255,255,0.3)" }}>
-              <img src="/logo.jpg" alt="ZyNum" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            </div>
-            <span style={{ color: "#ffffff", fontWeight: 900, fontSize: 18, letterSpacing: "-0.3px" }}>ZyNum</span>
+          <div style={{ flex: 1, textAlign: "center" }}>
+            <span style={{ fontWeight: 700, fontSize: 17, color: "#1a3a6b" }}>Créer un compte</span>
           </div>
-
-          {/* Language toggle */}
-          <button
-            onClick={() => setLang(lang === "fr" ? "en" : "fr")}
-            style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "7px 12px", cursor: "pointer" }}
-          >
-            <Globe2 style={{ width: 15, height: 15, color: "white" }} />
-            <span style={{ color: "white", fontSize: 12, fontWeight: 700 }}>{T.langBtn}</span>
-          </button>
+          <div style={{ width: 40 }} />
         </div>
 
-        {/* Form — seule zone scrollable */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "8px 24px 48px", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
-          <div style={{ marginBottom: 24 }}>
-            <h1 style={{ color: "#ffffff", fontSize: 28, fontWeight: 900, margin: "0 0 6px", letterSpacing: "-0.5px" }}>{T.title}</h1>
-            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, margin: 0 }}>{T.subtitle}</p>
+        {/* Logo */}
+        <div style={{ display: "flex", justifyContent: "center", margin: "20px 0 28px" }}>
+          <div style={{ width: 80, height: 80, borderRadius: 20, overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
+            <img src="/logo.jpg" alt="ZyNum" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </div>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+
+          {/* Pays */}
+          <div>
+            <div style={ICON_WRAP}>
+              <span style={ICON_POS}>🌍</span>
+              <select
+                value={country}
+                onChange={e => setCountry(e.target.value)}
+                style={{ ...INPUT_STYLE, paddingLeft: 44, appearance: "none", cursor: "pointer" }}
+              >
+                {COUNTRIES.map(c => (
+                  <option key={c.code} value={c.code}>{c.name} ({c.dial})</option>
+                ))}
+              </select>
+              <ChevronDown style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", width: 18, height: 18, color: "#9ca3af", pointerEvents: "none" }} />
+            </div>
           </div>
 
-          <form onSubmit={handleRegister} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-
-            {/* Name row */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              <div>
-                <label style={LABEL}>{T.fname}</label>
-                <div className="glass-input-icon">
-                  <User className="input-icon" style={{ width: 17, height: 17 }} />
-                  <input
-                    type="text" value={firstName} onChange={e => setFirstName(e.target.value)}
-                    placeholder="Jean" className="glass-input"
-                  />
-                </div>
-              </div>
-              <div>
-                <label style={LABEL}>{T.lname}</label>
-                <input
-                  type="text" value={lastName} onChange={e => setLastName(e.target.value)}
-                  placeholder="Dupont" className="glass-input"
-                />
-              </div>
+          {/* Email */}
+          <div>
+            <div style={ICON_WRAP}>
+              <span style={ICON_POS}><Mail style={{ width: 18, height: 18 }} /></span>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="Adresse email"
+                autoComplete="email"
+                style={{ ...INPUT_STYLE, borderColor: errors.email ? "#ef4444" : "transparent", border: errors.email ? "1.5px solid #ef4444" : "none" }}
+              />
             </div>
+            {errors.email && <p style={ERROR_STYLE}>{errors.email}</p>}
+          </div>
 
-            {/* Email */}
-            <div>
-              <label style={LABEL}>{T.email}</label>
-              <div className="glass-input-icon">
-                <Mail className="input-icon" style={{ width: 17, height: 17 }} />
-                <input
-                  type="email" value={email} onChange={e => setEmail(e.target.value)}
-                  placeholder="votre@email.com" autoComplete="email"
-                  className="glass-input"
-                />
-              </div>
+          {/* Mot de passe */}
+          <div>
+            <div style={{ ...ICON_WRAP, position: "relative" }}>
+              <span style={ICON_POS}><Lock style={{ width: 18, height: 18 }} /></span>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Mot de passe"
+                autoComplete="new-password"
+                style={{ ...INPUT_STYLE, paddingRight: 48, border: errors.password ? "1.5px solid #ef4444" : "none" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(s => !s)}
+                style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af", display: "flex" }}
+              >
+                {showPassword ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
+              </button>
             </div>
+            {errors.password && <p style={ERROR_STYLE}>{errors.password}</p>}
+          </div>
 
-            {/* Password */}
-            <div>
-              <label style={LABEL}>{T.password}</label>
-              <div className="glass-input-icon" style={{ position: "relative" }}>
-                <Lock className="input-icon" style={{ width: 17, height: 17 }} />
-                <input
-                  type={showPassword ? "text" : "password"} value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••" autoComplete="new-password"
-                  className="glass-input" style={{ paddingRight: 48 }}
-                />
-                <button type="button" onClick={() => setShowPassword(s => !s)}
-                  style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.6)", display: "flex" }}>
-                  {showPassword ? <EyeOff style={{ width: 17, height: 17 }} /> : <Eye style={{ width: 17, height: 17 }} />}
+          {/* Confirmer le mot de passe */}
+          <div>
+            <div style={{ ...ICON_WRAP, position: "relative" }}>
+              <span style={ICON_POS}><Lock style={{ width: 18, height: 18 }} /></span>
+              <input
+                type={showConfirm ? "text" : "password"}
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                placeholder="Répéter le mot de passe"
+                autoComplete="new-password"
+                style={{ ...INPUT_STYLE, paddingRight: 48, border: errors.confirm ? "1.5px solid #ef4444" : "none" }}
+              />
+              <div style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", display: "flex", alignItems: "center", gap: 6 }}>
+                {confirmPassword && confirmPassword === password && (
+                  <Check style={{ width: 16, height: 16, color: "#22c55e" }} />
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(s => !s)}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", display: "flex" }}
+                >
+                  {showConfirm ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
                 </button>
               </div>
-              {password.length > 0 && (
-                <div style={{ marginTop: 6 }}>
-                  <div style={{ display: "flex", gap: 4 }}>
-                    {[1,2,3,4].map(i => (
-                      <div key={i} style={{ height: 3, flex: 1, borderRadius: 4, background: i <= pwdStrength ? strengthColor : "rgba(255,255,255,0.2)", transition: "background 0.3s" }} />
-                    ))}
-                  </div>
-                  {strengthLabel && <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 11, marginTop: 3 }}>{strengthLabel}</p>}
-                </div>
-              )}
             </div>
-
-            {/* Confirm password */}
-            <div>
-              <label style={LABEL}>{T.confirm}</label>
-              <div className="glass-input-icon" style={{ position: "relative" }}>
-                <Lock className="input-icon" style={{ width: 17, height: 17 }} />
-                <input
-                  type={showConfirm ? "text" : "password"} value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••" autoComplete="new-password"
-                  className="glass-input" style={{
-                    paddingRight: 48,
-                    borderColor: confirmPassword && confirmPassword !== password ? "rgba(239,68,68,0.7)" : undefined
-                  }}
-                />
-                <div style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", display: "flex", alignItems: "center", gap: 6 }}>
-                  {confirmPassword && confirmPassword === password && (
-                    <Check style={{ width: 16, height: 16, color: "rgba(34,197,94,0.9)" }} />
-                  )}
-                  <button type="button" onClick={() => setShowConfirm(s => !s)}
-                    style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.6)", display: "flex" }}>
-                    {showConfirm ? <EyeOff style={{ width: 17, height: 17 }} /> : <Eye style={{ width: 17, height: 17 }} />}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Terms */}
-            <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" }}>
-              <div
-                onClick={() => setAcceptTerms(s => !s)}
-                style={{
-                  width: 20, height: 20, borderRadius: 6, border: "2px solid",
-                  borderColor: acceptTerms ? "#1A3FFF" : "rgba(255,255,255,0.4)",
-                  background: acceptTerms ? "#1A3FFF" : "rgba(255,255,255,0.1)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0, marginTop: 1, transition: "all 0.15s",
-                }}
-              >
-                {acceptTerms && <Check style={{ width: 12, height: 12, color: "white" }} />}
-              </div>
-              <span style={{ color: "rgba(255,255,255,0.65)", fontSize: 12, lineHeight: 1.5 }}>
-                {T.terms1}
-                <span style={{ color: "rgba(255,255,255,0.9)", fontWeight: 700 }}>{T.terms2}</span>
-                {T.terms3}
-                <span style={{ color: "rgba(255,255,255,0.9)", fontWeight: 700 }}>{T.terms4}</span>
-              </span>
-            </label>
-
-            {/* Error */}
-            {errorMsg && (
-              <div style={{ background: "rgba(239,68,68,0.25)", border: "1px solid rgba(239,68,68,0.5)", borderRadius: 12, padding: "10px 14px", color: "#fca5a5", fontSize: 13, fontWeight: 500 }}>
-                {errorMsg}
-              </div>
-            )}
-
-            {/* Submit */}
-            <button type="submit" disabled={registerMutation.isPending}
-              style={{ ...BTN_PRIMARY, marginTop: 4, opacity: registerMutation.isPending ? 0.7 : 1 }}>
-              {registerMutation.isPending
-                ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} />
-                : T.submit}
-            </button>
-          </form>
-
-          {/* Login link */}
-          <div style={{ marginTop: 14 }}>
-            <Link href="/login">
-              <button style={BTN_OUTLINE}>{T.hasAcct}</button>
-            </Link>
+            {errors.confirm && <p style={ERROR_STYLE}>{errors.confirm}</p>}
           </div>
+
+          {/* Code de parrainage */}
+          <div>
+            <div style={ICON_WRAP}>
+              <span style={ICON_POS}><Gift style={{ width: 18, height: 18 }} /></span>
+              <input
+                type="text"
+                value={referral}
+                onChange={e => setReferral(e.target.value)}
+                placeholder="Code de parrainage (optionnel)"
+                style={INPUT_STYLE}
+              />
+            </div>
+          </div>
+
+          {/* Global error */}
+          {globalError && (
+            <div style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.4)", borderRadius: 12, padding: "10px 14px", color: "#dc2626", fontSize: 13 }}>
+              {globalError}
+            </div>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={registerMutation.isPending}
+            style={{
+              width: "100%", height: 54, borderRadius: 30,
+              background: "#1a3fc8", color: "#fff",
+              fontWeight: 800, fontSize: 16, border: "none",
+              cursor: registerMutation.isPending ? "not-allowed" : "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 4px 20px rgba(26,63,200,0.4)",
+              marginTop: 4,
+              opacity: registerMutation.isPending ? 0.75 : 1,
+              transition: "opacity 0.15s",
+            }}
+          >
+            {registerMutation.isPending
+              ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} />
+              : "Inscrivez-vous maintenant"}
+          </button>
+        </form>
+
+        {/* Login link */}
+        <div style={{ textAlign: "center", marginTop: 20, marginBottom: 40 }}>
+          <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}>Déjà inscrit ? </span>
+          <Link href="/login">
+            <span style={{ color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>Connectez-vous</span>
+          </Link>
         </div>
       </div>
     </div>

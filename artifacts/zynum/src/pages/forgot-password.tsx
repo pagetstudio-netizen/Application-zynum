@@ -2,12 +2,27 @@ import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { ChevronLeft, Mail, Loader2, CheckCircle2, ArrowRight } from "lucide-react";
 
+const INPUT_STYLE: React.CSSProperties = {
+  width: "100%",
+  height: 54,
+  borderRadius: 14,
+  border: "none",
+  background: "#ffffff",
+  paddingLeft: 48,
+  paddingRight: 16,
+  fontSize: 15,
+  color: "#1a1a2e",
+  outline: "none",
+  boxSizing: "border-box" as const,
+  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+};
+
 export default function ForgotPassword() {
   const [, navigate] = useLocation();
-  const [email, setEmail]     = useState("");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sent, setSent]       = useState(false);
-  const [error, setError]     = useState("");
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
 
   const apiBase = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
@@ -18,9 +33,9 @@ export default function ForgotPassword() {
     setError("");
     try {
       await fetch(`${apiBase}/api/v1/auth/forgot-password`, {
-        method:  "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ email }),
+        body: JSON.stringify({ email }),
       });
       setSent(true);
     } catch {
@@ -31,56 +46,64 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 pt-12 pb-2">
-        <Link href="/login" className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
-          <ChevronLeft className="w-5 h-5 text-gray-600" />
-        </Link>
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-            <span className="text-white font-black text-xs">Z</span>
-          </div>
-          <span className="font-extrabold text-gray-900 text-base">ZyNum</span>
-        </div>
-        <div className="w-9" />
-      </div>
+    <div style={{
+      minHeight: "100dvh",
+      background: "linear-gradient(to bottom, #e8f4fd 0%, #c9e3f8 20%, #4a90d9 60%, #1a5fc8 100%)",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    }}>
+      <div style={{ width: "100%", maxWidth: 420, padding: "0 20px", boxSizing: "border-box" }}>
 
-      <div className="flex-1 flex flex-col px-6 pt-8 pb-10 max-w-sm mx-auto w-full">
+        {/* Top bar */}
+        <div style={{ display: "flex", alignItems: "center", paddingTop: 52, paddingBottom: 8 }}>
+          <Link href="/login">
+            <button style={{ background: "rgba(255,255,255,0.35)", border: "none", borderRadius: 12, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <ChevronLeft style={{ width: 22, height: 22, color: "#1a3a6b" }} />
+            </button>
+          </Link>
+          <div style={{ flex: 1, textAlign: "center" }}>
+            <span style={{ fontWeight: 700, fontSize: 17, color: "#1a3a6b" }}>Mot de passe oublié</span>
+          </div>
+          <div style={{ width: 40 }} />
+        </div>
+
+        {/* Logo */}
+        <div style={{ display: "flex", justifyContent: "center", margin: "20px 0 32px" }}>
+          <div style={{ width: 80, height: 80, borderRadius: 20, overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
+            <img src="/logo.jpg" alt="ZyNum" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </div>
+        </div>
 
         {!sent ? (
           <>
-            <div className="mb-8">
-              <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-5">
-                <Mail className="w-7 h-7 text-blue-500" />
-              </div>
-              <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Mot de passe oublié ?</h1>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                Entrez votre adresse email. Nous vous enverrons un code à 6 chiffres pour réinitialiser votre mot de passe.
+            <div style={{ marginBottom: 28 }}>
+              <h1 style={{ color: "#1a3a6b", fontSize: 22, fontWeight: 800, margin: "0 0 8px", textAlign: "center" }}>
+                Mot de passe oublié ?
+              </h1>
+              <p style={{ color: "#4a6fa5", fontSize: 14, textAlign: "center", margin: 0, lineHeight: 1.6 }}>
+                Entrez votre email. Nous vous enverrons un code à 6 chiffres pour réinitialiser votre mot de passe.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
-                  Adresse email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="votre@email.com"
-                    autoComplete="email"
-                    autoFocus
-                    className="w-full h-12 pl-10 pr-4 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
-                  />
-                </div>
+            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ position: "relative" }}>
+                <span style={{ position: "absolute", left: 15, top: "50%", transform: "translateY(-50%)", color: "#9ca3af", display: "flex", pointerEvents: "none" }}>
+                  <Mail style={{ width: 18, height: 18 }} />
+                </span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="Adresse email"
+                  autoComplete="email"
+                  autoFocus
+                  style={INPUT_STYLE}
+                />
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 text-xs font-medium rounded-xl px-3 py-2.5">
+                <div style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.4)", borderRadius: 12, padding: "10px 14px", color: "#dc2626", fontSize: 13 }}>
                   {error}
                 </div>
               )}
@@ -88,53 +111,70 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading || !email}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 disabled:opacity-60 transition-all"
+                style={{
+                  width: "100%", height: 54, borderRadius: 30,
+                  background: "#1a3fc8", color: "#fff",
+                  fontWeight: 800, fontSize: 16, border: "none",
+                  cursor: (loading || !email) ? "not-allowed" : "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  boxShadow: "0 4px 20px rgba(26,63,200,0.4)",
+                  marginTop: 4,
+                  opacity: (loading || !email) ? 0.65 : 1,
+                  transition: "opacity 0.15s",
+                }}
               >
                 {loading
-                  ? <Loader2 className="w-4 h-4 animate-spin" />
-                  : <>Envoyer le code <ArrowRight className="w-4 h-4" /></>}
+                  ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} />
+                  : <>Envoyer le code <ArrowRight style={{ width: 18, height: 18 }} /></>}
               </button>
 
               <button
                 type="button"
                 onClick={() => navigate("/reset-password")}
-                className="w-full text-xs text-gray-400 hover:text-gray-600 transition-colors text-center pt-1"
+                style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontSize: 13, textAlign: "center", marginTop: 4 }}
               >
                 J'ai déjà un code →
               </button>
             </form>
           </>
         ) : (
-          <div className="flex flex-col items-center text-center gap-5 pt-8">
-            <div className="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center">
-              <CheckCircle2 className="w-10 h-10 text-green-500" />
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 20 }}>
+            <div style={{ width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <CheckCircle2 style={{ width: 40, height: 40, color: "#ffffff" }} />
             </div>
             <div>
-              <h2 className="text-xl font-extrabold text-gray-900 mb-2">Email envoyé !</h2>
-              <p className="text-sm text-gray-500 leading-relaxed">
+              <h2 style={{ color: "#1a3a6b", fontSize: 20, fontWeight: 800, margin: "0 0 8px" }}>Email envoyé !</h2>
+              <p style={{ color: "#4a6fa5", fontSize: 14, margin: 0, lineHeight: 1.6 }}>
                 Un code à 6 chiffres a été envoyé à<br />
-                <span className="font-bold text-gray-800">{email}</span>.<br />
+                <strong style={{ color: "#1a3a6b" }}>{email}</strong>.<br />
                 Vérifiez votre boîte de réception (et les spams).
               </p>
             </div>
             <button
               onClick={() => navigate(`/reset-password?email=${encodeURIComponent(email)}`)}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 transition-all"
+              style={{
+                width: "100%", height: 54, borderRadius: 30,
+                background: "#1a3fc8", color: "#fff",
+                fontWeight: 800, fontSize: 16, border: "none",
+                cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                boxShadow: "0 4px 20px rgba(26,63,200,0.4)",
+              }}
             >
-              Saisir le code <ArrowRight className="w-4 h-4" />
+              Saisir le code <ArrowRight style={{ width: 18, height: 18 }} />
             </button>
             <button
               onClick={() => { setSent(false); setEmail(""); }}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+              style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontSize: 13 }}
             >
               Renvoyer l'email
             </button>
           </div>
         )}
 
-        <div className="mt-8 text-center">
-          <Link href="/login" className="text-sm text-blue-600 font-semibold hover:text-blue-700">
-            ← Retour à la connexion
+        <div style={{ textAlign: "center", marginTop: 32, marginBottom: 40 }}>
+          <Link href="/login">
+            <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, cursor: "pointer" }}>← Retour à la connexion</span>
           </Link>
         </div>
       </div>

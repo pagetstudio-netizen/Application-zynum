@@ -2,20 +2,34 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { ChevronLeft, Lock, Eye, EyeOff, Loader2, CheckCircle2, ArrowRight } from "lucide-react";
 
+const INPUT_STYLE: React.CSSProperties = {
+  width: "100%",
+  height: 54,
+  borderRadius: 14,
+  border: "none",
+  background: "#ffffff",
+  paddingLeft: 48,
+  paddingRight: 48,
+  fontSize: 15,
+  color: "#1a1a2e",
+  outline: "none",
+  boxSizing: "border-box" as const,
+  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+};
+
 export default function ResetPassword() {
   const [, navigate] = useLocation();
-
-  const params    = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(window.location.search);
   const emailInit = params.get("email") ?? "";
 
-  const [email, setEmail]         = useState(emailInit);
-  const [codeDigits, setCode]     = useState(["","","","","",""]);
-  const [newPwd, setNewPwd]       = useState("");
-  const [confirmPwd, setConfirm]  = useState("");
-  const [showPwd, setShowPwd]     = useState(false);
-  const [loading, setLoading]     = useState(false);
-  const [done, setDone]           = useState(false);
-  const [error, setError]         = useState("");
+  const [email, setEmail] = useState(emailInit);
+  const [codeDigits, setCode] = useState(["", "", "", "", "", ""]);
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirm] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
   const codeRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const apiBase = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
@@ -41,10 +55,10 @@ export default function ResetPassword() {
     if (newPwd !== confirmPwd) { setError("Les mots de passe ne correspondent pas"); return; }
     setLoading(true); setError("");
     try {
-      const res  = await fetch(`${apiBase}/api/v1/auth/reset-password`, {
-        method:  "POST",
+      const res = await fetch(`${apiBase}/api/v1/auth/reset-password`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ email, code, newPassword: newPwd }),
+        body: JSON.stringify({ email, code, newPassword: newPwd }),
       });
       const json = await res.json();
       if (!res.ok) { setError(json.message ?? "Code invalide ou expiré."); return; }
@@ -65,145 +79,173 @@ export default function ResetPassword() {
     if (/[^A-Za-z0-9]/.test(newPwd)) s++;
     return s;
   })();
-  const strengthColor = ["bg-gray-200","bg-red-400","bg-orange-400","bg-yellow-400","bg-green-500"][pwdStrength];
-  const strengthLabel = ["","Faible","Moyen","Bien","Fort"][pwdStrength];
+  const strengthColor = ["#e5e7eb", "#ef4444", "#f97316", "#eab308", "#22c55e"][pwdStrength];
+  const strengthLabel = ["", "Faible", "Moyen", "Bien", "Fort"][pwdStrength];
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <div className="flex items-center justify-between px-4 pt-12 pb-2">
-        <Link href="/forgot-password" className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
-          <ChevronLeft className="w-5 h-5 text-gray-600" />
-        </Link>
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-            <span className="text-white font-black text-xs">Z</span>
-          </div>
-          <span className="font-extrabold text-gray-900 text-base">ZyNum</span>
-        </div>
-        <div className="w-9" />
-      </div>
+    <div style={{
+      minHeight: "100dvh",
+      background: "linear-gradient(to bottom, #e8f4fd 0%, #c9e3f8 20%, #4a90d9 60%, #1a5fc8 100%)",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    }}>
+      <div style={{ width: "100%", maxWidth: 420, padding: "0 20px", boxSizing: "border-box" }}>
 
-      <div className="flex-1 flex flex-col px-6 pt-8 pb-10 max-w-sm mx-auto w-full overflow-y-auto">
+        {/* Top bar */}
+        <div style={{ display: "flex", alignItems: "center", paddingTop: 52, paddingBottom: 8 }}>
+          <Link href="/forgot-password">
+            <button style={{ background: "rgba(255,255,255,0.35)", border: "none", borderRadius: 12, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <ChevronLeft style={{ width: 22, height: 22, color: "#1a3a6b" }} />
+            </button>
+          </Link>
+          <div style={{ flex: 1, textAlign: "center" }}>
+            <span style={{ fontWeight: 700, fontSize: 17, color: "#1a3a6b" }}>Nouveau mot de passe</span>
+          </div>
+          <div style={{ width: 40 }} />
+        </div>
+
+        {/* Logo */}
+        <div style={{ display: "flex", justifyContent: "center", margin: "20px 0 28px" }}>
+          <div style={{ width: 80, height: 80, borderRadius: 20, overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
+            <img src="/logo.jpg" alt="ZyNum" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </div>
+        </div>
 
         {done ? (
-          <div className="flex flex-col items-center text-center gap-5 pt-8">
-            <div className="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center">
-              <CheckCircle2 className="w-10 h-10 text-green-500" />
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 20, paddingTop: 8 }}>
+            <div style={{ width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <CheckCircle2 style={{ width: 40, height: 40, color: "#ffffff" }} />
             </div>
             <div>
-              <h2 className="text-xl font-extrabold text-gray-900 mb-2">Mot de passe modifié !</h2>
-              <p className="text-sm text-gray-500 leading-relaxed">
+              <h2 style={{ color: "#1a3a6b", fontSize: 20, fontWeight: 800, margin: "0 0 8px" }}>Mot de passe modifié !</h2>
+              <p style={{ color: "#4a6fa5", fontSize: 14, margin: 0, lineHeight: 1.6 }}>
                 Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.
               </p>
             </div>
             <button
               onClick={() => navigate("/login")}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
+              style={{
+                width: "100%", height: 54, borderRadius: 30,
+                background: "#1a3fc8", color: "#fff",
+                fontWeight: 800, fontSize: 16, border: "none",
+                cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                boxShadow: "0 4px 20px rgba(26,63,200,0.4)",
+              }}
             >
-              Se connecter <ArrowRight className="w-4 h-4" />
+              Se connecter <ArrowRight style={{ width: 18, height: 18 }} />
             </button>
           </div>
         ) : (
           <>
-            <div className="mb-8">
-              <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-5">
-                <Lock className="w-7 h-7 text-blue-500" />
-              </div>
-              <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Nouveau mot de passe</h1>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                Entrez le code à 6 chiffres reçu par email et choisissez un nouveau mot de passe.
-              </p>
-            </div>
+            <p style={{ color: "#4a6fa5", fontSize: 14, textAlign: "center", margin: "0 0 24px", lineHeight: 1.6 }}>
+              Entrez le code à 6 chiffres reçu par email et choisissez un nouveau mot de passe.
+            </p>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
               {!emailInit && (
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Email</label>
+                <div style={{ position: "relative" }}>
                   <input
-                    type="email" value={email} onChange={e => setEmail(e.target.value)}
-                    placeholder="votre@email.com"
-                    className="w-full h-12 px-4 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="Adresse email"
+                    style={{ ...INPUT_STYLE, paddingLeft: 16 }}
                   />
                 </div>
               )}
 
+              {/* OTP digits */}
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 block">
+                <p style={{ color: "#1a3a6b", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>
                   Code de vérification
-                </label>
-                <div className="flex gap-2 justify-between">
+                </p>
+                <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
                   {codeDigits.map((d, i) => (
                     <input
                       key={i}
                       ref={el => { codeRefs.current[i] = el; }}
-                      type="text" inputMode="numeric" maxLength={1}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
                       value={d}
                       onChange={e => handleDigit(i, e.target.value)}
                       onKeyDown={e => handleKey(i, e)}
-                      className="w-12 h-14 rounded-2xl border-2 border-gray-200 bg-gray-50 text-center text-xl font-black text-gray-900 focus:outline-none focus:border-blue-500 focus:bg-white transition-all caret-transparent"
+                      style={{
+                        width: 48, height: 56, borderRadius: 14,
+                        background: "#ffffff",
+                        border: "2px solid rgba(26,63,200,0.15)",
+                        color: "#1a1a2e", fontSize: 22, fontWeight: 900,
+                        textAlign: "center", outline: "none",
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+                        boxSizing: "border-box",
+                      }}
                     />
                   ))}
                 </div>
               </div>
 
+              {/* New password */}
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
-                  Nouveau mot de passe
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <div style={{ position: "relative" }}>
+                  <span style={{ position: "absolute", left: 15, top: "50%", transform: "translateY(-50%)", color: "#9ca3af", display: "flex", pointerEvents: "none" }}>
+                    <Lock style={{ width: 18, height: 18 }} />
+                  </span>
                   <input
                     type={showPwd ? "text" : "password"}
-                    value={newPwd} onChange={e => setNewPwd(e.target.value)}
-                    placeholder="Min. 8 caractères"
+                    value={newPwd}
+                    onChange={e => setNewPwd(e.target.value)}
+                    placeholder="Nouveau mot de passe"
                     autoComplete="new-password"
-                    className="w-full h-12 pl-10 pr-12 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
+                    style={INPUT_STYLE}
                   />
-                  <button type="button" onClick={() => setShowPwd(s => !s)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                    {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  <button
+                    type="button"
+                    onClick={() => setShowPwd(s => !s)}
+                    style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af", display: "flex" }}
+                  >
+                    {showPwd ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
                   </button>
                 </div>
                 {newPwd && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="flex gap-1 flex-1">
-                      {[1,2,3,4].map(n => (
-                        <div key={n} className={`h-1 rounded-full flex-1 transition-colors ${pwdStrength >= n ? strengthColor : "bg-gray-200"}`} />
+                  <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ flex: 1, display: "flex", gap: 4 }}>
+                      {[1, 2, 3, 4].map(n => (
+                        <div key={n} style={{ height: 4, flex: 1, borderRadius: 4, background: pwdStrength >= n ? strengthColor : "#e5e7eb", transition: "background 0.3s" }} />
                       ))}
                     </div>
-                    <span className={`text-xs font-bold ${pwdStrength >= 3 ? "text-green-600" : pwdStrength >= 2 ? "text-yellow-600" : "text-red-500"}`}>
-                      {strengthLabel}
-                    </span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: strengthColor, minWidth: 32 }}>{strengthLabel}</span>
                   </div>
                 )}
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
-                  Confirmer le mot de passe
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type={showPwd ? "text" : "password"}
-                    value={confirmPwd} onChange={e => setConfirm(e.target.value)}
-                    placeholder="Répéter le mot de passe"
-                    autoComplete="new-password"
-                    className={`w-full h-12 pl-10 pr-4 rounded-2xl border bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:bg-white transition-all ${
-                      confirmPwd && confirmPwd !== newPwd
-                        ? "border-red-300 focus:border-red-400 focus:ring-red-500/20"
-                        : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-                    }`}
-                  />
-                </div>
-                {confirmPwd && confirmPwd !== newPwd && (
-                  <p className="text-xs text-red-500 mt-1.5">Les mots de passe ne correspondent pas</p>
-                )}
+              {/* Confirm password */}
+              <div style={{ position: "relative" }}>
+                <span style={{ position: "absolute", left: 15, top: "50%", transform: "translateY(-50%)", color: "#9ca3af", display: "flex", pointerEvents: "none" }}>
+                  <Lock style={{ width: 18, height: 18 }} />
+                </span>
+                <input
+                  type={showPwd ? "text" : "password"}
+                  value={confirmPwd}
+                  onChange={e => setConfirm(e.target.value)}
+                  placeholder="Répéter le mot de passe"
+                  autoComplete="new-password"
+                  style={{
+                    ...INPUT_STYLE,
+                    border: confirmPwd && confirmPwd !== newPwd ? "1.5px solid #ef4444" : "none",
+                  }}
+                />
               </div>
+              {confirmPwd && confirmPwd !== newPwd && (
+                <p style={{ color: "#dc2626", fontSize: 12, marginTop: -8, fontWeight: 500 }}>
+                  Les mots de passe ne correspondent pas
+                </p>
+              )}
 
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 text-xs font-medium rounded-xl px-3 py-2.5">
+                <div style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.4)", borderRadius: 12, padding: "10px 14px", color: "#dc2626", fontSize: 13 }}>
                   {error}
                 </div>
               )}
@@ -211,17 +253,27 @@ export default function ResetPassword() {
               <button
                 type="submit"
                 disabled={loading || codeDigits.join("").length !== 6 || !newPwd || !confirmPwd}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 disabled:opacity-60 transition-all"
+                style={{
+                  width: "100%", height: 54, borderRadius: 30,
+                  background: "#1a3fc8", color: "#fff",
+                  fontWeight: 800, fontSize: 16, border: "none",
+                  cursor: (loading || codeDigits.join("").length !== 6 || !newPwd || !confirmPwd) ? "not-allowed" : "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  boxShadow: "0 4px 20px rgba(26,63,200,0.4)",
+                  marginTop: 4,
+                  opacity: (loading || codeDigits.join("").length !== 6 || !newPwd || !confirmPwd) ? 0.6 : 1,
+                  transition: "opacity 0.15s",
+                }}
               >
                 {loading
-                  ? <Loader2 className="w-4 h-4 animate-spin" />
-                  : <>Réinitialiser <ArrowRight className="w-4 h-4" /></>}
+                  ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} />
+                  : <>Réinitialiser <ArrowRight style={{ width: 18, height: 18 }} /></>}
               </button>
             </form>
 
-            <div className="mt-6 text-center">
-              <Link href="/forgot-password" className="text-sm text-blue-600 font-semibold hover:text-blue-700">
-                ← Renvoyer un code
+            <div style={{ textAlign: "center", marginTop: 20, marginBottom: 40 }}>
+              <Link href="/forgot-password">
+                <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, cursor: "pointer" }}>← Renvoyer un code</span>
               </Link>
             </div>
           </>
