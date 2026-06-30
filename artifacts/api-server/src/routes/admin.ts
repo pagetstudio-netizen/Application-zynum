@@ -255,6 +255,73 @@ router.post("/v1/admin/transactions", ...auth, async (req: any, res): Promise<vo
   res.json({ success: true, transaction: tx });
 });
 
+/* ─── CRYPTO PAYMENTS ────────────────────────────────────────────────── */
+router.get("/v1/admin/crypto-payments", ...auth, async (req, res): Promise<void> => {
+  const { page = "1", limit = "30", q, status, provider } = req.query as Record<string, string>;
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+
+  const conditions: ReturnType<typeof eq>[] = [
+    or(eq(transactionsTable.method, "nowpayments"), eq(transactionsTable.method, "oxapay")) as any,
+  ];
+  if (status)   conditions.push(eq(transactionsTable.status, status) as any);
+  if (provider) conditions.push(eq(transactionsTable.method, provider) as any);
+  if (q) {
+    conditions.push(or(
+      like(usersTable.email, `%${q}%`),
+      like(usersTable.name, `%${q}%`),
+      like(transactionsTable.reference, `%${q}%`),
+    ) as any);
+  }
+  const where = and(...conditions);
+
+  const txs = await db.select({
+    id:        transactionsTable.id,
+    userId:    transactionsTable.userId,
+    type:      transactionsTable.type,
+    amountUsd: transactionsTable.amountUsd,
+    amountFcfa:transactionsTable.amountFcfa,
+    method:    transactionsTable.method,
+    provider:  transactionsTable.provider,
+    status:    transactionsTable.status,
+    reference: transactionsTable.reference,
+    metadata:  transactionsTable.metadata,
+    createdAt: transactionsTable.createdAt,
+    userName:  usersTable.name,
+    userEmail: usersTable.email,
+    userPhone: usersTable.phone,
+  })
+    .from(transactionsTable)
+    .leftJoin(usersTable, eq(transactionsTable.userId, usersTable.id))
+    .where(where)
+    .orderBy(desc(transactionsTable.createdAt))
+    .limit(parseInt(limit))
+    .offset(offset);
+
+  const [{ c }] = await db.select({ c: count() })
+    .from(transactionsTable)
+    .leftJoin(usersTable, eq(transactionsTable.userId, usersTable.id))
+    .where(where);
+
+  const [pending]   = await db.select({ c: count() }).from(transactionsTable).where(and(or(eq(transactionsTable.method, "nowpayments"), eq(transactionsTable.method, "oxapay")) as any, eq(transactionsTable.status, "pending") as any));
+  const [completed] = await db.select({ c: count() }).from(transactionsTable).where(and(or(eq(transactionsTable.method, "nowpayments"), eq(transactionsTable.method, "oxapay")) as any, eq(transactionsTable.status, "completed") as any));
+  const [failed]    = await db.select({ c: count() }).from(transactionsTable).where(and(or(eq(transactionsTable.method, "nowpayments"), eq(transactionsTable.method, "oxapay")) as any, eq(transactionsTable.status, "failed") as any));
+  const [vol]       = await db.select({ s: sum(transactionsTable.amountUsd) }).from(transactionsTable).where(and(or(eq(transactionsTable.method, "nowpayments"), eq(transactionsTable.method, "oxapay")) as any, eq(transactionsTable.status, "completed") as any));
+
+  res.json({
+    transactions: txs,
+    total: c,
+    page: parseInt(page),
+    limit: parseInt(limit),
+    stats: {
+      total: c,
+      pending: pending.c,
+      completed: completed.c,
+      failed: failed.c,
+      volumeUsd: vol.s ?? "0",
+    },
+  });
+});
+
 /* ─── PUBLIC: Active popup notifications (no auth) ───────────────────── */
 router.get("/v1/popup-notifications", async (req, res): Promise<void> => {
   const msgs = await db.select().from(adminMessagesTable)

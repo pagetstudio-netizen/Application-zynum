@@ -8,7 +8,7 @@ import {
   Search, ChevronLeft, ChevronRight, RefreshCw, Send,
   ToggleLeft, ToggleRight, DollarSign, Percent, Star,
   Package, AlertTriangle, Clock, Database, Bell, Eye, EyeOff, Key, Mail, Loader2,
-  Image as ImageIcon, X,
+  Image as ImageIcon, X, Bitcoin, Copy, ExternalLink, CircleDot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -2928,13 +2928,340 @@ function AdminAffiliations() {
   );
 }
 
-type AdminTab = "stats" | "users" | "orders" | "transactions" | "messages" | "settings" | "payments" | "operators" | "faq" | "social" | "countries" | "contact" | "waitlist" | "promos" | "email" | "telegram" | "affiliate";
+/* ─────────────────────────────────────────────────────────────────────────── */
+/*  AdminCryptoPayments                                                         */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+function cryptoStatusLabel(status: string) {
+  if (status === "completed") return { label: "Confirmé",   color: "#22c55e", bg: "rgba(34,197,94,0.12)",  border: "rgba(34,197,94,0.3)"  };
+  if (status === "pending")   return { label: "En attente", color: "#f59e0b", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.3)" };
+  return                             { label: "Expiré",     color: "#ef4444", bg: "rgba(239,68,68,0.12)",  border: "rgba(239,68,68,0.3)"  };
+}
+
+function CryptoBadge({ method }: { method: string }) {
+  const isNP = method === "nowpayments";
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 5,
+      padding: "3px 9px", borderRadius: 99,
+      fontSize: 11, fontWeight: 700, letterSpacing: "0.03em",
+      backgroundColor: isNP ? "rgba(99,102,241,0.15)" : "rgba(251,146,60,0.15)",
+      color: isNP ? "#818cf8" : "#fb923c",
+      border: `1px solid ${isNP ? "rgba(99,102,241,0.3)" : "rgba(251,146,60,0.3)"}`,
+    }}>
+      {isNP ? "NowPayments" : "OxaPay"}
+    </span>
+  );
+}
+
+function AdminCryptoPayments() {
+  const { toast } = useToast();
+  const [page, setPage]           = useState(1);
+  const [q, setQ]                 = useState("");
+  const [qInput, setQInput]       = useState("");
+  const [statusFilter, setStatus] = useState("");
+  const [provFilter, setProv]     = useState("");
+  const [checking, setChecking]   = useState<Record<number, boolean>>({});
+  const [autoRefresh, setAutoRef] = useState(false);
+
+  const params = new URLSearchParams({ page: String(page), limit: "25" });
+  if (q)            params.set("q", q);
+  if (statusFilter) params.set("status", statusFilter);
+  if (provFilter)   params.set("provider", provFilter);
+
+  const { data, loading, refetch } = useAdminFetch<any>(`/v1/admin/crypto-payments?${params}`, [page, q, statusFilter, provFilter]);
+
+  const refetchRef = React.useRef(refetch);
+  refetchRef.current = refetch;
+
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const timer = setInterval(() => refetchRef.current(), 20000);
+    return () => clearInterval(timer);
+  }, [autoRefresh]);
+
+  const copyText = (text: string, label = "Copié !") => {
+    navigator.clipboard.writeText(text).then(() => toast({ title: label }));
+  };
+
+  const checkStatus = async (tx: any) => {
+    setChecking(c => ({ ...c, [tx.id]: true }));
+    try {
+      const token   = localStorage.getItem("zynum_token") ?? "";
+      const meta    = (() => { try { return JSON.parse(tx.metadata ?? "{}"); } catch { return {}; } })();
+      let result: any;
+
+      if (tx.method === "nowpayments") {
+        const paymentId = meta.paymentId;
+        if (!paymentId) { toast({ title: "Erreur", description: "paymentId introuvable dans les métadonnées", variant: "destructive" }); return; }
+        const r = await fetch(`${API}/v1/payments/nowpayments/status/${paymentId}?orderId=${encodeURIComponent(tx.reference ?? "")}&userId=${tx.userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        result = await r.json();
+      } else {
+        const trackId = meta.trackId;
+        if (!trackId) { toast({ title: "Erreur", description: "trackId introuvable dans les métadonnées", variant: "destructive" }); return; }
+        const r = await fetch(`${API}/v1/payments/oxapay/confirm`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ trackId, orderId: tx.reference, userId: tx.userId }),
+        });
+        result = await r.json();
+      }
+
+      if (result.credited) {
+        toast({ title: "✅ Paiement confirmé !", description: `$${(result.amountUsd ?? 0).toFixed(2)} USD crédité.` });
+      } else if (result.failed) {
+        toast({ title: "❌ Paiement expiré/échoué", description: `Statut : ${result.status}`, variant: "destructive" });
+      } else {
+        toast({ title: `Statut : ${result.status ?? "—"}`, description: result.message ?? "En attente…" });
+      }
+      refetch();
+    } catch (e: any) {
+      toast({ title: "Erreur réseau", description: e.message, variant: "destructive" });
+    } finally {
+      setChecking(c => ({ ...c, [tx.id]: false }));
+    }
+  };
+
+  const stats   = data?.stats ?? {};
+  const txs     = data?.transactions ?? [];
+  const selCls  = "bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-primary/50";
+  const hasFilt = q || statusFilter || provFilter;
+
+  return (
+    <div className="space-y-5">
+
+      {/* ── Stats row ────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {[
+          { label: "Total",       val: stats.total     ?? 0, color: "#a78bfa", fmt: (v: number) => String(v) },
+          { label: "En attente",  val: stats.pending   ?? 0, color: "#f59e0b", fmt: (v: number) => String(v) },
+          { label: "Confirmés",   val: stats.completed ?? 0, color: "#22c55e", fmt: (v: number) => String(v) },
+          { label: "Expirés",     val: stats.failed    ?? 0, color: "#ef4444", fmt: (v: number) => String(v) },
+          { label: "Volume confirmé", val: Number(stats.volumeUsd ?? 0), color: "#38bdf8", fmt: (v: number) => `$${v.toFixed(2)}` },
+        ].map(s => (
+          <div key={s.label} className="rounded-xl border border-white/10 bg-card/40 p-4 text-center">
+            <p className="text-xl font-bold" style={{ color: s.color }}>{s.fmt(Number(s.val))}</p>
+            <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Toolbar ──────────────────────────────────────────────────── */}
+      <div className="rounded-2xl border border-white/10 bg-card/40 p-4 space-y-3">
+        {/* Search */}
+        <div className="flex flex-wrap gap-2">
+          <div className="flex flex-1 min-w-[200px] items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+            <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+            <input
+              value={qInput}
+              onChange={e => setQInput(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") { setQ(qInput); setPage(1); } }}
+              placeholder="Email, nom, référence..."
+              className="flex-1 bg-transparent text-sm text-white placeholder:text-muted-foreground focus:outline-none"
+            />
+            {qInput && <button onClick={() => { setQInput(""); setQ(""); setPage(1); }} className="text-muted-foreground hover:text-white"><X className="w-3 h-3" /></button>}
+          </div>
+          <button onClick={() => { setQ(qInput); setPage(1); }} className="px-4 py-2 bg-primary/20 border border-primary/30 rounded-xl text-sm text-primary font-medium hover:bg-primary/30 transition-colors">
+            Rechercher
+          </button>
+        </div>
+
+        {/* Filters row */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <select value={provFilter} onChange={e => { setProv(e.target.value); setPage(1); }} className={selCls}>
+            <option value="">Tous les prestataires</option>
+            <option value="nowpayments">NowPayments</option>
+            <option value="oxapay">OxaPay</option>
+          </select>
+
+          <select value={statusFilter} onChange={e => { setStatus(e.target.value); setPage(1); }} className={selCls}>
+            <option value="">Tous les statuts</option>
+            <option value="pending">En attente</option>
+            <option value="completed">Confirmés</option>
+            <option value="failed">Expirés/Échoués</option>
+          </select>
+
+          {hasFilt && (
+            <button onClick={() => { setQ(""); setQInput(""); setStatus(""); setProv(""); setPage(1); }} className="text-xs text-red-400 hover:text-red-300 px-3 py-2 rounded-xl border border-red-500/20 hover:bg-red-500/10 transition-colors">
+              Réinitialiser
+            </button>
+          )}
+
+          <div className="ml-auto flex items-center gap-2">
+            {/* Auto-refresh toggle */}
+            <button
+              onClick={() => setAutoRef(v => !v)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-medium transition-colors ${autoRefresh ? "bg-green-500/15 border-green-500/30 text-green-400" : "border-white/10 text-muted-foreground hover:text-white hover:bg-white/5"}`}
+            >
+              <CircleDot className={`w-3 h-3 ${autoRefresh ? "animate-pulse" : ""}`} />
+              {autoRefresh ? "Live" : "Auto"}
+            </button>
+            <button onClick={refetch} className="p-2 rounded-xl border border-white/10 text-muted-foreground hover:text-white hover:bg-white/5">
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Table ────────────────────────────────────────────────────── */}
+      {loading ? (
+        <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
+      ) : !txs.length ? (
+        <div className="rounded-2xl border border-white/10 bg-card/40 py-16 text-center">
+          <Bitcoin className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">
+            {hasFilt ? "Aucune transaction crypto ne correspond aux filtres" : "Aucune transaction crypto enregistrée"}
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="rounded-2xl border border-white/10 bg-card/40 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/10 bg-white/[0.02]">
+                    {["#", "Utilisateur", "Prestataire", "Montant", "Statut", "ID Paiement", "Référence", "Date", "Action"].map(h => (
+                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {txs.map((tx: any) => {
+                    const meta  = (() => { try { return JSON.parse(tx.metadata ?? "{}"); } catch { return {}; } })();
+                    const badge = cryptoStatusLabel(tx.status);
+                    const payId = tx.method === "nowpayments" ? (meta.paymentId ?? "—") : (meta.trackId ?? "—");
+                    const curr  = tx.method === "nowpayments" ? (meta.payCur ?? "—") : (meta.currency ?? "—");
+                    const network = tx.method === "nowpayments" ? (meta.network ?? "") : "";
+                    const isPending = tx.status === "pending";
+
+                    return (
+                      <tr key={tx.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+
+                        {/* ID */}
+                        <td className="px-4 py-3 text-muted-foreground text-xs font-mono">#{tx.id}</td>
+
+                        {/* Utilisateur */}
+                        <td className="px-4 py-3">
+                          <p className="text-white text-sm font-medium leading-tight">{tx.userName ?? "—"}</p>
+                          <p className="text-xs text-muted-foreground">{tx.userEmail ?? ""}</p>
+                          {tx.userPhone && <p className="text-xs text-muted-foreground/60">{tx.userPhone}</p>}
+                        </td>
+
+                        {/* Prestataire + devise */}
+                        <td className="px-4 py-3">
+                          <CryptoBadge method={tx.method} />
+                          {(curr && curr !== "—") && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {curr}{network ? ` (${network})` : ""}
+                            </p>
+                          )}
+                        </td>
+
+                        {/* Montant */}
+                        <td className="px-4 py-3">
+                          <p className="text-white font-semibold">${n(tx.amountUsd).toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">{Math.round(n(tx.amountFcfa)).toLocaleString("fr")} FCFA</p>
+                          {meta.payAmount && <p className="text-xs text-muted-foreground/60">{meta.payAmount} {curr}</p>}
+                        </td>
+
+                        {/* Statut */}
+                        <td className="px-4 py-3">
+                          <span style={{
+                            display: "inline-flex", alignItems: "center", gap: 5,
+                            padding: "3px 9px", borderRadius: 99, fontSize: 11, fontWeight: 700,
+                            backgroundColor: badge.bg, color: badge.color, border: `1px solid ${badge.border}`,
+                          }}>
+                            {isPending && <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: badge.color, animation: "pulse 1.5s infinite" }} />}
+                            {badge.label}
+                          </span>
+                        </td>
+
+                        {/* ID Paiement */}
+                        <td className="px-4 py-3">
+                          {payId !== "—" ? (
+                            <div className="flex items-center gap-1.5 group max-w-[130px]">
+                              <span className="text-xs font-mono text-muted-foreground truncate" title={payId}>{payId}</span>
+                              <button onClick={() => copyText(payId, "ID copié !")} className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white flex-shrink-0">
+                                <Copy className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ) : <span className="text-muted-foreground text-xs">—</span>}
+                          {meta.payAddress && (
+                            <div className="flex items-center gap-1.5 group max-w-[130px] mt-0.5">
+                              <span className="text-xs font-mono text-muted-foreground/60 truncate" title={meta.payAddress}>{meta.payAddress.slice(0, 10)}…</span>
+                              <button onClick={() => copyText(meta.payAddress, "Adresse copiée !")} className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/10 text-muted-foreground/60 hover:text-white flex-shrink-0">
+                                <Copy className="w-3 h-3" />
+                              </button>
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Référence */}
+                        <td className="px-4 py-3">
+                          {tx.reference ? (
+                            <div className="flex items-center gap-1.5 group max-w-[150px]">
+                              <span className="text-xs font-mono text-muted-foreground truncate" title={tx.reference}>{tx.reference}</span>
+                              <button onClick={() => copyText(tx.reference, "Référence copiée !")} className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white flex-shrink-0">
+                                <Copy className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ) : <span className="text-muted-foreground text-xs">—</span>}
+                        </td>
+
+                        {/* Date */}
+                        <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                          {new Date(tx.createdAt).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                        </td>
+
+                        {/* Action */}
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => checkStatus(tx)}
+                            disabled={checking[tx.id]}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{
+                              background: isPending ? "rgba(245,158,11,0.1)" : "rgba(255,255,255,0.04)",
+                              borderColor: isPending ? "rgba(245,158,11,0.3)" : "rgba(255,255,255,0.1)",
+                              color: isPending ? "#f59e0b" : "hsl(var(--muted-foreground))",
+                            }}
+                            title="Vérifier le statut en temps réel"
+                          >
+                            {checking[tx.id]
+                              ? <Loader2 className="w-3 h-3 animate-spin" />
+                              : <RefreshCw className="w-3 h-3" />}
+                            Vérifier
+                          </button>
+                          {meta.payLink && (
+                            <a href={meta.payLink} target="_blank" rel="noreferrer" className="flex items-center gap-1 mt-1 text-xs text-primary/70 hover:text-primary">
+                              <ExternalLink className="w-3 h-3" /> Lien
+                            </a>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {(data?.total ?? 0) > 25 && <Pagination page={page} total={data?.total ?? 0} limit={25} onChange={setPage} />}
+        </>
+      )}
+    </div>
+  );
+}
+
+type AdminTab = "stats" | "users" | "orders" | "transactions" | "messages" | "settings" | "payments" | "operators" | "faq" | "social" | "countries" | "contact" | "waitlist" | "promos" | "email" | "telegram" | "affiliate" | "crypto";
 
 const ADMIN_NAV: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
   { id: "stats",        label: "Statistiques",    icon: <BarChart3 className="w-4 h-4" /> },
   { id: "users",        label: "Utilisateurs",    icon: <Users className="w-4 h-4" /> },
   { id: "orders",       label: "Commandes",       icon: <ShoppingBag className="w-4 h-4" /> },
   { id: "transactions", label: "Transactions",    icon: <CreditCard className="w-4 h-4" /> },
+  { id: "crypto",       label: "Paiements Crypto", icon: <Bitcoin className="w-4 h-4" /> },
   { id: "promos",       label: "Codes Promo",     icon: <Percent className="w-4 h-4" /> },
   { id: "messages",     label: "Messages",        icon: <MessageSquare className="w-4 h-4" /> },
   { id: "contact",      label: "Contacts",        icon: <Send className="w-4 h-4" /> },
@@ -3052,6 +3379,7 @@ export default function AdminPanel() {
           {activeTab === "users"        && <AdminUsers />}
           {activeTab === "orders"       && <AdminOrders />}
           {activeTab === "transactions" && <AdminTransactions />}
+          {activeTab === "crypto"       && <AdminCryptoPayments />}
           {activeTab === "promos"       && <AdminDiscountCodes />}
           {activeTab === "messages"     && <AdminMessages />}
           {activeTab === "contact"      && <AdminContactMessages />}
