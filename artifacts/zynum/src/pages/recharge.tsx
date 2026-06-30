@@ -12,10 +12,10 @@ import { useCurrency } from "@/hooks/use-currency";
 import { useToast } from "@/hooks/use-toast";
 import { OmnipayModal } from "@/components/omnipay-modal";
 import { PaxityModal } from "@/components/paxity-modal";
+import { OxapayModal } from "@/components/oxapay-modal";
 import imgTMoneyOp from "@assets/images_(1)_1774832430242.png";
 import imgMoovOp   from "@assets/moov_(1)_1763835082986-GKkwwfPK_1774832019539.png";
 import imgAirtelOp from "@assets/Airtel_logo-01_1774832430216.png";
-import iconCard    from "@assets/9242877_1774828244157.png";
 
 const FCFA_PER_USD = 620;
 const RECHARGE_PRESETS = [1000, 2000, 5000, 10000, 20000, 50000];
@@ -45,6 +45,7 @@ export default function Recharge() {
   const [pendingMethod, setPendingMethod] = useState<"mobile" | "card" | null>(null);
   const [omnipayOpen,   setOmnipayOpen]   = useState(false);
   const [paxityOpen,    setPaxityOpen]    = useState(false);
+  const [oxapayOpen,    setOxapayOpen]    = useState(false);
   const [transactions,  setTransactions]  = useState<Tx[]>([]);
   const [txLoading,     setTxLoading]     = useState(true);
 
@@ -154,14 +155,14 @@ export default function Recharge() {
           {/* Green divider */}
           <div className="mx-5 h-[2px]" style={{ backgroundColor: "#00C87A" }} />
 
-          {/* Card payment */}
+          {/* Crypto payment */}
           <button
-            onClick={() => handleMethodClick("card")}
+            onClick={() => setOxapayOpen(true)}
             className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
           >
-            <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via Carte bancaire</span>
+            <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via Crypto monnaie</span>
             <div className="w-10 h-10 flex items-center justify-center shrink-0">
-              <img src={iconCard} alt="Carte bancaire" className="w-10 h-10 object-contain" />
+              <img src="/crypto-icon.png" alt="Crypto" className="w-10 h-10 object-contain" />
             </div>
           </button>
         </div>
@@ -306,6 +307,14 @@ export default function Recharge() {
           userId={user.id}
           onSuccess={handleSuccess}
           initialTab="card"
+        />
+      )}
+      {user && (
+        <OxapayModal
+          open={oxapayOpen}
+          onClose={() => setOxapayOpen(false)}
+          userId={user.id}
+          onSuccess={handleSuccess}
         />
       )}
     </div>

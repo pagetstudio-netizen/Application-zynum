@@ -15,6 +15,7 @@ import operatorRoutesRouter from "./operator-routes.js";
 import discountsRouter from "./discounts.js";
 import telegramRouter from "./telegram.js";
 import affiliateRouter from "./affiliate.js";
+import oxapayRouter from "./oxapay.js";
 
 const router: IRouter = Router();
 
@@ -34,5 +35,6 @@ router.use(operatorRoutesRouter);
 router.use(discountsRouter);
 router.use(telegramRouter);
 router.use(affiliateRouter);
+router.use(oxapayRouter);
 
 export default router;
