@@ -86,7 +86,7 @@ function ctaButton(url: string, label: string) {
   return `<a href="${url}" style="display:inline-block;background:linear-gradient(135deg,#ef4444,#dc2626);color:#ffffff;font-weight:700;font-size:15px;padding:14px 32px;border-radius:12px;text-decoration:none;margin:16px 0;letter-spacing:0.2px;">${label}</a>`;
 }
 
-export async function sendVerificationEmail(opts: { to: string; name: string; code: string; token?: string }) {
+export async function sendVerificationEmail(opts: { to: string; name: string; code: string }) {
   const body = `
     <h2 style="font-size:22px;font-weight:800;color:#111827;margin:0 0 8px;">Vérifiez votre email ✉️</h2>
     <p style="font-size:15px;color:#6b7280;margin:0 0 24px;">Bonjour <strong>${opts.name}</strong>, entrez ce code pour activer votre compte ZyNum :</p>
@@ -128,7 +128,7 @@ export async function sendWelcomeEmail(opts: { to: string; name: string }) {
   });
 }
 
-export async function sendPasswordResetEmail(opts: { to: string; name: string; code: string; token?: string }) {
+export async function sendPasswordResetEmail(opts: { to: string; name: string; code: string }) {
   const body = `
     <h2 style="font-size:22px;font-weight:800;color:#111827;margin:0 0 8px;">Réinitialisation du mot de passe 🔐</h2>
     <p style="font-size:15px;color:#6b7280;margin:0 0 24px;">Bonjour <strong>${opts.name}</strong>, utilisez ce code pour réinitialiser votre mot de passe :</p>

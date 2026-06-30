@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { RegisterUserBody, LoginUserBody } from "@workspace/api-zod";
 import { hashPassword, verifyPassword, createSession, deleteSession, getUserById, generateApiKey } from "../lib/auth.js";
 import { requireAuth, type AuthRequest } from "../middlewares/authMiddleware.js";
-import { createEmailCode, verifyEmailCode, verifyEmailToken } from "../lib/emailCodes.js";
+import { createEmailCode, verifyEmailCode } from "../lib/emailCodes.js";
 import {
   sendVerificationEmail,
   sendWelcomeEmail,
@@ -133,42 +133,6 @@ router.post("/v1/auth/verify-email", async (req, res): Promise<void> => {
   });
 });
 
-// ─── VERIFY EMAIL (link) ─────────────────────────────────────────────────────
-
-router.get("/v1/auth/verify-email-link", async (req, res): Promise<void> => {
-  const { token } = req.query as { token?: string };
-  if (!token) {
-    res.redirect("https://zynum.net/login?error=missing_token");
-    return;
-  }
-
-  const { valid, record } = await verifyEmailToken({ token, type: "verify_email" });
-  if (!valid || !record) {
-    res.redirect("https://zynum.net/login?error=invalid_token");
-    return;
-  }
-
-  const [user] = await db
-    .update(usersTable)
-    .set({ emailVerified: true, lastLoginAt: new Date() })
-    .where(eq(usersTable.email, record.email))
-    .returning();
-
-  if (!user) {
-    res.redirect("https://zynum.net/login?error=user_not_found");
-    return;
-  }
-
-  try {
-    await sendWelcomeEmail({ to: user.email, name: user.name });
-  } catch (err) {
-    console.error("Welcome email error:", err);
-  }
-
-  const sessionToken = await createSession(user.id);
-  res.redirect(`https://zynum.net/dashboard?auth_token=${sessionToken}`);
-});
-
 // ─── RESEND VERIFICATION ─────────────────────────────────────────────────────
 
 router.post("/v1/auth/resend-verification", async (req, res): Promise<void> => {
@@ -184,10 +148,10 @@ router.post("/v1/auth/resend-verification", async (req, res): Promise<void> => {
     return;
   }
 
-  const { code, token } = await createEmailCode({ email, userId: user.id, type: "verify_email", expiresInMinutes: 15 });
+  const { code } = await createEmailCode({ email, userId: user.id, type: "verify_email", expiresInMinutes: 15 });
 
   try {
-    await sendVerificationEmail({ to: email, name: user.name, code, token });
+    await sendVerificationEmail({ to: email, name: user.name, code });
   } catch (err) {
     console.error("Resend verification error:", err);
   }
@@ -295,38 +259,20 @@ router.post("/v1/auth/forgot-password", async (req, res): Promise<void> => {
 
   if (!user) return;
 
-  const { code, token } = await createEmailCode({ email, userId: user.id, type: "reset_password", expiresInMinutes: 15 });
+  const { code } = await createEmailCode({ email, userId: user.id, type: "reset_password", expiresInMinutes: 15 });
   try {
-    await sendPasswordResetEmail({ to: email, name: user.name, code, token });
+    await sendPasswordResetEmail({ to: email, name: user.name, code });
   } catch (err) {
     console.error("Password reset email error:", err);
   }
-});
-
-// ─── RESET PASSWORD (link) ───────────────────────────────────────────────────
-
-router.get("/v1/auth/reset-password-link", async (req, res): Promise<void> => {
-  const { token } = req.query as { token?: string };
-  if (!token) {
-    res.redirect("https://zynum.net/forgot-password?error=missing_token");
-    return;
-  }
-
-  const { valid, record } = await verifyEmailToken({ token, type: "reset_password" });
-  if (!valid || !record) {
-    res.redirect("https://zynum.net/forgot-password?error=invalid_token");
-    return;
-  }
-
-  res.redirect(`https://zynum.net/reset-password?email=${encodeURIComponent(record.email)}&verified=1`);
 });
 
 // ─── RESET PASSWORD ───────────────────────────────────────────────────────────
 
 router.post("/v1/auth/reset-password", async (req, res): Promise<void> => {
   const { email, code, newPassword } = req.body;
-  if (!email || !newPassword) {
-    res.status(400).json({ error: "Validation error", message: "Email et nouveau mot de passe requis" });
+  if (!email || !code || !newPassword) {
+    res.status(400).json({ error: "Validation error", message: "Email, code et nouveau mot de passe requis" });
     return;
   }
 
@@ -335,12 +281,10 @@ router.post("/v1/auth/reset-password", async (req, res): Promise<void> => {
     return;
   }
 
-  if (code) {
-    const { valid } = await verifyEmailCode({ email, code, type: "reset_password" });
-    if (!valid) {
-      res.status(400).json({ error: "Invalid code", message: "Code invalide ou expiré" });
-      return;
-    }
+  const { valid } = await verifyEmailCode({ email, code, type: "reset_password" });
+  if (!valid) {
+    res.status(400).json({ error: "Invalid code", message: "Code invalide ou expiré" });
+    return;
   }
 
   const passwordHash = hashPassword(newPassword);
