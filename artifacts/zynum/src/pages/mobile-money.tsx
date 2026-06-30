@@ -478,22 +478,54 @@ export default function MobileMoneyPage() {
 
           {/* Country + phone */}
           <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">{t("mm_phone_label")}</label>
-          <div className="flex gap-2 mb-6">
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            height: 54,
+            borderRadius: 14,
+            backgroundColor: "#ffffff",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+            marginBottom: 24,
+            overflow: "hidden",
+          }}>
+            {/* Country picker trigger */}
             <button
               onClick={() => { setCpQuery(""); setStep("country"); }}
-              className="flex items-center gap-2 px-3 py-3 rounded-2xl border-2 border-gray-200 bg-white shrink-0 active:bg-gray-50 transition-colors"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "0 12px",
+                height: "100%",
+                background: "none",
+                border: "none",
+                borderRight: "1px solid #f0f0f0",
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
             >
-              <span className="text-xl">{country.flag}</span>
-              <span className="text-sm font-semibold text-gray-700">+{country.prefix}</span>
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <span style={{ fontSize: 20 }}>{country.flag}</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e" }}>+{country.prefix}</span>
+              <ChevronDown style={{ width: 14, height: 14, color: "#9ca3af" }} />
             </button>
+            {/* Phone input */}
             <input
               type="tel"
               inputMode="numeric"
               placeholder={t("mm_phone_placeholder")}
               value={phone}
               onChange={e => setPhone(e.target.value)}
-              className="flex-1 h-14 px-4 rounded-2xl border-2 border-gray-200 bg-white text-gray-900 text-base font-semibold placeholder:text-gray-300 placeholder:font-normal focus:outline-none focus:border-blue-500 transition"
+              style={{
+                flex: 1,
+                height: "100%",
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                fontSize: 15,
+                fontWeight: 600,
+                color: "#1a1a2e",
+                padding: "0 14px",
+              }}
             />
           </div>
 

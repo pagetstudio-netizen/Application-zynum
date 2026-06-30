@@ -1018,7 +1018,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                       onClick={() => copy(activeOrder.smsCode || "", "Code")}
                       className="group w-full"
                     >
-                      <p className="text-5xl font-black text-teal-600 tracking-[0.25em] font-mono mb-1 group-hover:text-teal-700 transition-colors select-all">
+                      <p className="text-3xl font-black text-teal-600 tracking-[0.2em] font-mono mb-1 group-hover:text-teal-700 transition-colors select-all">
                         {activeOrder.smsCode}
                       </p>
                       <p className="text-xs text-teal-500 font-semibold flex items-center justify-center gap-1.5 group-hover:text-teal-700 transition-colors">
