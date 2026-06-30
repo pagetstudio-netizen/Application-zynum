@@ -3254,7 +3254,185 @@ function AdminCryptoPayments() {
   );
 }
 
-type AdminTab = "stats" | "users" | "orders" | "transactions" | "messages" | "settings" | "payments" | "operators" | "faq" | "social" | "countries" | "contact" | "waitlist" | "promos" | "email" | "telegram" | "affiliate" | "crypto";
+/* ─── APP UPDATE ─────────────────────────────────────────────────────── */
+function AdminAppUpdate() {
+  const { toast } = useToast();
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    app_current_version: "1.0.0",
+    app_update_mode: "disabled",
+    app_update_url: "",
+    app_update_title: "Mise à jour disponible",
+    app_update_message: "Une nouvelle version est disponible. Veuillez mettre à jour pour continuer à utiliser ZyNum.",
+  });
+
+  useEffect(() => {
+    const token = localStorage.getItem("zynum_token") ?? "";
+    fetch(`${API}/v1/admin/settings`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => {
+        if (d.settings) {
+          setForm(prev => ({
+            ...prev,
+            ...(d.settings.app_current_version && { app_current_version: d.settings.app_current_version }),
+            ...(d.settings.app_update_mode      && { app_update_mode:      d.settings.app_update_mode }),
+            ...(d.settings.app_update_url       !== undefined && { app_update_url:       d.settings.app_update_url }),
+            ...(d.settings.app_update_title     && { app_update_title:     d.settings.app_update_title }),
+            ...(d.settings.app_update_message   && { app_update_message:   d.settings.app_update_message }),
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const save = async () => {
+    setSaving(true);
+    const token = localStorage.getItem("zynum_token") ?? "";
+    try {
+      const r = await fetch(`${API}/v1/admin/settings/bulk`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ settings: form }),
+      });
+      if (!r.ok) throw new Error();
+      toast({ title: "Enregistré", description: "Configuration de mise à jour sauvegardée." });
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de sauvegarder.", variant: "destructive" });
+    }
+    setSaving(false);
+  };
+
+  const f = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+    setForm(prev => ({ ...prev, [k]: e.target.value }));
+
+  const modeInfo = {
+    disabled: { color: "#6B7280", bg: "#F3F4F6", label: "Désactivé", desc: "Aucune notification ne s'affiche." },
+    optional: { color: "#D97706", bg: "#FFFBEB", label: "Optionnel", desc: "Un modal s'affiche, l'utilisateur peut fermer et continuer." },
+    forced:   { color: "#DC2626", bg: "#FEF2F2", label: "Obligatoire", desc: "Toute l'app est bloquée. L'utilisateur DOIT mettre à jour." },
+  }[form.app_update_mode as "disabled" | "optional" | "forced"];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+      {/* Carte mode */}
+      <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #E5E7EB", padding: "20px 20px" }}>
+        <h3 style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: "0 0 16px" }}>Mode de mise à jour</h3>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {(["disabled", "optional", "forced"] as const).map(mode => {
+            const info = {
+              disabled: { color: "#6B7280", label: "Désactivé",    desc: "Aucune notification." },
+              optional: { color: "#D97706", label: "Optionnel",     desc: "Modal fermable — l'utilisateur peut ignorer." },
+              forced:   { color: "#DC2626", label: "Obligatoire",   desc: "Bloque toute l'app jusqu'à la mise à jour." },
+            }[mode];
+            const active = form.app_update_mode === mode;
+            return (
+              <button
+                key={mode}
+                onClick={() => setForm(prev => ({ ...prev, app_update_mode: mode }))}
+                style={{
+                  display: "flex", alignItems: "flex-start", gap: 12, padding: "14px 16px",
+                  borderRadius: 12, border: `2px solid ${active ? info.color : "#E5E7EB"}`,
+                  background: active ? `${info.color}10` : "#fff",
+                  cursor: "pointer", textAlign: "left", transition: "all 0.15s",
+                }}
+              >
+                <div style={{
+                  width: 18, height: 18, borderRadius: "50%", border: `2px solid ${active ? info.color : "#D1D5DB"}`,
+                  background: active ? info.color : "transparent",
+                  display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1,
+                }}>
+                  {active && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} />}
+                </div>
+                <div>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: active ? info.color : "#374151", margin: "0 0 2px" }}>{info.label}</p>
+                  <p style={{ fontSize: 11, color: "#9CA3AF", margin: 0 }}>{info.desc}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {form.app_update_mode !== "disabled" && (
+          <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 10, background: modeInfo!.bg, border: `1px solid ${modeInfo!.color}30` }}>
+            <p style={{ fontSize: 12, color: modeInfo!.color, margin: 0, fontWeight: 600 }}>⚠ {modeInfo!.desc}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Carte version */}
+      <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #E5E7EB", padding: "20px 20px" }}>
+        <h3 style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: "0 0 16px" }}>Version requise</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <label style={{ fontSize: 12, color: "#6B7280", fontWeight: 600 }}>Version minimale (ex: 1.0.2)</label>
+          <input
+            value={form.app_current_version}
+            onChange={f("app_current_version")}
+            placeholder="1.0.0"
+            style={{ padding: "10px 14px", borderRadius: 10, border: "1.5px solid #E5E7EB", fontSize: 14, color: "#111827", outline: "none", fontFamily: "monospace" }}
+          />
+          <p style={{ fontSize: 11, color: "#9CA3AF", margin: "4px 0 0" }}>Les utilisateurs avec une version inférieure verront la notification.</p>
+        </div>
+      </div>
+
+      {/* Carte lien */}
+      <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #E5E7EB", padding: "20px 20px" }}>
+        <h3 style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: "0 0 16px" }}>Lien de téléchargement</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <label style={{ fontSize: 12, color: "#6B7280", fontWeight: 600 }}>URL Play Store / App Store</label>
+          <input
+            value={form.app_update_url}
+            onChange={f("app_update_url")}
+            placeholder="https://play.google.com/store/apps/details?id=..."
+            style={{ padding: "10px 14px", borderRadius: 10, border: "1.5px solid #E5E7EB", fontSize: 13, color: "#111827", outline: "none" }}
+          />
+        </div>
+      </div>
+
+      {/* Carte texte */}
+      <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #E5E7EB", padding: "20px 20px" }}>
+        <h3 style={{ fontSize: 14, fontWeight: 700, color: "#111827", margin: "0 0 16px" }}>Message affiché</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <label style={{ fontSize: 12, color: "#6B7280", fontWeight: 600 }}>Titre</label>
+            <input
+              value={form.app_update_title}
+              onChange={f("app_update_title")}
+              placeholder="Mise à jour disponible"
+              style={{ padding: "10px 14px", borderRadius: 10, border: "1.5px solid #E5E7EB", fontSize: 14, color: "#111827", outline: "none" }}
+            />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <label style={{ fontSize: 12, color: "#6B7280", fontWeight: 600 }}>Message</label>
+            <textarea
+              value={form.app_update_message}
+              onChange={f("app_update_message")}
+              rows={3}
+              placeholder="Description de la mise à jour..."
+              style={{ padding: "10px 14px", borderRadius: 10, border: "1.5px solid #E5E7EB", fontSize: 13, color: "#111827", outline: "none", resize: "vertical", lineHeight: 1.5 }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Bouton sauvegarder */}
+      <button
+        onClick={save}
+        disabled={saving}
+        style={{
+          padding: "14px 24px", background: saving ? "#9CA3AF" : "#4F46E5",
+          color: "#fff", fontWeight: 700, fontSize: 14,
+          borderRadius: 14, border: "none", cursor: saving ? "not-allowed" : "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+        }}
+      >
+        {saving ? <><Loader2 style={{ width: 16, height: 16, animation: "spin 1s linear infinite" }} /> Enregistrement...</> : "Enregistrer"}
+      </button>
+    </div>
+  );
+}
+
+type AdminTab = "stats" | "users" | "orders" | "transactions" | "messages" | "settings" | "payments" | "operators" | "faq" | "social" | "countries" | "contact" | "waitlist" | "promos" | "email" | "telegram" | "affiliate" | "crypto" | "update";
 
 const ADMIN_NAV: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
   { id: "stats",        label: "Statistiques",    icon: <BarChart3 className="w-4 h-4" /> },
@@ -3275,6 +3453,7 @@ const ADMIN_NAV: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
   { id: "countries",    label: "Pays",            icon: <Globe2 className="w-4 h-4" /> },
   { id: "telegram",     label: "Telegram Bot",    icon: <Bell className="w-4 h-4" /> },
   { id: "affiliate",    label: "Affiliations",    icon: <Share2 className="w-4 h-4" /> },
+  { id: "update",       label: "Mises à jour",    icon: <RefreshCw className="w-4 h-4" /> },
 ];
 
 export default function AdminPanel() {
@@ -3393,6 +3572,7 @@ export default function AdminPanel() {
           {activeTab === "countries"    && <AdminCountries />}
           {activeTab === "telegram"     && <AdminTelegram />}
           {activeTab === "affiliate"    && <AdminAffiliations />}
+          {activeTab === "update"       && <AdminAppUpdate />}
         </motion.div>
       </AnimatePresence>
     </div>

@@ -739,4 +739,20 @@ router.post("/v1/admin/affiliate/withdrawals/:id/reject", ...auth, async (req, r
   res.json({ success: true });
 });
 
+/* ─── PUBLIC — VERSION APP ───────────────────────────────────────────── */
+router.get("/v1/app/version", async (req, res): Promise<void> => {
+  const keys = ["app_current_version", "app_update_mode", "app_update_url", "app_update_title", "app_update_message"];
+  const rows = await db.select().from(adminSettingsTable);
+  const map: Record<string, string> = {};
+  for (const r of rows) if (keys.includes(r.key)) map[r.key] = r.value;
+
+  res.json({
+    currentVersion: map["app_current_version"] ?? "1.0.0",
+    mode:           (map["app_update_mode"] ?? "disabled") as "disabled" | "optional" | "forced",
+    updateUrl:      map["app_update_url"] ?? "",
+    title:          map["app_update_title"] ?? "Mise à jour disponible",
+    message:        map["app_update_message"] ?? "Une nouvelle version est disponible. Veuillez mettre à jour pour continuer.",
+  });
+});
+
 export default router;

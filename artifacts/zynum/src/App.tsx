@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { CurrencyProvider } from "@/hooks/use-currency";
 import { LanguageProvider } from "@/hooks/use-language";
+import { UpdateGate } from "@/components/update-gate";
 
 import Onboarding from "@/pages/onboarding";
 import Login from "@/pages/login";
@@ -89,7 +90,9 @@ function App() {
         <LanguageProvider>
           <CurrencyProvider>
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
+              <UpdateGate>
+                <Router />
+              </UpdateGate>
             </WouterRouter>
             <ModalToaster />
           </CurrencyProvider>
