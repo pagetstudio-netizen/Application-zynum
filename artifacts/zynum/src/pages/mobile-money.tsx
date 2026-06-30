@@ -237,7 +237,7 @@ export default function MobileMoneyPage() {
   const user    = userData as { id: number; name: string } | undefined;
 
   const [step, setStep]         = useState<Step>("phone");
-  const [country, setCountry]   = useState<Country>(ALL_COUNTRIES.find(c => c.code === "CI") ?? ALL_COUNTRIES[0]);
+  const [country, setCountry]   = useState<Country>(ALL_COUNTRIES.find(c => c.code === "TG") ?? ALL_COUNTRIES[0]);
   const [operator, setOperator] = useState<Operator>(country.operators[0]);
   const [phone, setPhone]       = useState("");
   const [amountRaw, setAmountRaw] = useState("");

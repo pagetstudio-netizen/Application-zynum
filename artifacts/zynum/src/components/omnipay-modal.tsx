@@ -272,16 +272,16 @@ export function OmnipayModal({
       .catch(() => setCountriesLoaded(true));
   }, [apiBase]);
 
-  const defaultCountry = countries.find(c => c.code === "CI") ?? countries[0];
+  const defaultCountry = countries.find(c => c.code === "TG") ?? countries[0];
   const [country, setCountry]   = useState<DynCountry>(defaultCountry);
   const [operator, setOperator] = useState<DynOperator>(defaultCountry.operators[0]);
 
   // Sync country/operator when countries list arrives
   useEffect(() => {
     if (countriesLoaded && countries.length > 0) {
-      const ci = countries.find(c => c.code === "CI") ?? countries[0];
-      setCountry(ci);
-      setOperator(ci.operators[0]);
+      const tg = countries.find(c => c.code === "TG") ?? countries[0];
+      setCountry(tg);
+      setOperator(tg.operators[0]);
     }
   }, [countriesLoaded]);
 
