@@ -111,7 +111,7 @@ export default function AffiliatePage() {
   useEffect(() => { load(); }, [load]);
 
   const referralLink = stats?.referralCode
-    ? `${window.location.origin}/register?ref=${stats.referralCode}`
+    ? `https://zynum.net/register?ref=${stats.referralCode}`
     : null;
 
   const copyLink = () => {

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS } from "date-fns/locale";
 import {
   ChevronLeft, Eye, EyeOff, Plus, ArrowDownLeft, Clock,
 } from "lucide-react";
@@ -11,6 +11,7 @@ import { useGetBalance, useGetCurrentUser, getGetBalanceQueryKey } from "@worksp
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrency } from "@/hooks/use-currency";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 import { OmnipayModal } from "@/components/omnipay-modal";
 import { PaxityModal } from "@/components/paxity-modal";
 import { CryptoModal } from "@/components/crypto-modal";
@@ -35,6 +36,7 @@ export default function Recharge() {
   const { toast }    = useToast();
   const queryClient  = useQueryClient();
   const { currency } = useCurrency();
+  const { t, lang }  = useLanguage();
 
   const { data: userData }    = useGetCurrentUser({ query: { retry: false } as any });
   const { data: balanceData, refetch: refetchBalance } =
@@ -134,7 +136,7 @@ export default function Recharge() {
         >
           <ChevronLeft className="w-5 h-5 text-gray-700" />
         </button>
-        <h1 className="font-extrabold text-gray-900 text-lg flex-1">Recharge de compte</h1>
+        <h1 className="font-extrabold text-gray-900 text-lg flex-1">{t("recharge_page_title")}</h1>
       </div>
 
       {/* Fixed top section */}
@@ -150,7 +152,7 @@ export default function Recharge() {
               <span className="font-extrabold text-[#1a2b8c] text-lg tracking-tight">ZyNum</span>
             </div>
             <div className="text-right">
-              <p className="text-xs font-semibold text-white mb-0.5" style={{ color: "#ffffff" }}>Solde du compte</p>
+              <p className="text-xs font-semibold text-white mb-0.5" style={{ color: "#ffffff" }}>{t("recharge_account_balance")}</p>
               <div className="flex items-center gap-1.5 justify-end">
                 <p className="text-xl font-black tracking-tight" style={{ color: "#ffffff" }}>{displayBal}</p>
                 <button
@@ -172,7 +174,7 @@ export default function Recharge() {
             onClick={() => navigate("/recharge/mobile")}
             className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
           >
-            <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via mobile Money</span>
+            <span className="font-bold text-[#1a2b8c] text-[15px]">{t("recharge_via_mobile")}</span>
             <div className="flex items-center -space-x-2 shrink-0">
               <img src={imgTMoneyOp}  className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" alt="TMoney" />
               <img src={imgMoovOp}    className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" alt="Moov" />
@@ -188,7 +190,7 @@ export default function Recharge() {
             onClick={() => setCryptoOpen(true)}
             className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
           >
-            <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via Crypto monnaie</span>
+            <span className="font-bold text-[#1a2b8c] text-[15px]">{t("recharge_via_crypto")}</span>
             <div className="w-10 h-10 flex items-center justify-center shrink-0">
               <img src="/crypto-icon.png" alt="Crypto" className="w-10 h-10 object-contain" />
             </div>
@@ -196,18 +198,18 @@ export default function Recharge() {
         </div>
 
         {/* History title */}
-        <p className="font-bold text-gray-900 text-base pb-2">Historique des transactions</p>
+        <p className="font-bold text-gray-900 text-base pb-2">{t("recharge_history_title")}</p>
       </div>
 
       {/* Scrollable transactions */}
       <div className="flex-1 overflow-y-auto px-4 pb-8">
         {txLoading ? (
-          <div className="text-center py-8 text-gray-400 text-sm">Chargement…</div>
+          <div className="text-center py-8 text-gray-400 text-sm">{t("recharge_loading")}</div>
         ) : visibleTx.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <NoData
-              title="Aucune transaction"
-              description="Vos recharges et retraits apparaîtront ici"
+              title={t("recharge_no_tx")}
+              description={t("recharge_no_tx_desc")}
             />
           </div>
         ) : (
@@ -218,12 +220,12 @@ export default function Recharge() {
               const isFailed  = tx.status === "failed";
               const amountFcfa = tx.amountFcfa ?? Math.round((tx.amountUsd ?? 0) * FCFA_PER_USD);
               const date    = tx.createdAt ? new Date(tx.createdAt) : null;
-              const dateStr = date ? format(date, "dd MMM · HH:mm", { locale: fr }) : "";
+              const dateStr = date ? format(date, "dd MMM · HH:mm", { locale: lang === "en" ? enUS : fr }) : "";
               const label   = tx.type === "recharge"
-                ? "Rechargement"
+                ? t("recharge_tx_recharge")
                 : tx.type === "bonus"
-                ? "Bonus de parrainage"
-                : "Retrait bonus";
+                ? t("recharge_tx_bonus")
+                : t("recharge_tx_withdraw");
 
               return (
                 <div key={tx.id} className="flex items-center gap-3 px-4 py-3.5">
@@ -242,10 +244,10 @@ export default function Recharge() {
                     <div className="flex items-center gap-1.5">
                       <p className="font-semibold text-gray-900 text-sm truncate">{label}</p>
                       {isPending && (
-                        <span className="shrink-0 text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full">En cours</span>
+                        <span className="shrink-0 text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full">{t("recharge_tx_pending")}</span>
                       )}
                       {isFailed && (
-                        <span className="shrink-0 text-[10px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full">Échoué</span>
+                        <span className="shrink-0 text-[10px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full">{t("recharge_tx_failed")}</span>
                       )}
                     </div>
                     <p className="text-xs text-gray-400">{dateStr}</p>
@@ -278,8 +280,8 @@ export default function Recharge() {
             >
               <div className="px-5 pt-4 pb-4 border-b border-gray-100">
                 <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
-                <p className="font-bold text-gray-900 text-base">💳 Montant — Mobile Money</p>
-                <p className="text-xs text-gray-400 mt-1">Minimum 300 FCFA</p>
+                <p className="font-bold text-gray-900 text-base">{t("recharge_sheet_title")}</p>
+                <p className="text-xs text-gray-400 mt-1">{t("recharge_min_amount")}</p>
               </div>
               <div className="px-5 pt-4 space-y-4">
                 <div className="grid grid-cols-3 gap-2">
@@ -301,7 +303,7 @@ export default function Recharge() {
                   <span className="text-sm font-semibold text-gray-400 shrink-0">FCFA</span>
                   <input
                     type="number"
-                    placeholder="Montant personnalisé"
+                    placeholder={t("recharge_custom_placeholder")}
                     value={customInput}
                     onChange={e => setCustomInput(e.target.value)}
                     className="flex-1 bg-transparent text-gray-900 font-bold text-base focus:outline-none placeholder:text-gray-300"
@@ -312,7 +314,7 @@ export default function Recharge() {
                   className="w-full py-4 rounded-2xl font-bold text-white text-base active:scale-95 transition-transform shadow-lg"
                   style={{ backgroundColor: "#00C87A" }}
                 >
-                  Continuer — {effectiveAmount.toLocaleString("fr-FR")} FCFA →
+                  {t("recharge_continue_btn")} — {effectiveAmount.toLocaleString("fr-FR")} FCFA →
                 </button>
               </div>
             </motion.div>
