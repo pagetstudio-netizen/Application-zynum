@@ -118,10 +118,6 @@ export default function Recharge() {
     }, 3000);
   };
 
-  const pendingRechargeTx = transactions.filter(tx =>
-    tx.status === "pending" && tx.type === "recharge"
-  );
-
   const visibleTx = transactions.filter(tx =>
     (tx.status === "completed" || tx.status === "pending" || tx.status === "failed") &&
     (tx.type === "recharge" || tx.type === "affiliate_withdrawal" || tx.type === "withdrawal" || tx.type === "bonus")
@@ -140,19 +136,6 @@ export default function Recharge() {
         </button>
         <h1 className="font-extrabold text-gray-900 text-lg flex-1">Recharge de compte</h1>
       </div>
-
-      {/* Paiement en cours banner */}
-      {pendingRechargeTx.length > 0 && (
-        <div className="shrink-0 mx-4 mt-3 rounded-2xl bg-blue-50 border border-blue-200 px-4 py-3 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-            <div className="w-4 h-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-blue-700">Paiement en cours</p>
-            <p className="text-xs text-blue-500">En attente de confirmation de l'opérateur…</p>
-          </div>
-        </div>
-      )}
 
       {/* Fixed top section */}
       <div className="shrink-0 px-4 pt-4 pb-0 space-y-4 bg-gray-50">
