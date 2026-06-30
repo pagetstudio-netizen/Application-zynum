@@ -2,40 +2,27 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { LazyImage } from "@/components/lazy-image";
+import { useLanguage } from "@/hooks/use-language";
 
-const slides = [
-  {
-    id: 0,
-    image: "/onboarding1.png",
-    title: "Bienvenue sur ZyNum",
-    subtitle: "Votre numéro virtuel dans 180+ pays, livré en quelques secondes.",
-    accent: "#1A3FFF",
-    bg: "#EEF2FF",
-  },
-  {
-    id: 1,
-    image: "/onboarding2.png",
-    title: "Recevez vos SMS instantanément",
-    subtitle: "Telegram, WhatsApp, Google, TikTok et 200+ services disponibles.",
-    accent: "#7C3AED",
-    bg: "#F5F3FF",
-  },
-  {
-    id: 2,
-    image: "/onboarding3.png",
-    title: "Payez facilement en FCFA",
-    subtitle: "Rechargez via TMoney, Moov Money, Orange Money ou USDT.",
-    accent: "#059669",
-    bg: "#ECFDF5",
-  },
+const SLIDE_CONFIGS = [
+  { id: 0, image: "/onboarding1.png", accent: "#1A3FFF", bg: "#EEF2FF" },
+  { id: 1, image: "/onboarding2.png", accent: "#7C3AED", bg: "#F5F3FF" },
+  { id: 2, image: "/onboarding3.png", accent: "#059669", bg: "#ECFDF5" },
 ];
 
 export default function Onboarding() {
   const [current, setCurrent] = useState(0);
   const [animDir, setAnimDir] = useState(0);
   const [, setLocation] = useLocation();
+  const { lang, setLang, t } = useLanguage();
 
-  const slide = slides[current];
+  const slide = SLIDE_CONFIGS[current];
+
+  const slides = [
+    { title: t("onboarding_slide0_title"), subtitle: t("onboarding_slide0_sub"), badge: t("onboarding_slide0_badge") },
+    { title: t("onboarding_slide1_title"), subtitle: t("onboarding_slide1_sub"), badge: t("onboarding_slide1_badge") },
+    { title: t("onboarding_slide2_title"), subtitle: t("onboarding_slide2_sub"), badge: t("onboarding_slide2_badge") },
+  ];
 
   useEffect(() => {
     const html = document.documentElement;
@@ -77,24 +64,13 @@ export default function Onboarding() {
     }
   };
 
-  /* ── Card slide variants ── */
   const variants = {
-    enter: (d: number) => ({
-      x: d > 0 ? "100%" : "-100%",
-      opacity: 0,
-      scale: 0.92,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-      scale: 1,
-    },
-    exit: (d: number) => ({
-      x: d > 0 ? "-100%" : "100%",
-      opacity: 0,
-      scale: 0.92,
-    }),
+    enter: (d: number) => ({ x: d > 0 ? "100%" : "-100%", opacity: 0, scale: 0.92 }),
+    center: { x: 0, opacity: 1, scale: 1 },
+    exit: (d: number) => ({ x: d > 0 ? "-100%" : "100%", opacity: 0, scale: 0.92 }),
   };
+
+  const currentSlide = slides[current];
 
   return (
     <div
@@ -139,42 +115,50 @@ export default function Onboarding() {
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           </div>
-          <span
-            style={{
-              fontWeight: 900,
-              fontSize: 18,
-              letterSpacing: "-0.3px",
-              color: "#111",
-            }}
-          >
+          <span style={{ fontWeight: 900, fontSize: 18, letterSpacing: "-0.3px", color: "#111" }}>
             ZyNum
           </span>
         </div>
 
-        {/* Skip */}
-        {current < slides.length - 1 && (
-          <button
-            onClick={() => setLocation("/login")}
-            style={{
-              background: "none",
-              border: "none",
-              fontSize: 13,
-              fontWeight: 700,
-              color: "#9CA3AF",
-              cursor: "pointer",
-              padding: "8px 4px",
-            }}
-          >
-            Passer
-          </button>
-        )}
+        {/* Language switcher */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            background: "#ECEEF8",
+            borderRadius: 22,
+            padding: 3,
+            gap: 2,
+          }}
+        >
+          {(["fr", "en"] as const).map((l) => (
+            <button
+              key={l}
+              onClick={() => setLang(l)}
+              style={{
+                background: lang === l ? slide.accent : "transparent",
+                border: "none",
+                borderRadius: 18,
+                padding: "5px 11px",
+                fontSize: 12,
+                fontWeight: 800,
+                color: lang === l ? "#ffffff" : "#9CA3AF",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                letterSpacing: "0.4px",
+              }}
+            >
+              {l === "fr" ? "🇫🇷 FR" : "🇬🇧 EN"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Page title ── */}
       <div style={{ flexShrink: 0, padding: "20px 24px 12px", textAlign: "center" }}>
         <AnimatePresence mode="wait">
           <motion.div
-            key={current}
+            key={`${current}-${lang}`}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
@@ -190,35 +174,21 @@ export default function Onboarding() {
                 lineHeight: 1.25,
               }}
             >
-              {slide.title}
+              {currentSlide.title}
             </h1>
-            <p
-              style={{
-                fontSize: 14,
-                color: "#6B7280",
-                margin: "8px 0 0",
-                lineHeight: 1.6,
-              }}
-            >
-              {slide.subtitle}
+            <p style={{ fontSize: 14, color: "#6B7280", margin: "8px 0 0", lineHeight: 1.6 }}>
+              {currentSlide.subtitle}
             </p>
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* ── Cards carousel ── */}
-      <div
-        style={{
-          flex: 1,
-          minHeight: 0,
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
+      <div style={{ flex: 1, minHeight: 0, position: "relative", overflow: "hidden" }}>
         {/* Peek cards (prev & next ghost) */}
-        {slides.map((s, i) => {
+        {SLIDE_CONFIGS.map((s, i) => {
           if (i === current) return null;
-          const offset = (i - current) * 88; /* vw */
+          const offset = (i - current) * 88;
           return (
             <div
               key={s.id}
@@ -247,7 +217,7 @@ export default function Onboarding() {
               >
                 <LazyImage
                   src={s.image}
-                  alt={s.title}
+                  alt={slides[i].title}
                   imgStyle={{
                     width: "100%",
                     height: "100%",
@@ -294,7 +264,7 @@ export default function Onboarding() {
             >
               <LazyImage
                 src={slide.image}
-                alt={slide.title}
+                alt={currentSlide.title}
                 draggable={false}
                 imgStyle={{
                   width: "100%",
@@ -323,31 +293,18 @@ export default function Onboarding() {
                   boxShadow: `0 4px 16px ${slide.accent}55`,
                 }}
               >
-                {current === 0 ? "180+ pays" : current === 1 ? "200+ services" : "TMoney · Orange · USDT"}
+                {currentSlide.badge}
               </div>
             </div>
           </motion.div>
         </AnimatePresence>
-
       </div>
 
       {/* ── Bottom: dots + buttons ── */}
-      <div
-        style={{
-          flexShrink: 0,
-          padding: "12px 24px 40px",
-        }}
-      >
+      <div style={{ flexShrink: 0, padding: "12px 24px 40px" }}>
         {/* Dots */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 8,
-            marginBottom: 20,
-          }}
-        >
-          {slides.map((s, i) => (
+        <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 20 }}>
+          {SLIDE_CONFIGS.map((_, i) => (
             <button
               key={i}
               onClick={() => goTo(i)}
@@ -382,7 +339,7 @@ export default function Onboarding() {
             transition: "all 0.3s ease",
           }}
         >
-          {current < slides.length - 1 ? "Continuer" : "Créer un compte"}
+          {current < slides.length - 1 ? t("onboarding_continue") : t("onboarding_create_account")}
         </button>
 
         {/* Secondary CTA on last slide */}
@@ -403,7 +360,7 @@ export default function Onboarding() {
               transition: "all 0.3s ease",
             }}
           >
-            J'ai déjà un compte
+            {t("onboarding_has_account")}
           </button>
         )}
       </div>

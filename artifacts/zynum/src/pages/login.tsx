@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Lock, Eye, EyeOff, ChevronLeft, Mail } from "lucide-react";
 import { useLoginUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 
 const FIELD_WRAP: React.CSSProperties = {
   position: "relative",
@@ -43,6 +44,7 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t, lang, setLang } = useLanguage();
 
   const [step, setStep] = useState<Step>("credentials");
   const [email, setEmail] = useState("");
@@ -69,13 +71,13 @@ export default function Login() {
         sessionStorage.removeItem("zynum_dismissed_popups");
         sessionStorage.setItem("zynum_login_at", String(Date.now()));
         queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
-        toast({ title: "Connecté !", description: "Bienvenue sur ZyNum." });
+        toast({ title: t("login_connected"), description: t("login_welcome_desc") });
         setLocation("/dashboard");
       },
       onError: (error: any) => {
-        const msg = error?.data?.message || error?.message || "Email ou mot de passe incorrect";
+        const msg = error?.data?.message || error?.message || t("login_error_default");
         setErrorMsg(msg);
-        toast({ title: "Erreur de connexion", description: msg, variant: "destructive", duration: 3500 });
+        toast({ title: t("login_error_title"), description: msg, variant: "destructive", duration: 3500 });
       },
     },
   });
@@ -84,7 +86,7 @@ export default function Login() {
     e.preventDefault();
     setErrorMsg("");
     if (!email || !password) {
-      setErrorMsg("Veuillez remplir tous les champs");
+      setErrorMsg(t("login_fill_fields"));
       return;
     }
     loginMutation.mutate({ data: { email, password } });
@@ -105,7 +107,7 @@ export default function Login() {
 
   const handleVerify = async () => {
     const code = codeDigits.join("");
-    if (code.length !== 6) { setErrorMsg("Entrez les 6 chiffres"); return; }
+    if (code.length !== 6) { setErrorMsg(t("login_enter_6digits")); return; }
     setIsVerifying(true);
     setErrorMsg("");
     try {
@@ -115,10 +117,10 @@ export default function Login() {
         body: JSON.stringify({ email, code }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Code invalide");
+      if (!res.ok) throw new Error(data.message || t("register_code_invalid"));
       localStorage.setItem("zynum_token", data.token);
       queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
-      toast({ title: "Connecté !" });
+      toast({ title: t("login_connected") });
       setLocation("/dashboard");
     } catch (err: any) {
       setErrorMsg(err.message);
@@ -154,7 +156,28 @@ export default function Login() {
             </Link>
           )}
           <div style={{ flex: 1 }} />
-          <div style={{ width: 40 }} />
+          {/* Language switcher */}
+          <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.25)", borderRadius: 20, padding: 3, gap: 2 }}>
+            {(["fr", "en"] as const).map((l) => (
+              <button
+                key={l}
+                onClick={() => setLang(l)}
+                style={{
+                  background: lang === l ? "#1a3fc8" : "transparent",
+                  border: "none",
+                  borderRadius: 16,
+                  padding: "4px 10px",
+                  fontSize: 11,
+                  fontWeight: 800,
+                  color: lang === l ? "#ffffff" : "rgba(255,255,255,0.7)",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                {l === "fr" ? "🇫🇷 FR" : "🇬🇧 EN"}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Logo + title */}
@@ -164,7 +187,7 @@ export default function Login() {
           </div>
           <span style={{ fontWeight: 900, fontSize: 22, color: "#1a3a6b", letterSpacing: "-0.3px" }}>ZyNum</span>
           <span style={{ color: "#4a6fa5", fontSize: 14, marginTop: 4 }}>
-            {step === "credentials" ? "Connectez-vous à votre compte" : "Vérification en deux étapes"}
+            {step === "credentials" ? t("login_connect_subtitle") : t("login_2fa_title")}
           </span>
         </div>
 
@@ -178,20 +201,20 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="Adresse email"
+                placeholder={t("login_email_placeholder")}
                 autoComplete="email"
                 style={NAKED_INPUT}
               />
             </div>
 
-            {/* Mot de passe */}
+            {/* Password */}
             <div style={FIELD_WRAP}>
               <span style={ICON_LEFT}><Lock style={{ width: 18, height: 18 }} /></span>
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Mot de passe"
+                placeholder={t("login_password")}
                 autoComplete="current-password"
                 style={NAKED_INPUT}
               />
@@ -224,10 +247,10 @@ export default function Login() {
                     </svg>
                   )}
                 </div>
-                <span style={{ color: "rgba(255,255,255,0.9)", fontSize: 13 }}>Se souvenir</span>
+                <span style={{ color: "rgba(255,255,255,0.9)", fontSize: 13 }}>{t("login_remember")}</span>
               </label>
               <Link href="/forgot-password">
-                <span style={{ color: "#ffffff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Mot de passe oublié ?</span>
+                <span style={{ color: "#ffffff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>{t("login_forgot_label")}</span>
               </Link>
             </div>
 
@@ -256,7 +279,7 @@ export default function Login() {
             >
               {loginMutation.isPending
                 ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} />
-                : "Connexion"}
+                : t("login_btn")}
             </button>
           </form>
         )}
@@ -264,7 +287,7 @@ export default function Login() {
         {step === "verify_2fa" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, textAlign: "center", margin: 0 }}>
-              Code envoyé à <strong style={{ color: "#fff" }}>{email}</strong>
+              {t("login_code_sent_to")} <strong style={{ color: "#fff" }}>{email}</strong>
             </p>
 
             <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
@@ -309,16 +332,16 @@ export default function Login() {
                 opacity: (isVerifying || codeDigits.join("").length !== 6) ? 0.6 : 1,
               }}
             >
-              {isVerifying ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} /> : "Vérifier"}
+              {isVerifying ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} /> : t("login_verify_btn")}
             </button>
           </div>
         )}
 
         {/* Register link */}
         <div style={{ textAlign: "center", marginTop: 24, marginBottom: 40 }}>
-          <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 14 }}>Pas encore de compte ? </span>
+          <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 14 }}>{t("login_no_account_short")} </span>
           <Link href="/register">
-            <span style={{ color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>S'inscrire</span>
+            <span style={{ color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>{t("nav_register")}</span>
           </Link>
         </div>
       </div>

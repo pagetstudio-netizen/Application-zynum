@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Lock, Eye, EyeOff, Check, ChevronLeft, Gift, Mail, User, ShieldCheck, RefreshCw } from "lucide-react";
 import { useRegisterUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
 
 const FIELD_WRAP: React.CSSProperties = {
   position: "relative",
@@ -48,6 +49,7 @@ export default function Register() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t, lang, setLang } = useLanguage();
 
   const [name, setName]                       = useState("");
   const [email, setEmail]                     = useState("");
@@ -70,13 +72,13 @@ export default function Register() {
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!name.trim())      e.name    = "Le nom complet est requis";
-    if (!email.trim())     e.email   = "L'adresse email est requise";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "Adresse email invalide";
-    if (!password)         e.password = "Le mot de passe est requis";
-    else if (password.length < 6) e.password = "Au moins 6 caractères requis";
-    if (!confirmPassword)  e.confirm  = "Confirmez votre mot de passe";
-    else if (confirmPassword !== password) e.confirm = "Les mots de passe ne correspondent pas";
+    if (!name.trim())      e.name    = t("register_name_required");
+    if (!email.trim())     e.email   = t("register_email_required");
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = t("register_email_invalid");
+    if (!password)         e.password = t("register_pwd_required");
+    else if (password.length < 6) e.password = t("register_pwd_min6");
+    if (!confirmPassword)  e.confirm  = t("register_confirm_required");
+    else if (confirmPassword !== password) e.confirm = t("register_pwd_mismatch");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -92,7 +94,7 @@ export default function Register() {
         if (data.token) {
           localStorage.setItem("zynum_token", data.token);
           queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
-          toast({ title: "Compte créé !", description: "Bienvenue sur ZyNum !" });
+          toast({ title: t("register_account_created"), description: t("register_welcome") });
           setLocation("/dashboard");
         }
       },
@@ -100,9 +102,9 @@ export default function Register() {
         const msg =
           error?.response?.data?.message ||
           error?.data?.message ||
-          "Une erreur s'est produite";
+          t("register_error_default");
         setGlobalError(msg);
-        toast({ title: "Erreur d'inscription", description: msg, variant: "destructive", duration: 4000 });
+        toast({ title: t("register_error_label"), description: msg, variant: "destructive", duration: 4000 });
       },
     },
   });
@@ -155,13 +157,13 @@ export default function Register() {
         body: JSON.stringify({ email: pendingEmail, code }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message ?? "Code invalide");
+      if (!res.ok) throw new Error(data.message ?? t("register_code_invalid"));
       localStorage.setItem("zynum_token", data.token);
       queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
-      toast({ title: "Compte activé !", description: "Bienvenue sur ZyNum !" });
+      toast({ title: t("register_account_activated"), description: t("register_welcome") });
       setLocation("/dashboard");
     } catch (err: any) {
-      toast({ title: "Code invalide", description: err.message, variant: "destructive" });
+      toast({ title: t("register_code_invalid"), description: err.message, variant: "destructive" });
       setCodeDigits(["", "", "", "", "", ""]);
       digitRefs.current[0]?.focus();
     } finally {
@@ -177,9 +179,9 @@ export default function Register() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: pendingEmail }),
       });
-      toast({ title: "Code renvoyé !", description: `Vérifiez ${pendingEmail}` });
+      toast({ title: t("register_resent_title"), description: `${t("register_resent_desc")} ${pendingEmail}` });
     } catch {
-      toast({ title: "Erreur", description: "Impossible de renvoyer le code", variant: "destructive" });
+      toast({ title: t("error"), description: t("register_resend_error"), variant: "destructive" });
     } finally {
       setResendLoading(false);
     }
@@ -208,7 +210,7 @@ export default function Register() {
               <ChevronLeft style={{ width: 22, height: 22, color: "#1a3a6b" }} />
             </button>
             <div style={{ flex: 1, textAlign: "center" }}>
-              <span style={{ fontWeight: 700, fontSize: 17, color: "#1a3a6b" }}>Vérification email</span>
+              <span style={{ fontWeight: 700, fontSize: 17, color: "#1a3a6b" }}>{t("register_verify_title")}</span>
             </div>
             <div style={{ width: 40 }} />
           </div>
@@ -231,10 +233,10 @@ export default function Register() {
             textAlign: "center",
           }}>
             <p style={{ fontWeight: 700, fontSize: 16, color: "#1a3a6b", margin: "0 0 8px" }}>
-              Code envoyé par email
+              {t("register_code_sent")}
             </p>
             <p style={{ fontSize: 14, color: "rgba(26,58,107,0.75)", margin: 0, lineHeight: 1.5 }}>
-              Entrez le code à 6 chiffres envoyé à<br />
+              {t("register_code_hint")}<br />
               <strong style={{ color: "#1a3a6b" }}>{pendingEmail}</strong>
             </p>
           </div>
@@ -285,7 +287,7 @@ export default function Register() {
           >
             {verifyLoading
               ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} />
-              : <><Check style={{ width: 18, height: 18 }} /> Activer mon compte</>}
+              : <><Check style={{ width: 18, height: 18 }} /> {t("register_activate_btn")}</>}
           </button>
 
           <div style={{ textAlign: "center" }}>
@@ -301,7 +303,7 @@ export default function Register() {
               {resendLoading
                 ? <Loader2 style={{ width: 14, height: 14, animation: "spin 1s linear infinite" }} />
                 : <RefreshCw style={{ width: 14, height: 14 }} />}
-              Renvoyer le code
+              {t("register_resend_code")}
             </button>
           </div>
         </div>
@@ -329,9 +331,30 @@ export default function Register() {
             </button>
           </Link>
           <div style={{ flex: 1, textAlign: "center" }}>
-            <span style={{ fontWeight: 700, fontSize: 17, color: "#1a3a6b" }}>Créer un compte</span>
+            <span style={{ fontWeight: 700, fontSize: 17, color: "#1a3a6b" }}>{t("register_create_title")}</span>
           </div>
-          <div style={{ width: 40 }} />
+          {/* Language switcher */}
+          <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.25)", borderRadius: 20, padding: 3, gap: 2 }}>
+            {(["fr", "en"] as const).map((l) => (
+              <button
+                key={l}
+                onClick={() => setLang(l)}
+                style={{
+                  background: lang === l ? "#1a3fc8" : "transparent",
+                  border: "none",
+                  borderRadius: 16,
+                  padding: "4px 10px",
+                  fontSize: 11,
+                  fontWeight: 800,
+                  color: lang === l ? "#ffffff" : "rgba(255,255,255,0.7)",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                {l === "fr" ? "🇫🇷 FR" : "🇬🇧 EN"}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div style={{ display: "flex", justifyContent: "center", margin: "20px 0 28px" }}>
@@ -349,7 +372,7 @@ export default function Register() {
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Nom complet"
+                placeholder={t("register_name")}
                 autoComplete="name"
                 autoFocus
                 style={NAKED_INPUT}
@@ -365,7 +388,7 @@ export default function Register() {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="Adresse email"
+                placeholder={t("login_email_placeholder")}
                 autoComplete="email"
                 style={NAKED_INPUT}
               />
@@ -380,7 +403,7 @@ export default function Register() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Mot de passe"
+                placeholder={t("register_password")}
                 autoComplete="new-password"
                 style={NAKED_INPUT}
               />
@@ -402,7 +425,7 @@ export default function Register() {
                 type={showConfirm ? "text" : "password"}
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
-                placeholder="Répéter le mot de passe"
+                placeholder={t("register_repeat_pwd")}
                 autoComplete="new-password"
                 style={NAKED_INPUT}
               />
@@ -428,7 +451,7 @@ export default function Register() {
               type="text"
               value={referral}
               onChange={e => setReferral(e.target.value)}
-              placeholder="Code de parrainage (optionnel)"
+              placeholder={t("register_referral")}
               autoComplete="off"
               style={{ ...NAKED_INPUT, textTransform: "uppercase" }}
             />
@@ -464,15 +487,15 @@ export default function Register() {
           >
             {registerMutation.isPending
               ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} />
-              : "Créer mon compte"}
+              : t("register_btn")}
           </button>
         </form>
 
         <div style={{ textAlign: "center", marginTop: 20, marginBottom: 40 }}>
-          <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 14 }}>Déjà inscrit ? </span>
+          <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 14 }}>{t("register_has_account_short")} </span>
           <Link href="/login">
             <span style={{ color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>
-              Connectez-vous
+              {t("register_login_link_short")}
             </span>
           </Link>
         </div>
