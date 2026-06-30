@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import {
   ChevronLeft, Copy, Check, Loader2, CheckCircle2,
-  AlertCircle, Clock, ExternalLink,
+  AlertCircle, Clock, ExternalLink, RefreshCw,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetBalanceQueryKey, useGetCurrentUser } from "@workspace/api-client-react";
@@ -12,13 +12,15 @@ import { useLanguage } from "@/hooks/use-language";
 const FCFA_PER_USD = 620;
 
 const NP_CURRENCIES = [
-  { id: "usdttrc20", label: "USDT",     sub: "TRC20",  color: "#26A17B" },
-  { id: "usdterc20", label: "USDT",     sub: "ERC20",  color: "#627EEA" },
-  { id: "btc",       label: "Bitcoin",  sub: "BTC",    color: "#F7931A" },
-  { id: "eth",       label: "Ethereum", sub: "ETH",    color: "#627EEA" },
-  { id: "ltc",       label: "Litecoin", sub: "LTC",    color: "#345D9D" },
-  { id: "trx",       label: "TRON",     sub: "TRX",    color: "#EF0027" },
+  { id: "usdttrc20", label: "USDT",     sub: "TRC20",  color: "#26A17B", gecko: "tether"   },
+  { id: "usdterc20", label: "USDT",     sub: "ERC20",  color: "#627EEA", gecko: "tether"   },
+  { id: "btc",       label: "Bitcoin",  sub: "BTC",    color: "#F7931A", gecko: "bitcoin"  },
+  { id: "eth",       label: "Ethereum", sub: "ETH",    color: "#627EEA", gecko: "ethereum" },
+  { id: "ltc",       label: "Litecoin", sub: "LTC",    color: "#345D9D", gecko: "litecoin" },
+  { id: "trx",       label: "TRON",     sub: "TRX",    color: "#EF0027", gecko: "tron"     },
 ];
+
+const USDT_PEGGED = ["usdttrc20", "usdterc20"];
 
 type Provider = "nowpayments" | "oxapay";
 type Step     = "amount" | "pending" | "success" | "failed";
@@ -53,13 +55,50 @@ export default function CryptoRecharge() {
   const [opData,              setOpData]              = useState<OpData | null>(null);
   const [oxapayEnabled,       setOxapayEnabled]       = useState(true);
   const [nowpaymentsEnabled,  setNowpaymentsEnabled]  = useState(true);
+  const [cryptoPrices,        setCryptoPrices]        = useState<Record<string, number>>({});
+  const [priceLoading,        setPriceLoading]        = useState(false);
+  const [priceError,          setPriceError]          = useState(false);
 
   const pollRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const amountFcfa = Math.max(0, Math.round(parseFloat(amountInput) || 0));
-  const amountUsd  = (amountFcfa / FCFA_PER_USD).toFixed(2);
   const selectedCur = NP_CURRENCIES.find(c => c.id === payCur) ?? NP_CURRENCIES[0];
+
+  // ── Prix live via CoinGecko ──────────────────────────────────────────────────
+  const fetchPrices = useCallback(async () => {
+    setPriceLoading(true);
+    setPriceError(false);
+    try {
+      const ids = "bitcoin,ethereum,litecoin,tron,tether";
+      const res  = await fetch(
+        `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`,
+        { signal: AbortSignal.timeout(8000) },
+      );
+      if (!res.ok) throw new Error();
+      const data = await res.json() as Record<string, { usd: number }>;
+      setCryptoPrices({
+        btc:       data.bitcoin?.usd  ?? 0,
+        eth:       data.ethereum?.usd ?? 0,
+        ltc:       data.litecoin?.usd ?? 0,
+        trx:       data.tron?.usd     ?? 0,
+        usdttrc20: 1,
+        usdterc20: 1,
+      });
+    } catch {
+      setPriceError(true);
+    } finally {
+      setPriceLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchPrices(); }, [fetchPrices]);
+
+  // ── Calcul : crypto → USD → FCFA ─────────────────────────────────────────────
+  const cryptoUsdPrice  = USDT_PEGGED.includes(payCur) ? 1 : (cryptoPrices[payCur] ?? 0);
+  const cryptoAmount    = Math.max(0, parseFloat(amountInput) || 0);
+  const amountUsd       = cryptoAmount * cryptoUsdPrice;
+  const amountFcfa      = Math.max(0, Math.round(amountUsd * FCFA_PER_USD));
+  const minCryptoAmount = cryptoUsdPrice > 0 ? 300 / FCFA_PER_USD / cryptoUsdPrice : 0;
 
   useEffect(() => {
     fetch("/api/v1/settings")
@@ -186,11 +225,21 @@ export default function CryptoRecharge() {
   };
 
   const minFcfa = 300;
-  const minUsd  = (minFcfa / FCFA_PER_USD).toFixed(2);
+  const minCryptoDisplay = cryptoUsdPrice > 0
+    ? (minFcfa / FCFA_PER_USD / cryptoUsdPrice).toFixed(selectedCur.sub === "BTC" ? 6 : 4)
+    : "—";
 
   const handlePay = () => {
+    if (!cryptoUsdPrice) {
+      toast({ title: "Taux non disponible", description: "Impossible de récupérer le taux. Réessayez.", variant: "destructive" });
+      return;
+    }
     if (amountFcfa < minFcfa) {
-      toast({ title: t("crypto_min_amount"), description: `${minFcfa} FCFA (~$${minUsd})`, variant: "destructive" });
+      toast({
+        title: t("crypto_min_amount"),
+        description: `${minCryptoDisplay} ${selectedCur.sub} ≈ ${minFcfa} FCFA`,
+        variant: "destructive",
+      });
       return;
     }
     if (provider === "nowpayments") initiateNowPayments();
@@ -214,6 +263,9 @@ export default function CryptoRecharge() {
     setAmountInput("");
     setTimeLeft(60 * 60);
   };
+
+  // Reset amount quand la crypto change
+  const handleCurChange = (id: string) => { setPayCur(id); setAmountInput(""); };
 
   const canGoBack = step === "amount" || step === "success" || step === "failed";
 
@@ -310,7 +362,7 @@ export default function CryptoRecharge() {
                       {NP_CURRENCIES.map(c => (
                         <button
                           key={c.id}
-                          onClick={() => setPayCur(c.id)}
+                          onClick={() => handleCurChange(c.id)}
                           style={{
                             padding: "12px 6px", borderRadius: 14, border: "2px solid",
                             borderColor: payCur === c.id ? c.color : "#e5e7eb",
@@ -336,69 +388,100 @@ export default function CryptoRecharge() {
                   </div>
                 )}
 
-                {/* Amount input */}
+                {/* Prix live */}
+                <div style={{ marginBottom: 16 }}>
+                  {priceLoading ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#f9fafb", borderRadius: 12, padding: "10px 14px" }}>
+                      <Loader2 style={{ width: 14, height: 14, color: "#9ca3af", animation: "spin 1s linear infinite" }} />
+                      <span style={{ fontSize: 12, color: "#9ca3af" }}>Récupération des taux en cours…</span>
+                    </div>
+                  ) : priceError ? (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#fef2f2", borderRadius: 12, padding: "10px 14px" }}>
+                      <span style={{ fontSize: 12, color: "#dc2626", fontWeight: 600 }}>Taux indisponible</span>
+                      <button onClick={fetchPrices} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, color: "#dc2626", fontSize: 12, fontWeight: 700 }}>
+                        <RefreshCw style={{ width: 12, height: 12 }} /> Réessayer
+                      </button>
+                    </div>
+                  ) : cryptoUsdPrice > 0 ? (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f0fdf4", borderRadius: 12, padding: "10px 14px" }}>
+                      <span style={{ fontSize: 12, color: "#6b7280" }}>1 {selectedCur.sub} =</span>
+                      <span style={{ fontSize: 14, fontWeight: 800, color: "#059669" }}>
+                        ${cryptoUsdPrice.toLocaleString("en-US", { maximumFractionDigits: 2 })}
+                        <span style={{ color: "#9ca3af", fontWeight: 500 }}> · {Math.round(cryptoUsdPrice * FCFA_PER_USD).toLocaleString("fr-FR")} FCFA</span>
+                      </span>
+                    </div>
+                  ) : null}
+                </div>
+
+                {/* Amount input — saisie en crypto */}
                 <p style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
-                  {t("crypto_amount_label")}
+                  Montant à envoyer
                 </p>
 
-                {/* Big amount input */}
                 <div style={{
                   background: "#fff", borderRadius: 20, padding: "20px 20px",
-                  border: "2px solid", borderColor: amountFcfa > 0 ? "#f97316" : "#e5e7eb",
+                  border: "2px solid", borderColor: cryptoAmount > 0 ? selectedCur.color : "#e5e7eb",
                   marginBottom: 14, transition: "border-color 0.2s",
                   boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
                 }}>
-                  <p style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, margin: "0 0 6px" }}>{t("crypto_amount_fcfa_label")}</p>
+                  <p style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, margin: "0 0 6px" }}>
+                    {selectedCur.label} ({selectedCur.sub})
+                  </p>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <input
                       type="number"
-                      placeholder="Ex: 5000"
+                      placeholder={USDT_PEGGED.includes(payCur) ? "Ex : 10" : selectedCur.sub === "BTC" ? "Ex : 0.001" : "Ex : 0.01"}
                       value={amountInput}
                       onChange={e => setAmountInput(e.target.value)}
-                      inputMode="numeric"
+                      inputMode="decimal"
                       style={{
                         flex: 1, background: "none", border: "none", outline: "none",
                         fontSize: 32, fontWeight: 900, color: "#111827",
                         fontFamily: "monospace",
                       }}
                     />
-                    <span style={{ fontSize: 16, fontWeight: 700, color: "#9ca3af", flexShrink: 0 }}>FCFA</span>
+                    <span style={{ fontSize: 16, fontWeight: 800, color: selectedCur.color, flexShrink: 0 }}>
+                      {selectedCur.sub}
+                    </span>
                   </div>
                 </div>
 
-                {/* USD equivalent */}
-                {amountFcfa > 0 && (
+                {/* Équivalent FCFA + USD */}
+                {cryptoAmount > 0 && cryptoUsdPrice > 0 && (
                   <div style={{
-                    background: "#f0fdf4", borderRadius: 14, padding: "12px 16px",
-                    marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center",
+                    background: "#f0fdf4", borderRadius: 16, padding: "16px",
+                    marginBottom: 16, border: "1px solid #bbf7d0",
                   }}>
-                    <span style={{ fontSize: 13, color: "#6b7280" }}>
-                      {provider === "nowpayments"
-                        ? `≈ en ${selectedCur.label} (${selectedCur.sub})`
-                        : t("crypto_equiv_usd")}
-                    </span>
-                    <span style={{ fontSize: 18, fontWeight: 900, color: "#059669" }}>${amountUsd}</span>
+                    <p style={{ fontSize: 11, color: "#6b7280", margin: "0 0 6px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                      Vous allez recevoir
+                    </p>
+                    <p style={{ fontSize: 28, fontWeight: 900, color: "#059669", margin: "0 0 2px" }}>
+                      {amountFcfa.toLocaleString("fr-FR")} FCFA
+                    </p>
+                    <p style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>
+                      ≈ ${amountUsd.toFixed(2)} · taux : 1 {selectedCur.sub} = {Math.round(cryptoUsdPrice * FCFA_PER_USD).toLocaleString("fr-FR")} FCFA
+                    </p>
                   </div>
                 )}
 
                 {/* Min amount notice */}
                 <p style={{ fontSize: 12, color: "#9ca3af", textAlign: "center", margin: "0 0 20px" }}>
-                  {t("crypto_min_amount")} : <strong style={{ color: "#374151" }}>{minFcfa} FCFA</strong>
-                  <span style={{ color: "#9ca3af" }}> (~${minUsd})</span>
+                  Minimum : <strong style={{ color: "#374151" }}>{minCryptoDisplay} {selectedCur.sub}</strong>
+                  <span style={{ color: "#9ca3af" }}> ≈ {minFcfa} FCFA</span>
                 </p>
 
                 {/* CTA */}
                 <button
                   onClick={handlePay}
-                  disabled={loading || amountFcfa < minFcfa}
+                  disabled={loading || amountFcfa < minFcfa || !cryptoUsdPrice}
                   style={{
                     width: "100%", height: 58, borderRadius: 18,
-                    background: loading || amountFcfa < minFcfa ? "#d1d5db" : "#f97316",
+                    background: loading || amountFcfa < minFcfa || !cryptoUsdPrice ? "#d1d5db" : "#f97316",
                     color: "#fff", fontWeight: 800, fontSize: 16, border: "none",
-                    cursor: loading || amountFcfa < minFcfa ? "not-allowed" : "pointer",
+                    cursor: loading || amountFcfa < minFcfa || !cryptoUsdPrice ? "not-allowed" : "pointer",
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
                     transition: "all 0.15s",
-                    boxShadow: amountFcfa >= minFcfa && !loading ? "0 4px 18px rgba(249,115,22,0.35)" : "none",
+                    boxShadow: amountFcfa >= minFcfa && !loading && cryptoUsdPrice ? "0 4px 18px rgba(249,115,22,0.35)" : "none",
                   }}
                 >
                   {loading
