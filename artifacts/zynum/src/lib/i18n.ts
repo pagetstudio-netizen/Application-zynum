@@ -947,6 +947,36 @@ export const translations = {
     register_resent_title: "Code renvoyé !",
     register_resent_desc: "Vérifiez",
     register_resend_error: "Impossible de renvoyer le code",
+
+    // ── Forgot password ───────────────────────────────────────────────
+    forgot_title: "Mot de passe oublié",
+    forgot_heading: "Mot de passe oublié ?",
+    forgot_desc: "Entrez votre email. Nous vous enverrons un code à 6 chiffres pour réinitialiser votre mot de passe.",
+    forgot_send_btn: "Envoyer le code",
+    forgot_have_code: "J'ai déjà un code →",
+    forgot_error_network: "Erreur de connexion. Veuillez réessayer.",
+    forgot_sent_title: "Email envoyé !",
+    forgot_sent_desc1: "Un code à 6 chiffres a été envoyé à",
+    forgot_sent_desc2: "Vérifiez votre boîte de réception (et les spams).",
+    forgot_enter_code: "Saisir le code",
+    forgot_resend_email: "Renvoyer l'email",
+    forgot_back_login: "← Retour à la connexion",
+
+    // ── Reset password ────────────────────────────────────────────────
+    reset_title: "Nouveau mot de passe",
+    reset_desc: "Entrez le code à 6 chiffres reçu par email et choisissez un nouveau mot de passe.",
+    reset_code_label: "Code de vérification",
+    reset_new_pwd: "Nouveau mot de passe",
+    reset_strength_weak: "Faible",
+    reset_strength_fair: "Moyen",
+    reset_strength_good: "Bien",
+    reset_strength_strong: "Fort",
+    reset_enter_6digits: "Entrez les 6 chiffres du code",
+    reset_pwd_min8: "Le mot de passe doit contenir au moins 8 caractères",
+    reset_btn: "Réinitialiser",
+    reset_done_title: "Mot de passe modifié !",
+    reset_done_desc: "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.",
+    reset_resend_link: "← Renvoyer un code",
   },
 
   en: {
@@ -1895,6 +1925,36 @@ export const translations = {
     register_resent_title: "Code resent!",
     register_resent_desc: "Check",
     register_resend_error: "Could not resend code",
+
+    // ── Forgot password ───────────────────────────────────────────────
+    forgot_title: "Forgot password",
+    forgot_heading: "Forgot your password?",
+    forgot_desc: "Enter your email. We'll send you a 6-digit code to reset your password.",
+    forgot_send_btn: "Send code",
+    forgot_have_code: "I already have a code →",
+    forgot_error_network: "Connection error. Please try again.",
+    forgot_sent_title: "Email sent!",
+    forgot_sent_desc1: "A 6-digit code has been sent to",
+    forgot_sent_desc2: "Check your inbox (and spam folder).",
+    forgot_enter_code: "Enter the code",
+    forgot_resend_email: "Resend email",
+    forgot_back_login: "← Back to login",
+
+    // ── Reset password ────────────────────────────────────────────────
+    reset_title: "New password",
+    reset_desc: "Enter the 6-digit code you received by email and choose a new password.",
+    reset_code_label: "Verification code",
+    reset_new_pwd: "New password",
+    reset_strength_weak: "Weak",
+    reset_strength_fair: "Fair",
+    reset_strength_good: "Good",
+    reset_strength_strong: "Strong",
+    reset_enter_6digits: "Enter the 6-digit code",
+    reset_pwd_min8: "Password must be at least 8 characters",
+    reset_btn: "Reset",
+    reset_done_title: "Password changed!",
+    reset_done_desc: "Your password has been successfully reset. You can now log in.",
+    reset_resend_link: "← Resend a code",
   },
 } as const;
 

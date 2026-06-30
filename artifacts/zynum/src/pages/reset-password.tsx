@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { ChevronLeft, Lock, Eye, EyeOff, Loader2, CheckCircle2, ArrowRight } from "lucide-react";
+import { useLanguage } from "@/hooks/use-language";
 
 const FIELD_WRAP: React.CSSProperties = {
   position: "relative",
@@ -36,6 +37,7 @@ const ICON_LEFT: React.CSSProperties = {
 
 export default function ResetPassword() {
   const [, navigate] = useLocation();
+  const { t, lang, setLang } = useLanguage();
   const params = new URLSearchParams(window.location.search);
   const emailInit = params.get("email") ?? "";
 
@@ -67,9 +69,9 @@ export default function ResetPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const code = codeDigits.join("");
-    if (code.length !== 6) { setError("Entrez les 6 chiffres du code"); return; }
-    if (!newPwd || newPwd.length < 8) { setError("Le mot de passe doit contenir au moins 8 caractères"); return; }
-    if (newPwd !== confirmPwd) { setError("Les mots de passe ne correspondent pas"); return; }
+    if (code.length !== 6) { setError(t("reset_enter_6digits")); return; }
+    if (!newPwd || newPwd.length < 8) { setError(t("reset_pwd_min8")); return; }
+    if (newPwd !== confirmPwd) { setError(t("register_pwd_mismatch")); return; }
     setLoading(true); setError("");
     try {
       const res = await fetch(`${apiBase}/api/v1/auth/reset-password`, {
@@ -78,10 +80,10 @@ export default function ResetPassword() {
         body: JSON.stringify({ email, code, newPassword: newPwd }),
       });
       const json = await res.json();
-      if (!res.ok) { setError(json.message ?? "Code invalide ou expiré."); return; }
+      if (!res.ok) { setError(json.message ?? t("register_code_invalid")); return; }
       setDone(true);
     } catch {
-      setError("Erreur de connexion. Veuillez réessayer.");
+      setError(t("forgot_error_network"));
     } finally {
       setLoading(false);
     }
@@ -97,7 +99,31 @@ export default function ResetPassword() {
     return s;
   })();
   const strengthColor = ["#e5e7eb", "#ef4444", "#f97316", "#eab308", "#22c55e"][pwdStrength];
-  const strengthLabel = ["", "Faible", "Moyen", "Bien", "Fort"][pwdStrength];
+  const strengthLabels = ["", t("reset_strength_weak"), t("reset_strength_fair"), t("reset_strength_good"), t("reset_strength_strong")];
+
+  const LangSwitcher = (
+    <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.25)", borderRadius: 20, padding: 3, gap: 2 }}>
+      {(["fr", "en"] as const).map((l) => (
+        <button
+          key={l}
+          onClick={() => setLang(l)}
+          style={{
+            background: lang === l ? "#1a3fc8" : "transparent",
+            border: "none",
+            borderRadius: 16,
+            padding: "4px 10px",
+            fontSize: 11,
+            fontWeight: 800,
+            color: lang === l ? "#ffffff" : "rgba(255,255,255,0.7)",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+        >
+          {l === "fr" ? "🇫🇷 FR" : "🇬🇧 EN"}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <div style={{
@@ -117,9 +143,9 @@ export default function ResetPassword() {
             </button>
           </Link>
           <div style={{ flex: 1, textAlign: "center" }}>
-            <span style={{ fontWeight: 700, fontSize: 17, color: "#1a3a6b" }}>Nouveau mot de passe</span>
+            <span style={{ fontWeight: 700, fontSize: 17, color: "#1a3a6b" }}>{t("reset_title")}</span>
           </div>
-          <div style={{ width: 40 }} />
+          {LangSwitcher}
         </div>
 
         {/* Logo */}
@@ -135,9 +161,9 @@ export default function ResetPassword() {
               <CheckCircle2 style={{ width: 40, height: 40, color: "#ffffff" }} />
             </div>
             <div>
-              <h2 style={{ color: "#1a3a6b", fontSize: 20, fontWeight: 800, margin: "0 0 8px" }}>Mot de passe modifié !</h2>
+              <h2 style={{ color: "#1a3a6b", fontSize: 20, fontWeight: 800, margin: "0 0 8px" }}>{t("reset_done_title")}</h2>
               <p style={{ color: "#4a6fa5", fontSize: 14, margin: 0, lineHeight: 1.6 }}>
-                Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.
+                {t("reset_done_desc")}
               </p>
             </div>
             <button
@@ -151,13 +177,13 @@ export default function ResetPassword() {
                 boxShadow: "0 4px 20px rgba(26,63,200,0.4)",
               }}
             >
-              Se connecter <ArrowRight style={{ width: 18, height: 18 }} />
+              {t("login_btn")} <ArrowRight style={{ width: 18, height: 18 }} />
             </button>
           </div>
         ) : (
           <>
             <p style={{ color: "#4a6fa5", fontSize: 14, textAlign: "center", margin: "0 0 24px", lineHeight: 1.6 }}>
-              Entrez le code à 6 chiffres reçu par email et choisissez un nouveau mot de passe.
+              {t("reset_desc")}
             </p>
 
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -168,7 +194,7 @@ export default function ResetPassword() {
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    placeholder="Adresse email"
+                    placeholder={t("login_email_placeholder")}
                     style={{ ...NAKED_INPUT, paddingLeft: 16 }}
                   />
                 </div>
@@ -177,7 +203,7 @@ export default function ResetPassword() {
               {/* OTP digits */}
               <div>
                 <p style={{ color: "#1a3a6b", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>
-                  Code de vérification
+                  {t("reset_code_label")}
                 </p>
                 <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
                   {codeDigits.map((d, i) => (
@@ -221,7 +247,7 @@ export default function ResetPassword() {
                     type={showPwd ? "text" : "password"}
                     value={newPwd}
                     onChange={e => setNewPwd(e.target.value)}
-                    placeholder="Nouveau mot de passe"
+                    placeholder={t("reset_new_pwd")}
                     autoComplete="new-password"
                     style={NAKED_INPUT}
                   />
@@ -240,7 +266,7 @@ export default function ResetPassword() {
                         <div key={n} style={{ height: 4, flex: 1, borderRadius: 4, background: pwdStrength >= n ? strengthColor : "#e5e7eb", transition: "background 0.3s" }} />
                       ))}
                     </div>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: strengthColor, minWidth: 32 }}>{strengthLabel}</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: strengthColor, minWidth: 32 }}>{strengthLabels[pwdStrength]}</span>
                   </div>
                 )}
               </div>
@@ -257,14 +283,14 @@ export default function ResetPassword() {
                   type={showPwd ? "text" : "password"}
                   value={confirmPwd}
                   onChange={e => setConfirm(e.target.value)}
-                  placeholder="Répéter le mot de passe"
+                  placeholder={t("register_repeat_pwd")}
                   autoComplete="new-password"
                   style={NAKED_INPUT}
                 />
               </div>
               {confirmPwd && confirmPwd !== newPwd && (
                 <p style={{ color: "#dc2626", fontSize: 12, marginTop: -8, fontWeight: 500 }}>
-                  Les mots de passe ne correspondent pas
+                  {t("register_pwd_mismatch")}
                 </p>
               )}
 
@@ -291,13 +317,13 @@ export default function ResetPassword() {
               >
                 {loading
                   ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} />
-                  : <>Réinitialiser <ArrowRight style={{ width: 18, height: 18 }} /></>}
+                  : <>{t("reset_btn")} <ArrowRight style={{ width: 18, height: 18 }} /></>}
               </button>
             </form>
 
             <div style={{ textAlign: "center", marginTop: 20, marginBottom: 40 }}>
               <Link href="/forgot-password">
-                <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, cursor: "pointer" }}>← Renvoyer un code</span>
+                <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, cursor: "pointer" }}>{t("reset_resend_link")}</span>
               </Link>
             </div>
           </>

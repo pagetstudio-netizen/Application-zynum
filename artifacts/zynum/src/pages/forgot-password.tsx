@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { ChevronLeft, Mail, Loader2, CheckCircle2, ArrowRight } from "lucide-react";
+import { useLanguage } from "@/hooks/use-language";
 
 const FIELD_WRAP: React.CSSProperties = {
   position: "relative",
@@ -36,6 +37,7 @@ const ICON_LEFT: React.CSSProperties = {
 
 export default function ForgotPassword() {
   const [, navigate] = useLocation();
+  const { t, lang, setLang } = useLanguage();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -56,11 +58,35 @@ export default function ForgotPassword() {
       });
       setSent(true);
     } catch {
-      setError("Erreur de connexion. Veuillez réessayer.");
+      setError(t("forgot_error_network"));
     } finally {
       setLoading(false);
     }
   };
+
+  const LangSwitcher = (
+    <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.25)", borderRadius: 20, padding: 3, gap: 2 }}>
+      {(["fr", "en"] as const).map((l) => (
+        <button
+          key={l}
+          onClick={() => setLang(l)}
+          style={{
+            background: lang === l ? "#1a3fc8" : "transparent",
+            border: "none",
+            borderRadius: 16,
+            padding: "4px 10px",
+            fontSize: 11,
+            fontWeight: 800,
+            color: lang === l ? "#ffffff" : "rgba(255,255,255,0.7)",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+        >
+          {l === "fr" ? "🇫🇷 FR" : "🇬🇧 EN"}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <div style={{
@@ -80,9 +106,9 @@ export default function ForgotPassword() {
             </button>
           </Link>
           <div style={{ flex: 1, textAlign: "center" }}>
-            <span style={{ fontWeight: 700, fontSize: 17, color: "#1a3a6b" }}>Mot de passe oublié</span>
+            <span style={{ fontWeight: 700, fontSize: 17, color: "#1a3a6b" }}>{t("forgot_title")}</span>
           </div>
-          <div style={{ width: 40 }} />
+          {LangSwitcher}
         </div>
 
         {/* Logo */}
@@ -96,10 +122,10 @@ export default function ForgotPassword() {
           <>
             <div style={{ marginBottom: 28 }}>
               <h1 style={{ color: "#1a3a6b", fontSize: 22, fontWeight: 800, margin: "0 0 8px", textAlign: "center" }}>
-                Mot de passe oublié ?
+                {t("forgot_heading")}
               </h1>
               <p style={{ color: "#4a6fa5", fontSize: 14, textAlign: "center", margin: 0, lineHeight: 1.6 }}>
-                Entrez votre email. Nous vous enverrons un code à 6 chiffres pour réinitialiser votre mot de passe.
+                {t("forgot_desc")}
               </p>
             </div>
 
@@ -110,7 +136,7 @@ export default function ForgotPassword() {
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="Adresse email"
+                  placeholder={t("login_email_placeholder")}
                   autoComplete="email"
                   autoFocus
                   style={NAKED_INPUT}
@@ -140,7 +166,7 @@ export default function ForgotPassword() {
               >
                 {loading
                   ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} />
-                  : <>Envoyer le code <ArrowRight style={{ width: 18, height: 18 }} /></>}
+                  : <>{t("forgot_send_btn")} <ArrowRight style={{ width: 18, height: 18 }} /></>}
               </button>
 
               <button
@@ -148,7 +174,7 @@ export default function ForgotPassword() {
                 onClick={() => navigate("/reset-password")}
                 style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", fontSize: 13, textAlign: "center", marginTop: 4 }}
               >
-                J'ai déjà un code →
+                {t("forgot_have_code")}
               </button>
             </form>
           </>
@@ -158,11 +184,11 @@ export default function ForgotPassword() {
               <CheckCircle2 style={{ width: 40, height: 40, color: "#ffffff" }} />
             </div>
             <div>
-              <h2 style={{ color: "#1a3a6b", fontSize: 20, fontWeight: 800, margin: "0 0 8px" }}>Email envoyé !</h2>
+              <h2 style={{ color: "#1a3a6b", fontSize: 20, fontWeight: 800, margin: "0 0 8px" }}>{t("forgot_sent_title")}</h2>
               <p style={{ color: "#4a6fa5", fontSize: 14, margin: 0, lineHeight: 1.6 }}>
-                Un code à 6 chiffres a été envoyé à<br />
+                {t("forgot_sent_desc1")}<br />
                 <strong style={{ color: "#1a3a6b" }}>{email}</strong>.<br />
-                Vérifiez votre boîte de réception (et les spams).
+                {t("forgot_sent_desc2")}
               </p>
             </div>
             <button
@@ -176,20 +202,20 @@ export default function ForgotPassword() {
                 boxShadow: "0 4px 20px rgba(26,63,200,0.4)",
               }}
             >
-              Saisir le code <ArrowRight style={{ width: 18, height: 18 }} />
+              {t("forgot_enter_code")} <ArrowRight style={{ width: 18, height: 18 }} />
             </button>
             <button
               onClick={() => { setSent(false); setEmail(""); }}
               style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.8)", fontSize: 13 }}
             >
-              Renvoyer l'email
+              {t("forgot_resend_email")}
             </button>
           </div>
         )}
 
         <div style={{ textAlign: "center", marginTop: 32, marginBottom: 40 }}>
           <Link href="/login">
-            <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, cursor: "pointer" }}>← Retour à la connexion</span>
+            <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, cursor: "pointer" }}>{t("forgot_back_login")}</span>
           </Link>
         </div>
       </div>
