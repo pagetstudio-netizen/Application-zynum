@@ -434,10 +434,10 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
       s.name.toLowerCase().includes(searchService.toLowerCase())
     );
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#F5F6FA" }}>
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#F5F6FA", overflowX: "hidden", maxWidth: "100%" }}>
 
         {/* ── En-tête fixé ── */}
-        <div style={{ flexShrink: 0, position: "sticky", top: 0, zIndex: 20, background: "#F5F6FA", paddingBottom: 4 }}>
+        <div style={{ flexShrink: 0, position: "sticky", top: 0, zIndex: 20, background: "#F5F6FA", paddingBottom: 4, overflowX: "hidden" }}>
           {/* Carte titre + solde */}
           <div style={{
             display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -445,8 +445,8 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
             padding: "14px 16px", overflow: "hidden",
             boxShadow: "0 1px 6px rgba(0,0,0,0.07)",
           }}>
-            <span style={{ fontSize: 17, fontWeight: 800, color: "#111827", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 8 }}>{t("buy_choose_service")}</span>
-            {user && <div style={{ flexShrink: 0 }}><BalancePill variant="colored" /></div>}
+            <span style={{ fontSize: 17, fontWeight: 800, color: "#111827", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 8, flex: "1 1 0" }}>{t("buy_choose_service")}</span>
+            {user && <div style={{ flexShrink: 0, maxWidth: "50%", overflow: "hidden" }}><BalancePill variant="colored" /></div>}
           </div>
 
           {/* Barre de recherche */}
@@ -517,10 +517,10 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
       .filter((c) => c.name.toLowerCase().includes(searchCountry.toLowerCase()));
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#ffffff" }}>
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#ffffff", overflowX: "hidden", maxWidth: "100%" }}>
 
         {/* ── En-tête fixé ── */}
-        <div style={{ flexShrink: 0, position: "sticky", top: 0, zIndex: 20, background: "#ffffff", borderBottom: "1px solid #F3F4F6" }}>
+        <div style={{ flexShrink: 0, position: "sticky", top: 0, zIndex: 20, background: "#ffffff", borderBottom: "1px solid #F3F4F6", overflowX: "hidden" }}>
           {/* Barre retour + titre + solde */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px 10px", overflow: "hidden" }}>
             <button
@@ -529,8 +529,8 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
             >
               <ArrowLeft style={{ width: 22, height: 22, color: "#374151" }} />
             </button>
-            <span style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 600, color: "#6B7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t("buy_change_service_btn")}</span>
-            {user && <div style={{ flexShrink: 0 }}><BalancePill variant="white" /></div>}
+            <span style={{ flex: "1 1 0", minWidth: 0, fontSize: 15, fontWeight: 600, color: "#6B7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t("buy_change_service_btn")}</span>
+            {user && <div style={{ flexShrink: 0, maxWidth: "45%", overflow: "hidden" }}><BalancePill variant="white" /></div>}
           </div>
 
           {/* Carte service sélectionné */}
@@ -642,15 +642,19 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
   // ── STEP 3 — OPERATOR ───────────────────────────────────────────────────────
   if (step === "operator") {
     return (
-      <div className="flex flex-col min-h-full">
+      <div className="flex flex-col min-h-full" style={{ overflowX: "hidden", maxWidth: "100%" }}>
         {/* Sticky header bleu */}
-        <div className="sticky top-0 z-20 px-4 pt-3 pb-3 space-y-2" style={{ backgroundColor: "#1A3FFF" }}>
-          <div className="flex items-center gap-2 min-w-0">
+        <div className="sticky top-0 z-20 px-4 pt-3 pb-3 space-y-2" style={{ backgroundColor: "#1A3FFF", overflowX: "hidden" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, overflow: "hidden" }}>
             <button onClick={() => goBack("country")} className="p-2 -ml-2 rounded-xl active:bg-blue-700 transition-colors shrink-0">
               <ArrowLeft style={{ width: 20, height: 20, color: "#ffffff" }} />
             </button>
-            <h1 className="text-base font-extrabold flex-1 min-w-0 truncate" style={{ color: "#ffffff" }}>{t("buy_s3_title")}</h1>
-            {user && <div className="shrink-0"><BalancePill variant="white" /></div>}
+            <h1 className="text-base font-extrabold min-w-0 truncate" style={{ color: "#ffffff", flex: "1 1 0", overflow: "hidden" }}>{t("buy_s3_title")}</h1>
+            {user && (
+              <div style={{ flexShrink: 0, maxWidth: "45%", overflow: "hidden" }}>
+                <BalancePill variant="white" />
+              </div>
+            )}
           </div>
 
           {/* Carte service + pays */}
@@ -686,25 +690,26 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.07 }}
                   onClick={() => setSelectedOperator(op.name)}
+                  style={{ overflow: "hidden" }}
                   className={`w-full flex items-center justify-between gap-3 px-4 py-4 rounded-2xl border text-left transition-all ${
                     active ? "border-blue-400 bg-blue-50 shadow-md shadow-blue-100" : "border-gray-200 bg-white hover:bg-gray-50 shadow-sm"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold ${active ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-500"}`}>
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shrink-0 ${active ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-500"}`}>
                       {op.label?.slice(0, 1).toUpperCase() ?? "?"}
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-semibold text-gray-900 text-sm">{op.label ?? op.name}</p>
-                        {i === 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 border border-green-200 text-green-700">{t("buy_recommended")}</span>}
+                        <p className="font-semibold text-gray-900 text-sm truncate">{op.label ?? op.name}</p>
+                        {i === 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 border border-green-200 text-green-700 shrink-0">{t("buy_recommended")}</span>}
                       </div>
                       <p className="text-xs text-gray-400 mt-0.5">{op.available} {t("buy_num_dispo")}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <p className="font-bold text-gray-900 text-sm">
-                      {currency === "FCFA" ? `${op.priceFcfa?.toLocaleString("fr-FR")} FCFA` : `$${op.priceUsd?.toFixed(2)}`}
+                  <div className="flex items-center gap-2 shrink-0 ml-2">
+                    <p className="font-bold text-gray-900 text-sm whitespace-nowrap">
+                      {currency === "FCFA" ? `${op.priceFcfa?.toLocaleString("fr-FR")} F` : `$${op.priceUsd?.toFixed(2)}`}
                     </p>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${active ? "border-blue-600 bg-blue-600" : "border-gray-300"}`}>
                       {active && <Check className="w-3 h-3 text-white" />}

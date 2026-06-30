@@ -1568,7 +1568,7 @@ function NumerosTab() {
   const [stepTitle, setStepTitle] = useState("Acheter un numéro");
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto pb-24">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pb-24">
         <BuyNumber isEmbedded={true} onStepChange={setStepTitle} />
       </div>
     </div>
