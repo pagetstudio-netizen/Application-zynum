@@ -464,7 +464,6 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
             boxShadow: "0 1px 6px rgba(0,0,0,0.07)",
           }}>
             <span style={{ fontSize: 17, fontWeight: 800, color: "#111827", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 8, flex: "1 1 0" }}>{t("buy_choose_service")}</span>
-            {user && <div style={{ flexShrink: 0, maxWidth: "50%", overflow: "hidden" }}><BalancePill variant="colored" /></div>}
           </div>
 
           {/* Barre de recherche */}
@@ -548,7 +547,6 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
               <ArrowLeft style={{ width: 22, height: 22, color: "#374151" }} />
             </button>
             <span style={{ flex: "1 1 0", minWidth: 0, fontSize: 15, fontWeight: 600, color: "#6B7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t("buy_change_service_btn")}</span>
-            {user && <div style={{ flexShrink: 0, maxWidth: "45%", overflow: "hidden" }}><BalancePill variant="white" /></div>}
           </div>
 
           {/* Carte service sélectionné */}
@@ -669,11 +667,6 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
               <ArrowLeft style={{ width: 20, height: 20, color: "#ffffff" }} />
             </button>
             <h1 style={{ fontSize: 15, fontWeight: 800, color: "#ffffff", flex: "1 1 0", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", margin: 0 }}>{t("buy_s3_title")}</h1>
-            {user && (
-              <div style={{ flexShrink: 0, maxWidth: "42%", overflow: "hidden" }}>
-                <BalancePill variant="white" />
-              </div>
-            )}
           </div>
 
           {/* Carte service + pays */}
