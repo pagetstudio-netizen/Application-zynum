@@ -10,7 +10,7 @@ import {
   ArrowUpRight, ArrowDownLeft, Tag, History, RefreshCw,
   Phone, Globe2, Star, Lock, KeyRound, X, Menu,
   ChevronLeft, Clock, XCircle, Package, CreditCard, SlidersHorizontal,
-  Share2, DollarSign, ArrowDownToLine, Users,
+  Share2, DollarSign, ArrowDownToLine, Users, Link2, UserPlus,
 } from "lucide-react";
 import {
   useGetCurrentUser, useLogoutUser, useGetBalance,
@@ -1063,7 +1063,9 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
         {/* ── Hero section ── */}
         <div style={{ background: "linear-gradient(160deg, #D0E8FF 0%, #B8D9FF 100%)", padding: "32px 24px 28px", textAlign: "center" }}>
           {/* Illustration */}
-          <div style={{ fontSize: 56, marginBottom: 16, lineHeight: 1 }}>🎁</div>
+          <div style={{ width: 72, height: 72, borderRadius: 22, background: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <Gift style={{ width: 40, height: 40, color: "#0284C7" }} />
+          </div>
           <h2 style={{ fontSize: 20, fontWeight: 800, color: "#0F172A", margin: "0 0 8px", lineHeight: 1.3 }}>
             {t("referral_hero_title")}
           </h2>
@@ -1145,18 +1147,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
             </div>
 
             {/* Points Bonus */}
-            <div style={{ background: "#fff", borderRadius: 20, padding: "18px 16px", boxShadow: "0 2px 10px rgba(0,0,0,0.06)", textAlign: "center", position: "relative" }}>
-              {/* 3-dot menu */}
-              <button
-                onClick={() => setShowWithdrawInfo(true)}
-                style={{
-                  position: "absolute", top: 10, right: 10,
-                  background: "none", border: "none", cursor: "pointer",
-                  padding: 4, borderRadius: 8, display: "flex", flexDirection: "column", gap: 3, alignItems: "center",
-                }}
-              >
-                {[0,1,2].map(i => <span key={i} style={{ width: 4, height: 4, borderRadius: "50%", background: "#94A3B8", display: "block" }} />)}
-              </button>
+            <div style={{ background: "#fff", borderRadius: 20, padding: "18px 16px", boxShadow: "0 2px 10px rgba(0,0,0,0.06)", textAlign: "center" }}>
               <div style={{ width: 44, height: 44, borderRadius: 14, background: "#FFF7ED", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}>
                 <Star style={{ width: 22, height: 22, color: "#F97316" }} />
               </div>
@@ -1186,14 +1177,14 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
           <div style={{ background: "#fff", borderRadius: 20, padding: "18px 16px", boxShadow: "0 2px 10px rgba(0,0,0,0.06)" }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 1, margin: "0 0 16px" }}>{t("referral_how_title")}</p>
             {[
-              { emoji: "🔗", color: "#4F46E5", bg: "#EEF2FF", title: t("referral_step1_title"), desc: t("referral_step1_desc") },
-              { emoji: "👤", color: "#059669", bg: "#ECFDF5", title: t("referral_step2_title"), desc: t("referral_step2_desc") },
-              { emoji: "💰", color: "#D97706", bg: "#FFFBEB", title: t("referral_step3_title"), desc: t("referral_step3_desc") },
+              { icon: <Link2 style={{ width: 18, height: 18, color: "#4F46E5" }} />, color: "#4F46E5", bg: "#EEF2FF", title: t("referral_step1_title"), desc: t("referral_step1_desc") },
+              { icon: <UserPlus style={{ width: 18, height: 18, color: "#059669" }} />, color: "#059669", bg: "#ECFDF5", title: t("referral_step2_title"), desc: t("referral_step2_desc") },
+              { icon: <WalletIcon style={{ width: 18, height: 18, color: "#D97706" }} />, color: "#D97706", bg: "#FFFBEB", title: t("referral_step3_title"), desc: t("referral_step3_desc") },
             ].map((step, i, arr) => (
               <div key={step.title} style={{ display: "flex", gap: 12 }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <div style={{ width: 38, height: 38, borderRadius: 12, background: step.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
-                    {step.emoji}
+                  <div style={{ width: 38, height: 38, borderRadius: 12, background: step.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {step.icon}
                   </div>
                   {i < arr.length - 1 && <div style={{ width: 2, flex: 1, background: "#F1F5F9", margin: "4px 0" }} />}
                 </div>
