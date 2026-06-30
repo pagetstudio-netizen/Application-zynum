@@ -1,27 +1,9 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Lock, Eye, EyeOff, Check, ChevronLeft, ChevronDown, Gift, Phone } from "lucide-react";
+import { Loader2, Lock, Eye, EyeOff, Check, ChevronLeft, Gift, Mail, User } from "lucide-react";
 import { useRegisterUser, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
-
-const COUNTRIES = [
-  { name: "Cameroun", code: "CM", dial: "+237" },
-  { name: "Côte d'Ivoire", code: "CI", dial: "+225" },
-  { name: "Sénégal", code: "SN", dial: "+221" },
-  { name: "Mali", code: "ML", dial: "+223" },
-  { name: "Burkina Faso", code: "BF", dial: "+226" },
-  { name: "Niger", code: "NE", dial: "+227" },
-  { name: "Tchad", code: "TD", dial: "+235" },
-  { name: "Gabon", code: "GA", dial: "+241" },
-  { name: "Congo", code: "CG", dial: "+242" },
-  { name: "RD Congo", code: "CD", dial: "+243" },
-  { name: "Guinée", code: "GN", dial: "+224" },
-  { name: "Togo", code: "TG", dial: "+228" },
-  { name: "Bénin", code: "BJ", dial: "+229" },
-  { name: "France", code: "FR", dial: "+33" },
-  { name: "Maroc", code: "MA", dial: "+212" },
-];
 
 const FIELD_WRAP: React.CSSProperties = {
   position: "relative",
@@ -67,26 +49,26 @@ export default function Register() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [country, setCountry] = useState("CM");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName]                       = useState("");
+  const [email, setEmail]                     = useState("");
+  const [password, setPassword]               = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [referralCode] = useState(() => new URLSearchParams(window.location.search).get("ref") ?? "");
-  const [referral, setReferral] = useState(referralCode);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword]       = useState(false);
+  const [showConfirm, setShowConfirm]         = useState(false);
+  const [referral, setReferral]               = useState(
+    () => new URLSearchParams(window.location.search).get("ref") ?? ""
+  );
+  const [errors, setErrors]     = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState("");
-
-  const selectedCountry = COUNTRIES.find(c => c.code === country) ?? COUNTRIES[0];
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!phone) e.phone = "Le numéro de téléphone est requis";
-    else if (phone.replace(/\s/g, "").length < 6) e.phone = "Numéro de téléphone invalide";
-    if (!password) e.password = "Le mot de passe est requis";
-    else if (password.length < 6) e.password = "Au moins 6 caractères";
-    if (!confirmPassword) e.confirm = "Confirmez le mot de passe";
+    if (!name.trim())      e.name    = "Le nom complet est requis";
+    if (!email.trim())     e.email   = "L'adresse email est requise";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "Adresse email invalide";
+    if (!password)         e.password = "Le mot de passe est requis";
+    else if (password.length < 6) e.password = "Au moins 6 caractères requis";
+    if (!confirmPassword)  e.confirm  = "Confirmez votre mot de passe";
     else if (confirmPassword !== password) e.confirm = "Les mots de passe ne correspondent pas";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -101,9 +83,12 @@ export default function Register() {
         setLocation("/dashboard");
       },
       onError: (error: any) => {
-        const msg = error?.response?.data?.message || error?.data?.message || "Une erreur s'est produite";
+        const msg =
+          error?.response?.data?.message ||
+          error?.data?.message ||
+          "Une erreur s'est produite";
         setGlobalError(msg);
-        toast({ title: "Erreur d'inscription", description: msg, variant: "destructive", duration: 3500 });
+        toast({ title: "Erreur d'inscription", description: msg, variant: "destructive", duration: 4000 });
       },
     },
   });
@@ -112,15 +97,13 @@ export default function Register() {
     e.preventDefault();
     setGlobalError("");
     if (!validate()) return;
-    const fullPhone = `${selectedCountry.dial}${phone.replace(/\s/g, "")}`;
     registerMutation.mutate({
       data: {
-        name: phone.replace(/\s/g, ""),
-        email: `${phone.replace(/\s/g, "")}@zynum.local`,
-        phone: fullPhone,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
         password,
         confirmPassword,
-        ...(referral ? { referralCode: referral } : {}),
+        ...(referral ? { referralCode: referral.trim().toUpperCase() } : {}),
       },
     } as any);
   };
@@ -138,7 +121,10 @@ export default function Register() {
         {/* Top bar */}
         <div style={{ display: "flex", alignItems: "center", paddingTop: 52, paddingBottom: 8 }}>
           <Link href="/">
-            <button style={{ background: "rgba(255,255,255,0.35)", border: "none", borderRadius: 12, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+            <button style={{
+              background: "rgba(255,255,255,0.35)", border: "none", borderRadius: 12,
+              width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+            }}>
               <ChevronLeft style={{ width: 22, height: 22, color: "#1a3a6b" }} />
             </button>
           </Link>
@@ -158,75 +144,51 @@ export default function Register() {
         {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 
-          {/* Pays — select wrapper */}
+          {/* Nom complet */}
           <div>
-            <div style={{ ...FIELD_WRAP, paddingRight: 14 }}>
-              <select
-                value={country}
-                onChange={e => setCountry(e.target.value)}
-                style={{
-                  flex: 1,
-                  height: "100%",
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  fontSize: 15,
-                  color: "#1a1a2e",
-                  fontWeight: 600,
-                  paddingLeft: 16,
-                  cursor: "pointer",
-                  appearance: "none",
-                  WebkitAppearance: "none",
-                }}
-              >
-                {COUNTRIES.map(c => (
-                  <option key={c.code} value={c.code}>{c.name} ({c.dial})</option>
-                ))}
-              </select>
-              <ChevronDown style={{ width: 18, height: 18, color: "#9ca3af", flexShrink: 0, pointerEvents: "none" }} />
+            <div style={{
+              ...FIELD_WRAP,
+              ...(errors.name ? { border: "1.5px solid #ef4444" } : {}),
+            }}>
+              <span style={ICON_LEFT}><User style={{ width: 18, height: 18 }} /></span>
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Nom complet"
+                autoComplete="name"
+                autoFocus
+                style={NAKED_INPUT}
+              />
             </div>
+            {errors.name && <p style={ERROR_STYLE}>{errors.name}</p>}
           </div>
 
-          {/* Téléphone */}
+          {/* Email */}
           <div>
-            <div style={{ display: "flex", gap: 8 }}>
-              {/* Badge indicatif */}
-              <div style={{
-                height: 54,
-                borderRadius: 14,
-                backgroundColor: "#ffffff",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "0 16px",
-                fontWeight: 700,
-                color: "#1a1a2e",
-                fontSize: 15,
-                flexShrink: 0,
-                whiteSpace: "nowrap",
-              }}>
-                {selectedCountry.dial}
-              </div>
-              {/* Input numéro */}
-              <div style={{ ...FIELD_WRAP, flex: 1, borderColor: errors.phone ? "#ef4444" : undefined, border: errors.phone ? "1.5px solid #ef4444" : undefined }}>
-                <span style={ICON_LEFT}><Phone style={{ width: 18, height: 18 }} /></span>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={e => setPhone(e.target.value.replace(/[^\d\s]/g, ""))}
-                  placeholder="Numéro de téléphone"
-                  autoComplete="tel"
-                  style={NAKED_INPUT}
-                />
-              </div>
+            <div style={{
+              ...FIELD_WRAP,
+              ...(errors.email ? { border: "1.5px solid #ef4444" } : {}),
+            }}>
+              <span style={ICON_LEFT}><Mail style={{ width: 18, height: 18 }} /></span>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="Adresse email"
+                autoComplete="email"
+                style={NAKED_INPUT}
+              />
             </div>
-            {errors.phone && <p style={ERROR_STYLE}>{errors.phone}</p>}
+            {errors.email && <p style={ERROR_STYLE}>{errors.email}</p>}
           </div>
 
           {/* Mot de passe */}
           <div>
-            <div style={{ ...FIELD_WRAP, borderColor: errors.password ? "#ef4444" : undefined, border: errors.password ? "1.5px solid #ef4444" : undefined }}>
+            <div style={{
+              ...FIELD_WRAP,
+              ...(errors.password ? { border: "1.5px solid #ef4444" } : {}),
+            }}>
               <span style={ICON_LEFT}><Lock style={{ width: 18, height: 18 }} /></span>
               <input
                 type={showPassword ? "text" : "password"}
@@ -249,7 +211,10 @@ export default function Register() {
 
           {/* Confirmer le mot de passe */}
           <div>
-            <div style={{ ...FIELD_WRAP, borderColor: errors.confirm ? "#ef4444" : undefined, border: errors.confirm ? "1.5px solid #ef4444" : undefined }}>
+            <div style={{
+              ...FIELD_WRAP,
+              ...(errors.confirm ? { border: "1.5px solid #ef4444" } : {}),
+            }}>
               <span style={ICON_LEFT}><Lock style={{ width: 18, height: 18 }} /></span>
               <input
                 type={showConfirm ? "text" : "password"}
@@ -261,7 +226,7 @@ export default function Register() {
               />
               <div style={{ display: "flex", alignItems: "center", gap: 6, paddingRight: 14 }}>
                 {confirmPassword && confirmPassword === password && (
-                  <Check style={{ width: 16, height: 16, color: "#22c55e" }} />
+                  <Check style={{ width: 16, height: 16, color: "#22c55e", flexShrink: 0 }} />
                 )}
                 <button
                   type="button"
@@ -275,7 +240,7 @@ export default function Register() {
             {errors.confirm && <p style={ERROR_STYLE}>{errors.confirm}</p>}
           </div>
 
-          {/* Code de parrainage */}
+          {/* Code de parrainage (optionnel) */}
           <div style={FIELD_WRAP}>
             <span style={ICON_LEFT}><Gift style={{ width: 18, height: 18 }} /></span>
             <input
@@ -283,18 +248,26 @@ export default function Register() {
               value={referral}
               onChange={e => setReferral(e.target.value)}
               placeholder="Code de parrainage (optionnel)"
-              style={NAKED_INPUT}
+              autoComplete="off"
+              style={{ ...NAKED_INPUT, textTransform: "uppercase" }}
             />
           </div>
 
-          {/* Global error */}
+          {/* Erreur globale */}
           {globalError && (
-            <div style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.4)", borderRadius: 12, padding: "10px 14px", color: "#dc2626", fontSize: 13 }}>
+            <div style={{
+              background: "rgba(239,68,68,0.15)",
+              border: "1px solid rgba(239,68,68,0.4)",
+              borderRadius: 12,
+              padding: "10px 14px",
+              color: "#dc2626",
+              fontSize: 13,
+            }}>
               {globalError}
             </div>
           )}
 
-          {/* Submit */}
+          {/* Bouton submit */}
           <button
             type="submit"
             disabled={registerMutation.isPending}
@@ -312,15 +285,17 @@ export default function Register() {
           >
             {registerMutation.isPending
               ? <Loader2 style={{ width: 20, height: 20, animation: "spin 1s linear infinite" }} />
-              : "Inscrivez-vous maintenant"}
+              : "Créer mon compte"}
           </button>
         </form>
 
-        {/* Login link */}
+        {/* Lien connexion */}
         <div style={{ textAlign: "center", marginTop: 20, marginBottom: 40 }}>
           <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 14 }}>Déjà inscrit ? </span>
           <Link href="/login">
-            <span style={{ color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>Connectez-vous</span>
+            <span style={{ color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>
+              Connectez-vous
+            </span>
           </Link>
         </div>
       </div>
