@@ -40,6 +40,20 @@ async function ensureSchema() {
     )
   `);
   await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "email_codes" (
+      "id" serial PRIMARY KEY NOT NULL,
+      "email" text NOT NULL,
+      "user_id" integer,
+      "code" text NOT NULL,
+      "token" text NOT NULL,
+      "type" text NOT NULL,
+      "expires_at" timestamp with time zone NOT NULL,
+      "used_at" timestamp with time zone,
+      "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+      CONSTRAINT "email_codes_token_unique" UNIQUE("token")
+    )
+  `);
+  await db.execute(sql`
     CREATE TABLE IF NOT EXISTS "orders" (
       "id" serial PRIMARY KEY NOT NULL,
       "user_id" integer NOT NULL,
