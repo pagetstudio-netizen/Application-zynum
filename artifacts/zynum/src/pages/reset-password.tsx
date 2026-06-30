@@ -2,19 +2,36 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { ChevronLeft, Lock, Eye, EyeOff, Loader2, CheckCircle2, ArrowRight } from "lucide-react";
 
-const INPUT_STYLE: React.CSSProperties = {
+const FIELD_WRAP: React.CSSProperties = {
+  position: "relative",
   width: "100%",
   height: 54,
   borderRadius: 14,
+  backgroundColor: "#ffffff",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+  display: "flex",
+  alignItems: "center",
+};
+
+const NAKED_INPUT: React.CSSProperties = {
+  flex: 1,
+  height: "100%",
+  background: "transparent",
   border: "none",
-  background: "#ffffff",
-  paddingLeft: 48,
-  paddingRight: 48,
+  outline: "none",
   fontSize: 15,
   color: "#1a1a2e",
-  outline: "none",
-  boxSizing: "border-box" as const,
-  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+  paddingRight: 14,
+};
+
+const ICON_LEFT: React.CSSProperties = {
+  width: 48,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexShrink: 0,
+  color: "#9ca3af",
+  pointerEvents: "none",
 };
 
 export default function ResetPassword() {
@@ -85,7 +102,7 @@ export default function ResetPassword() {
   return (
     <div style={{
       minHeight: "100dvh",
-      background: "linear-gradient(to bottom, #f0f7ff 0%, #d0e8f8 25%, #4a90d9 60%, #1a5fc8 100%)",
+      background: "linear-gradient(to bottom, #e8f4ff 0%, #c5ddf5 20%, #5b9fd6 55%, #1a5fc8 100%)",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -146,13 +163,13 @@ export default function ResetPassword() {
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
               {!emailInit && (
-                <div style={{ position: "relative" }}>
+                <div style={FIELD_WRAP}>
                   <input
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="Adresse email"
-                    style={{ ...INPUT_STYLE, paddingLeft: 16 }}
+                    style={{ ...NAKED_INPUT, paddingLeft: 16 }}
                   />
                 </div>
               )}
@@ -164,33 +181,40 @@ export default function ResetPassword() {
                 </p>
                 <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
                   {codeDigits.map((d, i) => (
-                    <input
+                    <div
                       key={i}
-                      ref={el => { codeRefs.current[i] = el; }}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={1}
-                      value={d}
-                      onChange={e => handleDigit(i, e.target.value)}
-                      onKeyDown={e => handleKey(i, e)}
                       style={{
                         width: 48, height: 56, borderRadius: 14,
-                        background: "#ffffff",
-                        border: "2px solid rgba(26,63,200,0.15)",
-                        color: "#1a1a2e", fontSize: 22, fontWeight: 900,
-                        textAlign: "center", outline: "none",
-                        boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-                        boxSizing: "border-box",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
                       }}
-                    />
+                    >
+                      <input
+                        ref={el => { codeRefs.current[i] = el; }}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={d}
+                        onChange={e => handleDigit(i, e.target.value)}
+                        onKeyDown={e => handleKey(i, e)}
+                        style={{
+                          width: "100%", height: "100%",
+                          background: "transparent",
+                          border: "none",
+                          color: "#1a1a2e", fontSize: 22, fontWeight: 900,
+                          textAlign: "center", outline: "none",
+                        }}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
 
               {/* New password */}
               <div>
-                <div style={{ position: "relative" }}>
-                  <span style={{ position: "absolute", left: 15, top: "50%", transform: "translateY(-50%)", color: "#9ca3af", display: "flex", pointerEvents: "none" }}>
+                <div style={FIELD_WRAP}>
+                  <span style={ICON_LEFT}>
                     <Lock style={{ width: 18, height: 18 }} />
                   </span>
                   <input
@@ -199,12 +223,12 @@ export default function ResetPassword() {
                     onChange={e => setNewPwd(e.target.value)}
                     placeholder="Nouveau mot de passe"
                     autoComplete="new-password"
-                    style={INPUT_STYLE}
+                    style={NAKED_INPUT}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPwd(s => !s)}
-                    style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af", display: "flex" }}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", display: "flex", padding: "0 14px 0 0" }}
                   >
                     {showPwd ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
                   </button>
@@ -222,8 +246,11 @@ export default function ResetPassword() {
               </div>
 
               {/* Confirm password */}
-              <div style={{ position: "relative" }}>
-                <span style={{ position: "absolute", left: 15, top: "50%", transform: "translateY(-50%)", color: "#9ca3af", display: "flex", pointerEvents: "none" }}>
+              <div style={{
+                ...FIELD_WRAP,
+                ...(confirmPwd && confirmPwd !== newPwd ? { boxShadow: "0 0 0 1.5px #ef4444, 0 2px 8px rgba(0,0,0,0.10)" } : {}),
+              }}>
+                <span style={ICON_LEFT}>
                   <Lock style={{ width: 18, height: 18 }} />
                 </span>
                 <input
@@ -232,10 +259,7 @@ export default function ResetPassword() {
                   onChange={e => setConfirm(e.target.value)}
                   placeholder="Répéter le mot de passe"
                   autoComplete="new-password"
-                  style={{
-                    ...INPUT_STYLE,
-                    border: confirmPwd && confirmPwd !== newPwd ? "1.5px solid #ef4444" : "none",
-                  }}
+                  style={NAKED_INPUT}
                 />
               </div>
               {confirmPwd && confirmPwd !== newPwd && (
