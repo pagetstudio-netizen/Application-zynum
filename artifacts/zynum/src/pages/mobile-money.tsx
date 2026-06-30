@@ -462,7 +462,7 @@ export default function MobileMoneyPage() {
   // ── PHONE STEP ──────────────────────────────────────────────────────────────
   if (step === "phone") {
     return (
-      <div className="flex flex-col bg-white" style={{ minHeight: "100dvh" }}>
+      <div className="flex flex-col" style={{ minHeight: "100dvh", backgroundColor: "#f0f2f5" }}>
         {/* Fixed header */}
         <div className="fixed top-0 left-0 right-0 z-40 flex items-center gap-3 px-4 bg-[#1A3FFF]" style={{ height: HEADER_H }}>
           <button onClick={() => navigate("/recharge")} className="p-2 rounded-xl active:bg-blue-700 transition-colors">
@@ -476,7 +476,7 @@ export default function MobileMoneyPage() {
             {t("mm_phone_hint")}
           </p>
 
-          {/* Country + phone */}
+          {/* Country + phone — style auth */}
           <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">{t("mm_phone_label")}</label>
           <div style={{
             display: "flex",
@@ -484,7 +484,7 @@ export default function MobileMoneyPage() {
             height: 54,
             borderRadius: 14,
             backgroundColor: "#ffffff",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.13)",
             marginBottom: 24,
             overflow: "hidden",
           }}>
@@ -497,9 +497,9 @@ export default function MobileMoneyPage() {
                 gap: 6,
                 padding: "0 12px",
                 height: "100%",
-                background: "none",
+                backgroundColor: "#ffffff",
                 border: "none",
-                borderRight: "1px solid #f0f0f0",
+                borderRight: "1.5px solid #ececec",
                 cursor: "pointer",
                 flexShrink: 0,
               }}
@@ -518,7 +518,7 @@ export default function MobileMoneyPage() {
               style={{
                 flex: 1,
                 height: "100%",
-                background: "transparent",
+                backgroundColor: "#ffffff",
                 border: "none",
                 outline: "none",
                 fontSize: 15,
