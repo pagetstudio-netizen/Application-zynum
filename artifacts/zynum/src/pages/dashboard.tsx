@@ -30,6 +30,7 @@ import { useNotifications } from "@/components/notification-banner";
 import imgTMoneyOp  from "@assets/images_(1)_1774832430242.png";
 import imgMoovOp    from "@assets/moov_(1)_1763835082986-GKkwwfPK_1774832019539.png";
 import imgAirtelOp  from "@assets/Airtel_logo-01_1774832430216.png";
+import imgParamsIcon from "@assets/20260413_084836_1782817603068.png";
 import { usePublicSettings, openTelegramSupport } from "@/hooks/use-public-settings";
 
 type Tab = "accueil" | "numeros" | "sms" | "compte";
@@ -1596,7 +1597,7 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
     { id: "infos",    iconSrc: "/icon-profile.png",  iconBg: "#EFF6FF", label: "Informations personnelles", accent: "#3B82F6" },
     { id: "security", iconSrc: "/icon-password.png", iconBg: "#111827", label: "Sécurité",                  accent: "#F97316" },
     { id: "referral", iconSrc: "/icon-records.png",  iconBg: "#111827", label: "Parrainage",                accent: "#8B5CF6", badge: "10%" },
-    { id: "params",   iconSrc: "/icon-params.png",   iconBg: "#111827", label: "Paramètres",                accent: "#6B7280" },
+    { id: "params",   iconSrc: imgParamsIcon,          iconBg: "#111827", label: "Paramètres",                accent: "#6B7280" },
     { id: "help",     iconSrc: "/icon-support.png",  iconBg: "#111827", label: "Centre d'aide",             accent: "#14B8A6" },
   ];
 
@@ -1666,7 +1667,13 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
                   <img
                     src={item.iconSrc}
                     className="w-8 h-8 object-contain"
-                    style={item.iconBg === "#EFF6FF" ? { filter: "saturate(0) brightness(0.4)" } : {}}
+                    style={
+                      item.iconBg === "#EFF6FF"
+                        ? { filter: "saturate(0) brightness(0.4)" }
+                        : item.id === "params"
+                        ? { mixBlendMode: "screen" as const }
+                        : {}
+                    }
                   />
                 </div>
                 <div className="flex-1 min-w-0">
