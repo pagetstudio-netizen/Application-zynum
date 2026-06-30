@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import {
   useGetCurrentUser, useLogoutUser, useGetBalance,
-  useGetOrderHistory, useGetServices, useGetCurrentUserQueryKey,
+  useGetOrderHistory, useGetServices, getGetCurrentUserQueryKey,
   getGetBalanceQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -109,7 +109,7 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
   const { t } = useLanguage();
   const queryClient = useQueryClient();
   const { currency } = useCurrency();
-  const { data: balanceData, refetch: refetchBalance } = useGetBalance({ query: { retry: false } });
+  const { data: balanceData, refetch: refetchBalance } = useGetBalance({ query: { retry: false } as any });
 
   const [showBal, setShowBal] = useState(true);
   const [amount, setAmount] = useState(5000);
@@ -378,9 +378,9 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
   const [, navigate] = useLocation();
   const [showBal, setShowBal] = useState(true);
   const [notifOpen, setNotifOpen] = useState(false);
-  const { data: balanceData } = useGetBalance({ query: { retry: false } });
-  const { data: servicesData } = useGetServices(undefined, { query: { retry: false, staleTime: 60000 } });
-  const { data: historyData } = useGetOrderHistory({ page: 1, limit: 5 }, { query: { retry: false } });
+  const { data: balanceData } = useGetBalance({ query: { retry: false } as any });
+  const { data: servicesData } = useGetServices({ query: { retry: false, staleTime: 60000 } as any });
+  const { data: historyData } = useGetOrderHistory({ page: 1, limit: 5 }, { query: { retry: false } as any });
   const { notifs: adminNotifs } = useNotifications();
 
   const balance = balanceData?.balance ?? 0;
@@ -668,8 +668,8 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
   const { t } = useLanguage();
   const [, navigate] = useLocation();
   const [showBal, setShowBal] = useState(true);
-  const { data: balanceData } = useGetBalance({ query: { retry: false } });
-  const { data: historyData } = useGetOrderHistory({ page: 1, limit: 50 }, { query: { retry: false } });
+  const { data: balanceData } = useGetBalance({ query: { retry: false } as any });
+  const { data: historyData } = useGetOrderHistory({ page: 1, limit: 50 }, { query: { retry: false } as any });
 
   const balance = balanceData?.balance ?? 0;
   const displayBal = showBal ? fmt(balance, currency) : "••••••";
@@ -1807,7 +1807,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("accueil");
 
   const { data: rawUser, isLoading, isFetching } = useGetCurrentUser({
-    query: { retry: false, staleTime: 30_000 },
+    query: { retry: false, staleTime: 30_000 } as any,
   });
   const showLoader = isLoading && !rawUser;
   const user = rawUser as UserWithAdmin | undefined;
@@ -1915,7 +1915,7 @@ export default function Dashboard() {
             <OrderHistory filter={historyFilter} setFilter={setHistoryFilter} />
           </div>
         )}
-        {activeTab === "compte" && <CompteTab user={user} onLogout={() => logoutMutation.mutate({})} />}
+        {activeTab === "compte" && <CompteTab user={user} onLogout={() => logoutMutation.mutate(undefined as any)} />}
       </div>
 
       <BottomNav active={activeTab} onChange={navigate} />

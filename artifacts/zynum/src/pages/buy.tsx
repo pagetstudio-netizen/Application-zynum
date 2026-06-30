@@ -171,8 +171,8 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
-  const { data: user, isLoading: isUserLoading } = useGetCurrentUser({ query: { retry: false } });
-  const { data: balanceData, refetch: refetchBalance } = useGetBalance({ query: { enabled: !!user, retry: false } });
+  const { data: user, isLoading: isUserLoading } = useGetCurrentUser({ query: { retry: false } as any });
+  const { data: balanceData, refetch: refetchBalance } = useGetBalance({ query: { enabled: !!user, retry: false } as any });
 
   const [step, setStep] = useState<BuyStep>("service");
 
@@ -284,7 +284,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
   const { data: servicesData, isLoading: isLoadingServices } = useGetServices();
   const { data: countriesData, isLoading: isLoadingCountries } = useGetCountries(
     { service: selectedService || undefined },
-    { query: { enabled: !!selectedService } }
+    { query: { enabled: !!selectedService } as any }
   );
   const { data: operatorsData, isLoading: isLoadingOperators } = useGetOperators(selectedService, selectedCountry);
 
@@ -333,8 +333,8 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
   const { data: smsData, refetch: refetchSms } = useCheckSms(activeOrder?.id || "", {
     query: {
       enabled: !!activeOrder && step === "active" && needsPolling(activeOrder),
-      refetchInterval: (q) => (needsPolling(q.state.data?.order ?? activeOrder) ? 5000 : false),
-    },
+      refetchInterval: (q: any) => (needsPolling(q.state.data?.order ?? activeOrder) ? 5000 : false),
+    } as any,
   });
 
   useEffect(() => {
@@ -363,7 +363,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
       currency: currency as "USD" | "FCFA",
       operator: selectedOperator ?? "any",
       discountCode: discountApplied?.code,
-    }});
+    } as any });
   }, [selectedService, selectedCountry, selectedOperator, currency, discountApplied, buyMutation]);
 
   const handleChangeNumber = () => {

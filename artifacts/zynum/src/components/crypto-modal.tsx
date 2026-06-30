@@ -168,7 +168,7 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
     try {
       const res = await fetch("/api/v1/payments/nowpayments/initiate", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...authHeader() },
+        headers: { "Content-Type": "application/json", ...authHeader() } as Record<string, string>,
         body: JSON.stringify({ amountFcfa: effectiveAmount, userId, payCurrency: payCur }),
       });
       const data = await res.json();
@@ -190,7 +190,7 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
     try {
       const res = await fetch("/api/v1/payments/oxapay/initiate", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...authHeader() },
+        headers: { "Content-Type": "application/json", ...authHeader() } as Record<string, string>,
         body: JSON.stringify({ amountFcfa: effectiveAmount, userId }),
       });
       const data = await res.json();
@@ -243,7 +243,7 @@ export function CryptoModal({ open, onClose, userId, onSuccess }: Props) {
       {/* Backdrop */}
       <div
         style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }}
-        onClick={() => { if (!isPaying || step === "success" || step === "failed") { stopAll(); onClose(); } }}
+        onClick={() => { if (!isPaying || (step as string) === "success" || (step as string) === "failed") { stopAll(); onClose(); } }}
       />
 
       {/* Sheet */}

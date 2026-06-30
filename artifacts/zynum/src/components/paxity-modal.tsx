@@ -33,7 +33,7 @@ interface OperatorDef {
   id: string;
   label: string;
   logo: string;
-  type: "CODE_QR" | "PUSH" | "CODE_OTP";
+  type: string;
 }
 
 interface CountryDef {
@@ -146,7 +146,7 @@ const COUNTRIES: CountryDef[] = [
       { id: "MOOVTG",   label: "Moov Money", logo: MOOV_LOGO,   type: "PUSH" },
     ],
   },
-].sort((a, b) => a.name.localeCompare(b.name, "fr"));
+].sort((a, b) => a.name.localeCompare(b.name, "fr")) as CountryDef[];
 
 /* ── Country Picker View ────────────────────────────────────────── */
 function CountryPicker({

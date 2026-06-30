@@ -19,11 +19,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
 
   const { data: user, isLoading: isLoadingUser } = useGetCurrentUser({
-    query: { retry: false, staleTime: 5 * 60 * 1000 },
+    query: { retry: false, staleTime: 5 * 60 * 1000 } as any,
   });
 
   const { data: balanceData } = useGetBalance({
-    query: { enabled: !!user, refetchInterval: 30000 },
+    query: { enabled: !!user, refetchInterval: 30000 } as any,
   });
 
   const logoutMutation = useLogoutUser({

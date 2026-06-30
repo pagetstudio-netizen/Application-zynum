@@ -232,8 +232,8 @@ export default function MobileMoneyPage() {
   const { currency }  = useCurrency();
   const queryClient   = useQueryClient();
 
-  const { data: userData }    = useGetCurrentUser({ query: { retry: false } });
-  const { data: balanceData, refetch: refetchBalance } = useGetBalance({ query: { retry: false } });
+  const { data: userData }    = useGetCurrentUser({ query: { retry: false } as any });
+  const { data: balanceData, refetch: refetchBalance } = useGetBalance({ query: { retry: false } as any });
   const user    = userData as { id: number; name: string } | undefined;
 
   const [step, setStep]         = useState<Step>("phone");

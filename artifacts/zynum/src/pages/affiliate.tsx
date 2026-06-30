@@ -212,9 +212,9 @@ export default function AffiliatePage() {
             <Users className="w-6 h-6 text-white" />
           </div>
           <div>
-            <p className="text-sm text-white/70 mb-1">Mes filleuls</p>
-            <p className="text-3xl font-bold">{stats?.filleulCount ?? 0}</p>
-            <p className="text-xs text-white/60 mt-1">Personnes inscrites via votre lien</p>
+            <p className="text-sm text-white/70 mb-1" style={{ color: "rgba(255,255,255,0.7)" }}>Mes filleuls</p>
+            <p className="text-3xl font-bold" style={{ color: "#ffffff" }}>{stats?.filleulCount ?? 0}</p>
+            <p className="text-xs text-white/60 mt-1" style={{ color: "rgba(255,255,255,0.6)" }}>Personnes inscrites via votre lien</p>
           </div>
         </motion.div>
 
@@ -229,10 +229,10 @@ export default function AffiliatePage() {
             <DollarSign className="w-6 h-6 text-white" />
           </div>
           <div>
-            <p className="text-sm text-white/70 mb-1">Commissions gagnées</p>
-            <p className="text-3xl font-bold">{fmt(stats?.totalEarned ?? 0)}</p>
-            <p className="text-xs text-white/60 mt-1">
-              Solde disponible : <span className="font-bold">{fmt(stats?.affiliateBalance ?? 0)}</span>
+            <p className="text-sm text-white/70 mb-1" style={{ color: "rgba(255,255,255,0.7)" }}>Commissions gagnées</p>
+            <p className="text-3xl font-bold" style={{ color: "#ffffff" }}>{fmt(stats?.totalEarned ?? 0)}</p>
+            <p className="text-xs text-white/60 mt-1" style={{ color: "rgba(255,255,255,0.6)" }}>
+              Solde disponible : <span className="font-bold" style={{ color: "#ffffff" }}>{fmt(stats?.affiliateBalance ?? 0)}</span>
             </p>
           </div>
         </motion.div>

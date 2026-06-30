@@ -337,18 +337,18 @@ export default function OrderHistory({
   const [allOrders, setAllOrders] = useState<any[]>([]);
   const limit = 50;
 
-  const { data: user } = useGetCurrentUser({ query: { retry: false } });
+  const { data: user } = useGetCurrentUser({ query: { retry: false } as any });
 
   const { data: historyData, isLoading, isFetching } = useGetOrderHistory(
     { page, limit },
     {
       query: {
         enabled: !!user,
-        refetchInterval: (q) => {
+        refetchInterval: (q: any) => {
           const hasPending = q.state.data?.orders.some((o: any) => o.status === "PENDING");
           return hasPending ? 5000 : false;
         },
-      },
+      } as any,
     }
   );
 
