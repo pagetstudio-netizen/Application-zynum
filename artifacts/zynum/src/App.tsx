@@ -15,6 +15,7 @@ import Dashboard from "@/pages/dashboard";
 import Recharge from "@/pages/recharge";
 import MobileMoney from "@/pages/mobile-money";
 import CardPayment from "@/pages/card-payment";
+import CryptoRecharge from "@/pages/crypto-recharge";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import Admin from "@/pages/admin";
@@ -74,6 +75,7 @@ function Router() {
         <Route path="/recharge" component={Recharge} />
         <Route path="/recharge/mobile" component={MobileMoney} />
         <Route path="/recharge/card" component={CardPayment} />
+        <Route path="/recharge/crypto" component={CryptoRecharge} />
         <Route path="/forgot-password" component={ForgotPassword} />
         <Route path="/reset-password" component={ResetPassword} />
         <Route path="/admin" component={Admin} />

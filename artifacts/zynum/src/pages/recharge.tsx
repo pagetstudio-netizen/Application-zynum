@@ -14,7 +14,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/use-language";
 import { OmnipayModal } from "@/components/omnipay-modal";
 import { PaxityModal } from "@/components/paxity-modal";
-import { CryptoModal } from "@/components/crypto-modal";
 import imgTMoneyOp from "@assets/images_(1)_1774832430242.png";
 import imgMoovOp   from "@assets/moov_(1)_1763835082986-GKkwwfPK_1774832019539.png";
 import imgAirtelOp from "@assets/Airtel_logo-01_1774832430216.png";
@@ -48,7 +47,6 @@ export default function Recharge() {
   const [pendingMethod, setPendingMethod] = useState<"mobile" | null>(null);
   const [omnipayOpen,   setOmnipayOpen]   = useState(false);
   const [paxityOpen,    setPaxityOpen]    = useState(false);
-  const [cryptoOpen,    setCryptoOpen]    = useState(false);
   const [transactions,  setTransactions]  = useState<Tx[]>([]);
   const [txLoading,     setTxLoading]     = useState(true);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -187,7 +185,7 @@ export default function Recharge() {
 
           {/* Crypto payment */}
           <button
-            onClick={() => setCryptoOpen(true)}
+            onClick={() => navigate("/recharge/crypto")}
             className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
           >
             <span className="font-bold text-[#1a2b8c] text-[15px]">{t("recharge_via_crypto")}</span>
@@ -342,14 +340,6 @@ export default function Recharge() {
           userId={user.id}
           onSuccess={handleSuccess}
           initialTab="card"
-        />
-      )}
-      {user && (
-        <CryptoModal
-          open={cryptoOpen}
-          onClose={() => setCryptoOpen(false)}
-          userId={user.id}
-          onSuccess={handleSuccess}
         />
       )}
     </div>
