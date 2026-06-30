@@ -687,7 +687,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
         </div>
 
         {/* ── Liste opérateurs — scrollable ── */}
-        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "8px 16px 16px", backgroundColor: "#ffffff", display: "flex", flexDirection: "column", gap: operators.length > 5 ? 8 : 12 }}>
+        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "8px 16px 16px", backgroundColor: "#ffffff", display: "flex", flexDirection: "column", gap: 12 }}>
           {isLoadingOperators ? (
             <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><Loader2 className="w-7 h-7 animate-spin text-blue-500" /></div>
           ) : operators.length === 0 ? (
@@ -695,7 +695,6 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
           ) : (
             operators.map((op, i) => {
               const active = selectedOperator === op.name;
-              const compact = operators.length > 5;
               return (
                 <motion.button
                   key={op.name}
@@ -703,22 +702,22 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(i * 0.05, 0.3) }}
                   onClick={() => setSelectedOperator(op.name)}
-                  style={{ overflow: "hidden", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: compact ? "10px 14px" : "14px 16px", borderRadius: compact ? 14 : 18, border: `2px solid ${active ? "#3b82f6" : "#E5E7EB"}`, background: active ? "#EFF6FF" : "#ffffff", boxShadow: active ? "0 2px 12px rgba(59,130,246,0.15)" : "0 1px 4px rgba(0,0,0,0.06)", cursor: "pointer", textAlign: "left" }}
+                  style={{ overflow: "hidden", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "14px 16px", borderRadius: 18, border: `2px solid ${active ? "#3b82f6" : "#E5E7EB"}`, background: active ? "#EFF6FF" : "#ffffff", boxShadow: active ? "0 2px 12px rgba(59,130,246,0.15)" : "0 1px 4px rgba(0,0,0,0.06)", cursor: "pointer", textAlign: "left", flexShrink: 0 }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: compact ? 10 : 12, minWidth: 0, flex: 1 }}>
-                    <div style={{ width: compact ? 34 : 40, height: compact ? 34 : 40, borderRadius: compact ? 10 : 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: compact ? 14 : 16, fontWeight: 700, flexShrink: 0, background: active ? "#DBEAFE" : "#F3F4F6", color: active ? "#2563EB" : "#6B7280" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flex: 1 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, flexShrink: 0, background: active ? "#DBEAFE" : "#F3F4F6", color: active ? "#2563EB" : "#6B7280" }}>
                       {op.label?.slice(0, 1).toUpperCase() ?? "?"}
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "nowrap" }}>
-                        <p style={{ fontWeight: 600, fontSize: compact ? 13 : 14, color: "#111827", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{op.label ?? op.name}</p>
+                        <p style={{ fontWeight: 600, fontSize: 14, color: "#111827", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{op.label ?? op.name}</p>
                         {i === 0 && <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 999, background: "#F0FDF4", border: "1px solid #BBF7D0", color: "#15803D", flexShrink: 0 }}>{t("buy_recommended")}</span>}
                       </div>
-                      <p style={{ fontSize: 11, color: "#9CA3AF", margin: compact ? "1px 0 0" : "3px 0 0" }}>{op.available} {t("buy_num_dispo")}</p>
+                      <p style={{ fontSize: 11, color: "#9CA3AF", margin: "3px 0 0" }}>{op.available} {t("buy_num_dispo")}</p>
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                    <p style={{ fontWeight: 700, fontSize: compact ? 13 : 14, color: "#111827", margin: 0, whiteSpace: "nowrap" }}>
+                    <p style={{ fontWeight: 700, fontSize: 14, color: "#111827", margin: 0, whiteSpace: "nowrap" }}>
                       {currency === "FCFA" ? `${op.priceFcfa?.toLocaleString("fr-FR")} F` : `$${op.priceUsd?.toFixed(2)}`}
                     </p>
                     <div style={{ width: 20, height: 20, borderRadius: "50%", border: `2px solid ${active ? "#2563EB" : "#D1D5DB"}`, background: active ? "#2563EB" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
