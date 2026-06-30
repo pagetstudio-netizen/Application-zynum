@@ -65,14 +65,16 @@ const POPULAR_COUNTRIES = [
   { flag: "🇨🇦", name: "Canada", code: "+1" },
 ];
 
-const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  PENDING:  { label: "En attente", cls: "bg-yellow-50 text-yellow-700 border-yellow-200" },
-  RECEIVED: { label: "Reçu",       cls: "bg-green-50 text-green-700 border-green-200" },
-  FINISHED: { label: "Terminé",    cls: "bg-blue-50 text-blue-700 border-blue-200" },
-  TIMEOUT:  { label: "Expiré",     cls: "bg-gray-100 text-gray-500 border-gray-200" },
-  CANCELED: { label: "Annulé",     cls: "bg-gray-100 text-gray-500 border-gray-200" },
-  BANNED:   { label: "Banni",      cls: "bg-red-50 text-red-600 border-red-200" },
-};
+function getStatusMap(t: (k: string) => string): Record<string, { label: string; cls: string }> {
+  return {
+    PENDING:  { label: t("status_pending"),  cls: "bg-yellow-50 text-yellow-700 border-yellow-200" },
+    RECEIVED: { label: t("status_received"), cls: "bg-green-50 text-green-700 border-green-200" },
+    FINISHED: { label: t("status_finished"), cls: "bg-blue-50 text-blue-700 border-blue-200" },
+    TIMEOUT:  { label: t("status_timeout"),  cls: "bg-gray-100 text-gray-500 border-gray-200" },
+    CANCELED: { label: t("status_canceled"), cls: "bg-gray-100 text-gray-500 border-gray-200" },
+    BANNED:   { label: t("status_banned"),   cls: "bg-red-50 text-red-600 border-red-200" },
+  };
+}
 
 // ─── RECHARGE VIEW ───────────────────────────────────────────────────────────
 const COUNTRIES = [
@@ -104,6 +106,7 @@ const RECHARGE_PRESETS = [1000, 2000, 5000, 10000, 20000, 50000];
 
 function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => void }) {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const { currency } = useCurrency();
   const { data: balanceData, refetch: refetchBalance } = useGetBalance({ query: { retry: false } });
@@ -144,7 +147,7 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
 
   const handleConfirmAmount = () => {
     if (amount < 300) {
-      toast({ variant: "destructive", title: "Montant trop faible", description: "Minimum 300 FCFA." });
+      toast({ variant: "destructive", title: t("dash_amount_too_low"), description: t("mm_min_amount") });
       return;
     }
     if (pendingMethod === "mobile") {
@@ -157,7 +160,7 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
   };
 
   const handlePaymentSuccess = () => {
-    toast({ title: "Paiement initié !", description: "Votre solde sera mis à jour dans quelques instants." });
+    toast({ title: t("dash_payment_initiated"), description: t("dash_payment_initiated_desc") });
     setTimeout(() => {
       refetchBalance();
       queryClient.invalidateQueries({ queryKey: getGetBalanceQueryKey() });
@@ -179,7 +182,7 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
         <button onClick={onBack} className="p-2 rounded-xl active:bg-gray-100 transition-colors">
           <ChevronLeft className="w-5 h-5 text-gray-700" />
         </button>
-        <h1 className="font-extrabold text-gray-900 text-lg flex-1">Recharge de compte</h1>
+        <h1 className="font-extrabold text-gray-900 text-lg flex-1">{t("dash_recharge_title")}</h1>
       </div>
 
       {/* Fixed section — balance card + method buttons + history title */}
@@ -195,7 +198,7 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
               <span className="font-extrabold text-[#1a2b8c] text-lg tracking-tight">ZyNum</span>
             </div>
             <div className="text-right">
-              <p className="text-xs font-semibold text-white mb-0.5">Solde du compte</p>
+              <p className="text-xs font-semibold text-white mb-0.5">{t("dash_balance_label")}</p>
               <div className="flex items-center gap-1.5 justify-end">
                 <p className="text-xl font-black text-white tracking-tight">{displayBal}</p>
                 <button onClick={() => setShowBal(s => !s)} className="text-white/80 hover:text-white transition-colors">
@@ -212,7 +215,7 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
             onClick={() => handleMethodClick("mobile")}
             className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
           >
-            <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via mobile Money</span>
+            <span className="font-bold text-[#1a2b8c] text-[15px]">{t("dash_recharge_via_mobile")}</span>
             <div className="flex items-center -space-x-2 shrink-0">
               <img src={imgTMoneyOp}  className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" alt="TMoney" />
               <img src={imgMoovOp}    className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm" alt="Moov" />
@@ -224,7 +227,7 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
             onClick={() => handleMethodClick("card")}
             className="w-full flex items-center justify-between px-5 py-5 active:bg-gray-50 transition-colors"
           >
-            <span className="font-bold text-[#1a2b8c] text-[15px]">recharger via Carte bancaire</span>
+            <span className="font-bold text-[#1a2b8c] text-[15px]">{t("dash_recharge_via_card")}</span>
             <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
               <CreditCard className="w-6 h-6 text-red-500" />
             </div>
@@ -232,20 +235,20 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
         </div>
 
         {/* History title — fixed */}
-        <p className="font-bold text-gray-900 text-base pb-2">Historique des transactions</p>
+        <p className="font-bold text-gray-900 text-base pb-2">{t("dash_tx_history")}</p>
       </div>
 
       {/* Scrollable transactions list */}
       <div className="flex-1 overflow-y-auto px-4 pb-8">
         {txLoading ? (
-          <div className="text-center py-8 text-gray-400 text-sm">Chargement…</div>
+          <div className="text-center py-8 text-gray-400 text-sm">{t("loading")}</div>
         ) : transactions.filter(tx => tx.status === "completed").length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-10 text-center">
             <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
               <History className="w-6 h-6 text-gray-400" />
             </div>
-            <p className="text-sm font-semibold text-gray-500">Aucune transaction</p>
-            <p className="text-xs text-gray-400 mt-1">Vos recharges apparaîtront ici</p>
+            <p className="text-sm font-semibold text-gray-500">{t("dash_no_tx")}</p>
+            <p className="text-xs text-gray-400 mt-1">{t("dash_no_tx_sub")}</p>
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-50">
@@ -265,7 +268,7 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-900 text-sm truncate">
-                      {isRecharge ? "Rechargement" : "Retrait"}
+                      {isRecharge ? t("dash_tx_recharge_label") : t("dash_tx_withdrawal_label")}
                     </p>
                     <p className="text-xs text-gray-400">{dateStr}</p>
                   </div>
@@ -298,9 +301,9 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
               <div className="px-5 pt-5 pb-4 border-b border-gray-100">
                 <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
                 <p className="font-bold text-gray-900 text-base">
-                  {pendingMethod === "mobile" ? "💳 Montant à recharger (Mobile Money)" : "💳 Montant à recharger (Carte bancaire)"}
+                  {pendingMethod === "mobile" ? t("dash_amount_mobile") : t("dash_amount_card")}
                 </p>
-                <p className="text-xs text-gray-400 mt-1">Minimum 300 FCFA</p>
+                <p className="text-xs text-gray-400 mt-1">{t("mm_min_amount")}</p>
               </div>
               <div className="px-5 pt-4 space-y-4">
                 <div className="grid grid-cols-3 gap-2">
@@ -332,7 +335,7 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
                   className="w-full py-4 rounded-2xl font-bold text-white text-base active:scale-95 transition-transform shadow-lg"
                   style={{ backgroundColor: "#00C87A" }}
                 >
-                  Continuer →
+                  {t("dash_continue")}
                 </button>
               </div>
             </motion.div>
@@ -371,6 +374,7 @@ function RechargeView({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
 // ─── HOME TAB ────────────────────────────────────────────────────────────────
 function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Tab) => void }) {
   const { currency } = useCurrency();
+  const { t } = useLanguage();
   const [, navigate] = useLocation();
   const [showBal, setShowBal] = useState(true);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -383,17 +387,17 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
   const displayBal = showBal ? fmt(balance, currency) : "••••••";
   const services = (servicesData?.services ?? []).slice(0, 4);
   const orders = historyData?.orders ?? [];
+  const STATUS_MAP = getStatusMap(t);
 
-  const initials = user.name?.charAt(0).toUpperCase() ?? "Z";
   const firstName = user.name?.split(" ")[0] ?? "là";
 
   const AVANTAGES = [
-    { emoji: "🌍", title: "180+ pays disponibles",         desc: "Recevez des SMS depuis n'importe quel pays du monde." },
-    { emoji: "⚡", title: "Réception instantanée",          desc: "Votre SMS arrive en quelques secondes après l'achat." },
-    { emoji: "💰", title: "Paiement Mobile Money",         desc: "TMoney, Flooz, Orange Money, Wave et plus encore." },
-    { emoji: "🔒", title: "100% anonyme et sécurisé",      desc: "Aucune donnée personnelle requise pour acheter." },
-    { emoji: "🎁", title: "Programme de parrainage",        desc: "Invitez vos amis et gagnez des FCFA à chaque achat." },
-    { emoji: "📱", title: "Toutes les apps supportées",    desc: "WhatsApp, Telegram, TikTok, Gmail, Facebook et +." },
+    { emoji: "🌍", title: t("dash_adv1_title"), desc: t("dash_adv1_desc") },
+    { emoji: "⚡", title: t("dash_adv2_title"), desc: t("dash_adv2_desc") },
+    { emoji: "💰", title: t("dash_adv3_title"), desc: t("dash_adv3_desc") },
+    { emoji: "🔒", title: t("dash_adv4_title"), desc: t("dash_adv4_desc") },
+    { emoji: "🎁", title: t("dash_adv5_title"), desc: t("dash_adv5_desc") },
+    { emoji: "📱", title: t("dash_adv6_title"), desc: t("dash_adv6_desc") },
   ];
 
 
@@ -422,9 +426,9 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
             >
               <div style={{ padding: "24px 20px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
                 <div>
-                  <p style={{ color: "#ffffff", fontWeight: 900, fontSize: "16px", margin: 0 }}>Notifications</p>
+                  <p style={{ color: "#ffffff", fontWeight: 900, fontSize: "16px", margin: 0 }}>{t("dash_notifications")}</p>
                   <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px", marginTop: "2px" }}>
-                    {adminNotifs.length > 0 ? `${adminNotifs.length} notification${adminNotifs.length > 1 ? "s" : ""}` : "Aucune notification"}
+                    {adminNotifs.length > 0 ? `${adminNotifs.length} notification${adminNotifs.length > 1 ? "s" : ""}` : t("dash_no_notif")}
                   </p>
                 </div>
                 <button
@@ -438,7 +442,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
                 {adminNotifs.length === 0 ? (
                   <div style={{ textAlign: "center", padding: "32px 0" }}>
                     <p style={{ fontSize: "32px", marginBottom: 8 }}>🔔</p>
-                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "13px" }}>Aucune notification pour le moment</p>
+                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "13px" }}>{t("dash_notif_none_msg")}</p>
                   </div>
                 ) : adminNotifs.map((n) => (
                   <div
@@ -462,7 +466,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
                 {adminNotifs.length === 0 && (
                   <>
                     <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", marginTop: 8, paddingTop: 16 }}>
-                      <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "11px", textAlign: "center", marginBottom: 10 }}>Avantages ZyNum</p>
+                      <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "11px", textAlign: "center", marginBottom: 10 }}>{t("dash_advantages_title")}</p>
                     </div>
                     {AVANTAGES.map((a, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px", borderRadius: "16px", backgroundColor: "rgba(255,255,255,0.07)" }}>
@@ -497,7 +501,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
             <span style={{ position: "absolute", bottom: 1, right: 1, width: 11, height: 11, backgroundColor: "#00C87A", borderRadius: "50%", border: "2px solid #111111", display: "block" }} />
           </button>
           <div style={{ minWidth: 0 }}>
-            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 500, margin: 0, lineHeight: 1 }}>Bonjour 👋</p>
+            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: 500, margin: 0, lineHeight: 1 }}>{t("dash_hello")}</p>
             <p style={{ color: "#ffffff", fontSize: "16px", fontWeight: 900, margin: "3px 0 0", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{firstName}</p>
           </div>
         </div>
@@ -529,7 +533,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
               <span className="font-extrabold text-[#1a2b8c] text-lg tracking-tight">ZyNum</span>
             </div>
             <div className="text-right">
-              <p className="text-xs font-semibold text-white mb-0.5">Solde du compte</p>
+              <p className="text-xs font-semibold text-white mb-0.5">{t("dash_balance_label")}</p>
               <div className="flex items-center gap-1.5 justify-end">
                 <p className="text-xl font-black text-white tracking-tight">
                   {showBal ? displayBal : "••••••"}
@@ -547,7 +551,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
               onClick={() => navigate("/recharge")}
               className="w-full flex items-center justify-between px-5 py-4 active:bg-gray-50 transition-colors"
             >
-              <span className="font-bold text-[#1a2b8c] text-[15px]">Recharger votre compte</span>
+              <span className="font-bold text-[#1a2b8c] text-[15px]">{t("dash_recharge_account")}</span>
               <ChevronRight className="w-5 h-5 text-[#1a2b8c]" strokeWidth={3} />
             </button>
             <div className="mx-5 h-[2px]" style={{ backgroundColor: "#00C87A" }} />
@@ -555,7 +559,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
               onClick={() => onNavigate("numeros")}
               className="w-full flex items-center justify-between px-5 py-4 active:bg-gray-50 transition-colors"
             >
-              <span className="font-bold text-[#1a2b8c] text-[15px]">Acheter un numéro virtuel</span>
+              <span className="font-bold text-[#1a2b8c] text-[15px]">{t("dash_buy_virtual")}</span>
               <ChevronRight className="w-5 h-5 text-[#1a2b8c]" strokeWidth={3} />
             </button>
           </div>
@@ -564,8 +568,8 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
         {/* Services populaires */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-gray-900 text-sm">Services populaires</h3>
-            <button onClick={() => onNavigate("numeros")} className="text-xs text-blue-600 font-semibold">Voir tout</button>
+            <h3 className="font-bold text-gray-900 text-sm">{t("dash_popular_services")}</h3>
+            <button onClick={() => onNavigate("numeros")} className="text-xs text-blue-600 font-semibold">{t("dash_see_all")}</button>
           </div>
           {services.length > 0 ? (
             <div className="grid grid-cols-4 gap-3">
@@ -600,8 +604,8 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
         {/* Pays populaires */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-gray-900 text-sm">Pays populaires</h3>
-            <button onClick={() => onNavigate("numeros")} className="text-xs text-blue-600 font-semibold">Voir tout</button>
+            <h3 className="font-bold text-gray-900 text-sm">{t("dash_popular_countries")}</h3>
+            <button onClick={() => onNavigate("numeros")} className="text-xs text-blue-600 font-semibold">{t("dash_see_all")}</button>
           </div>
           <div className="grid grid-cols-4 gap-2">
             {POPULAR_COUNTRIES.map(c => (
@@ -618,14 +622,14 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
         {/* Activité récente */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-gray-900 text-sm">Activité récente</h3>
-            <button onClick={() => onNavigate("sms")} className="text-xs text-blue-600 font-semibold">Voir tout</button>
+            <h3 className="font-bold text-gray-900 text-sm">{t("dash_recent_activity")}</h3>
+            <button onClick={() => onNavigate("sms")} className="text-xs text-blue-600 font-semibold">{t("dash_see_all")}</button>
           </div>
           {orders.length === 0 ? (
             <div className="bg-white rounded-2xl p-6 text-center border border-gray-100">
               <MessageSquare className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">Aucune activité récente</p>
-              <button onClick={() => onNavigate("numeros")} className="mt-3 text-xs text-blue-600 font-semibold">Acheter un numéro →</button>
+              <p className="text-sm text-gray-400">{t("dash_no_activity")}</p>
+              <button onClick={() => onNavigate("numeros")} className="mt-3 text-xs text-blue-600 font-semibold">{t("dash_buy_action")}</button>
             </div>
           ) : (
             <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
@@ -661,6 +665,7 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
 // ─── WALLET TAB ──────────────────────────────────────────────────────────────
 function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
   const { currency } = useCurrency();
+  const { t } = useLanguage();
   const [, navigate] = useLocation();
   const [showBal, setShowBal] = useState(true);
   const { data: balanceData } = useGetBalance({ query: { retry: false } });
@@ -682,7 +687,7 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-white px-4 pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
-        <h1 className="font-extrabold text-gray-900 text-xl">Wallet</h1>
+        <h1 className="font-extrabold text-gray-900 text-xl">{t("dash_wallet")}</h1>
         <button className="relative p-2 rounded-xl bg-gray-100">
           <img src="/bell-icon.png" alt="Notifications" className="w-5 h-5 object-contain" style={{ filter: "brightness(0) opacity(0.45)" }} />
         </button>
@@ -692,24 +697,24 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
         {/* Balance card */}
         <div className="rounded-3xl bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 p-5 text-white shadow-xl shadow-blue-500/25">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-xs font-semibold text-blue-200 uppercase tracking-wider">Solde actuel</p>
+            <p className="text-xs font-semibold text-blue-200 uppercase tracking-wider">{t("dash_current_balance")}</p>
             <button onClick={() => setShowBal(s => !s)} className="text-blue-200 hover:text-white transition-colors">
               {showBal ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
             </button>
           </div>
           <p className="text-3xl font-black mb-4">{displayBal}</p>
           <button onClick={() => onNavigate("sms")} className="inline-flex items-center gap-1.5 text-blue-200 text-xs font-semibold hover:text-white transition-colors">
-            <History className="w-3.5 h-3.5" /> Historique
+            <History className="w-3.5 h-3.5" /> {t("dash_wallet_history")}
           </button>
         </div>
 
         {/* Quick actions */}
         <div className="grid grid-cols-4 gap-2">
           {[
-            { icon: <Plus className="w-5 h-5" />, label: "Recharger", color: "text-blue-600 bg-blue-50", action: () => navigate("/recharge") },
-            { icon: <ArrowUpRight className="w-5 h-5" />, label: "Retirer", color: "text-purple-600 bg-purple-50", action: () => {} },
-            { icon: <ArrowDownLeft className="w-5 h-5" />, label: "Transférer", color: "text-emerald-600 bg-emerald-50", action: () => {} },
-            { icon: <Tag className="w-5 h-5" />, label: "Code promo", color: "text-orange-600 bg-orange-50", action: () => {} },
+            { icon: <Plus className="w-5 h-5" />, label: t("dash_action_recharge"), color: "text-blue-600 bg-blue-50", action: () => navigate("/recharge") },
+            { icon: <ArrowUpRight className="w-5 h-5" />, label: t("dash_action_withdraw"), color: "text-purple-600 bg-purple-50", action: () => {} },
+            { icon: <ArrowDownLeft className="w-5 h-5" />, label: t("dash_action_transfer"), color: "text-emerald-600 bg-emerald-50", action: () => {} },
+            { icon: <Tag className="w-5 h-5" />, label: t("dash_action_promo"), color: "text-orange-600 bg-orange-50", action: () => {} },
           ].map(a => (
             <button key={a.label} onClick={a.action} className="flex flex-col items-center gap-2 active:scale-95 transition-transform">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${a.color}`}>{a.icon}</div>
@@ -720,7 +725,7 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
 
         {/* Payment methods */}
         <div>
-          <h3 className="font-bold text-gray-900 text-sm mb-3">Méthodes de paiement</h3>
+          <h3 className="font-bold text-gray-900 text-sm mb-3">{t("dash_payment_methods")}</h3>
           <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
             {METHODS.map((m, i) => (
               <button
@@ -733,7 +738,7 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-gray-900">{m.name}</p>
-                  <p className="text-xs text-gray-400">Commission {m.commission}</p>
+                  <p className="text-xs text-gray-400">{t("dash_commission")} {m.commission}</p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-gray-300" />
               </button>
@@ -745,8 +750,8 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
         {transactions.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-gray-900 text-sm">Transactions récentes</h3>
-              <button onClick={() => onNavigate("sms")} className="text-xs text-blue-600 font-semibold">Voir tout</button>
+              <h3 className="font-bold text-gray-900 text-sm">{t("dash_recent_tx")}</h3>
+              <button onClick={() => onNavigate("sms")} className="text-xs text-blue-600 font-semibold">{t("dash_see_all")}</button>
             </div>
             <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
               {transactions.slice(0, 5).map((order: any, i: number) => (
@@ -755,7 +760,7 @@ function WalletTab({ onNavigate }: { onNavigate: (t: Tab) => void }) {
                     <Phone className="w-4 h-4 text-red-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">Achat numéro</p>
+                    <p className="text-sm font-semibold text-gray-900 truncate">{t("dash_number_purchase")}</p>
                     <p className="text-xs text-gray-400 truncate">{order.serviceName}</p>
                   </div>
                   <span className="text-sm font-bold text-red-500 shrink-0">
@@ -1250,6 +1255,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
 // ─── API PAGE ─────────────────────────────────────────────────────────────────
 function APIPage({ onBack }: { onBack: () => void }) {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [showKey, setShowKey] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -1277,8 +1283,8 @@ function APIPage({ onBack }: { onBack: () => void }) {
       });
       const data = await res.json();
       setApiKey(data.apiKey ?? null);
-      toast({ title: "Clé API régénérée !" });
-    } catch { toast({ variant: "destructive", title: "Erreur", description: "Impossible de régénérer la clé" }); }
+      toast({ title: t("api_key_regenerated") });
+    } catch { toast({ variant: "destructive", title: t("error"), description: t("api_key_regen_error") }); }
     finally { setRegenerating(false); }
   };
 
@@ -1287,30 +1293,30 @@ function APIPage({ onBack }: { onBack: () => void }) {
     navigator.clipboard.writeText(apiKey);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
-    toast({ title: "Clé API copiée !", duration: 2000 });
+    toast({ title: t("api_key_copied"), duration: 2000 });
   };
 
   return (
-    <SubPage title="API & Développeurs" onBack={onBack}>
+    <SubPage title={t("dash_api_title")} onBack={onBack}>
       <div className="px-4 pt-5 space-y-4">
         {/* Header */}
         <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex items-start gap-3">
           <Code2 className="w-5 h-5 text-indigo-600 mt-0.5 shrink-0" />
           <div>
-            <p className="text-sm font-bold text-indigo-900">Accès API ZyNum</p>
-            <p className="text-xs text-indigo-600 mt-0.5 leading-relaxed">Intégrez ZyNum dans vos applications avec notre API REST.</p>
+            <p className="text-sm font-bold text-indigo-900">{t("api_access_title")}</p>
+            <p className="text-xs text-indigo-600 mt-0.5 leading-relaxed">{t("api_access_desc")}</p>
           </div>
         </div>
 
         {/* API Key */}
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Votre clé API</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t("api_your_key")}</p>
           {loading ? (
             <div className="h-12 bg-gray-100 rounded-xl animate-pulse" />
           ) : (
             <div className="flex items-center gap-2">
               <div className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 font-mono text-xs text-gray-700 truncate">
-                {apiKey ? (showKey ? apiKey : "•".repeat(32)) : "Aucune clé générée"}
+                {apiKey ? (showKey ? apiKey : "•".repeat(32)) : t("api_no_key")}
               </div>
               <button onClick={() => setShowKey(s => !s)} className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
                 {showKey ? <EyeOff className="w-4 h-4 text-gray-600" /> : <Eye className="w-4 h-4 text-gray-600" />}
@@ -1326,13 +1332,13 @@ function APIPage({ onBack }: { onBack: () => void }) {
             className="w-full h-11 rounded-xl border-2 border-indigo-200 text-indigo-600 font-bold text-sm hover:bg-indigo-50 disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
           >
             <RefreshCw className={`w-4 h-4 ${regenerating ? "animate-spin" : ""}`} />
-            {regenerating ? "Génération..." : apiKey ? "Régénérer la clé" : "Générer une clé API"}
+            {regenerating ? t("api_generating_key") : apiKey ? t("api_regen_key") : t("api_generate_key")}
           </button>
         </div>
 
         {/* Base URL */}
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">URL de base</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{t("api_base_url_label")}</p>
           <div className="bg-gray-50 rounded-xl px-3 py-2.5 font-mono text-xs text-gray-700 border border-gray-200">
             {window.location.origin}/api/v1
           </div>
@@ -1340,12 +1346,12 @@ function APIPage({ onBack }: { onBack: () => void }) {
 
         {/* Endpoints summary */}
         <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">Endpoints disponibles</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">{t("api_endpoints_title")}</p>
           {[
-            { method: "GET",  path: "/services",    desc: "Lister les services" },
-            { method: "GET",  path: "/countries",   desc: "Lister les pays" },
-            { method: "POST", path: "/numbers/buy", desc: "Acheter un numéro" },
-            { method: "GET",  path: "/orders",      desc: "Historique commandes" },
+            { method: "GET",  path: "/services",    desc: t("api_ep_services") },
+            { method: "GET",  path: "/countries",   desc: t("api_ep_countries") },
+            { method: "POST", path: "/numbers/buy", desc: t("api_ep_buy") },
+            { method: "GET",  path: "/orders",      desc: t("api_ep_orders") },
           ].map((ep, i) => (
             <div key={ep.path} className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? "border-t border-gray-50" : ""}`}>
               <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg shrink-0 ${ep.method === "GET" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>{ep.method}</span>
@@ -1415,20 +1421,22 @@ function ParamsPage({ onBack }: { onBack: () => void }) {
     });
   };
 
+  const { t } = useLanguage();
+
   const notifItems = [
-    { key: "sms",      label: lang === "fr" ? "SMS reçus"        : "SMS received",    sub: lang === "fr" ? "Alertes lors de la réception d'un SMS"   : "Alerts on SMS reception" },
-    { key: "recharge", label: lang === "fr" ? "Recharges"         : "Top-up",          sub: lang === "fr" ? "Confirmation de recharge de solde"        : "Balance top-up confirmation" },
-    { key: "promo",    label: lang === "fr" ? "Offres spéciales"  : "Special offers",  sub: lang === "fr" ? "Promotions et remises exclusives"          : "Exclusive promotions & discounts" },
+    { key: "sms",      label: t("params_sms_label"),     sub: t("params_sms_sub") },
+    { key: "recharge", label: t("params_recharge_label"), sub: t("params_recharge_sub") },
+    { key: "promo",    label: t("params_promo_label"),    sub: t("params_promo_sub") },
   ];
 
   return (
-    <SubPage title={lang === "fr" ? "Paramètres" : "Settings"} onBack={onBack}>
+    <SubPage title={t("params_title")} onBack={onBack}>
       <div className="px-4 pt-5 space-y-4 pb-8">
 
         {/* ── Langue ── */}
         <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">
-            {lang === "fr" ? "Langue de l'application" : "App language"}
+            {t("params_lang_title")}
           </p>
           {(["fr", "en"] as const).map((l, i) => (
             <button
@@ -1452,7 +1460,7 @@ function ParamsPage({ onBack }: { onBack: () => void }) {
         {/* ── Devise ── */}
         <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">
-            {lang === "fr" ? "Devise d'affichage" : "Display currency"}
+            {t("params_currency_title")}
           </p>
           {(["FCFA", "USD"] as const).map((c, i) => (
             <button
@@ -1481,43 +1489,26 @@ function ParamsPage({ onBack }: { onBack: () => void }) {
 // ─── HELP PAGE ────────────────────────────────────────────────────────────────
 function HelpPage({ onBack }: { onBack: () => void }) {
   const { settings: publicSettings } = usePublicSettings();
+  const { t } = useLanguage();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const FAQ = [
-    {
-      q: "Comment acheter un numéro virtuel ?",
-      a: "Allez dans l'onglet 'Numéros', choisissez un service (ex: WhatsApp), sélectionnez un pays et appuyez sur 'Acheter'. Le numéro sera disponible en quelques secondes.",
-    },
-    {
-      q: "Comment recharger mon solde ?",
-      a: "Dans l'onglet 'Compte', accédez à vos paramètres ou utilisez le bouton Recharger depuis l'accueil. Nous acceptons TMoney, Moov Money, Orange Money et USDT.",
-    },
-    {
-      q: "Combien de temps le numéro est-il valide ?",
-      a: "Chaque numéro virtuel est valide pendant 20 minutes par défaut. Si aucun SMS n'est reçu, la commande est annulée et vous êtes remboursé.",
-    },
-    {
-      q: "Que faire si je ne reçois pas de SMS ?",
-      a: "Attendez quelques minutes. Si le SMS n'arrive toujours pas, annulez la commande depuis l'historique pour être remboursé automatiquement.",
-    },
-    {
-      q: "Mon solde est-il remboursable ?",
-      a: "Les soldes ZyNum ne sont pas remboursables en argent. En cas de commande annulée ou expirée, votre solde est automatiquement recrédité.",
-    },
-    {
-      q: "Comment fonctionne le programme de parrainage ?",
-      a: "Partagez votre code unique avec vos amis. Lorsqu'ils s'inscrivent et rechargent leur compte, vous recevez 10% de commission sur chaque recharge.",
-    },
+    { q: t("help_q1"), a: t("help_a1") },
+    { q: t("help_q2"), a: t("help_a2") },
+    { q: t("help_q3"), a: t("help_a3") },
+    { q: t("help_q4"), a: t("help_a4") },
+    { q: t("help_q5"), a: t("help_a5") },
+    { q: t("help_q6"), a: t("help_a6") },
   ];
 
   return (
-    <SubPage title="Centre d'aide" onBack={onBack}>
+    <SubPage title={t("dash_help_title")} onBack={onBack}>
       <div className="px-4 pt-5 space-y-4">
 
 
         {/* FAQ */}
         <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">Questions fréquentes</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 pt-4 pb-3">{t("dash_faq_title")}</p>
           {FAQ.map((item, i) => (
             <div key={i} className={`${i > 0 ? "border-t border-gray-50" : ""}`}>
               <button
@@ -1550,8 +1541,8 @@ function HelpPage({ onBack }: { onBack: () => void }) {
         {/* Quick links */}
         <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
           {[
-            { icon: <Shield className="w-4 h-4 text-green-600" />,   label: "Politique de confidentialité", color: "bg-green-50", href: "https://zynum.net/privacy" },
-            { icon: <Star className="w-4 h-4 text-yellow-600" />,    label: "Conditions d'utilisation",   color: "bg-yellow-50", href: "https://zynum.net/terms" },
+            { icon: <Shield className="w-4 h-4 text-green-600" />,   label: t("dash_privacy"), color: "bg-green-50", href: "https://zynum.net/privacy" },
+            { icon: <Star className="w-4 h-4 text-yellow-600" />,    label: t("dash_terms"),   color: "bg-yellow-50", href: "https://zynum.net/terms" },
           ].map((link, i) => (
             <a
               key={link.label}
@@ -1595,12 +1586,14 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
     ? format(new Date(user.createdAt), "MMMM yyyy", { locale: fr })
     : "";
 
+  const { t } = useLanguage();
+
   const MENU = [
-    { id: "infos",    iconSrc: "/icon-profile.png",  iconBg: "#EFF6FF", label: "Informations personnelles", accent: "#3B82F6" },
-    { id: "security", iconSrc: "/icon-password.png", iconBg: "#111827", label: "Sécurité",                  accent: "#F97316" },
-    { id: "referral", iconSrc: "/icon-records.png",  iconBg: "#111827", label: "Parrainage",                accent: "#8B5CF6", badge: "10%" },
-    { id: "params",   iconSrc: imgParamsIcon,          iconBg: "#111827", label: "Paramètres",                accent: "#6B7280" },
-    { id: "help",     iconSrc: "/icon-support.png",  iconBg: "#111827", label: "Centre d'aide",             accent: "#14B8A6" },
+    { id: "infos",    iconSrc: "/icon-profile.png",  iconBg: "#EFF6FF", label: t("dash_menu_infos"),    accent: "#3B82F6" },
+    { id: "security", iconSrc: "/icon-password.png", iconBg: "#111827", label: t("dash_menu_security"), accent: "#F97316" },
+    { id: "referral", iconSrc: "/icon-records.png",  iconBg: "#111827", label: t("dash_menu_referral"), accent: "#8B5CF6", badge: "10%" },
+    { id: "params",   iconSrc: imgParamsIcon,          iconBg: "#111827", label: t("dash_menu_params"),   accent: "#6B7280" },
+    { id: "help",     iconSrc: "/icon-support.png",  iconBg: "#111827", label: t("dash_menu_help"),     accent: "#14B8A6" },
   ];
 
   const nav = (s: string) => setSection(s);
@@ -1624,7 +1617,7 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
         className="flex-1 flex flex-col overflow-hidden"
       >
         <div className="bg-white px-4 pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-gray-100">
-          <h1 className="font-extrabold text-gray-900 text-xl">Compte</h1>
+          <h1 className="font-extrabold text-gray-900 text-xl">{t("dash_account_tab")}</h1>
           <button onClick={() => nav("params")} className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
             <Settings className="w-5 h-5 text-gray-600" />
           </button>
@@ -1641,16 +1634,16 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="font-bold text-gray-900 text-base truncate">{user.name}</p>
-                  <span className="shrink-0 text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Vérifié</span>
+                  <span className="shrink-0 text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">{t("dash_verified")}</span>
                 </div>
                 <p className="text-sm text-gray-500 truncate">{user.email}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Membre depuis {memberSince}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{t("dash_member_since")} {memberSince}</p>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />
             </div>
             <div className="border-t border-gray-50 pt-3 flex items-center justify-between text-xs text-gray-400">
               <span>ID: ZY{user.id.toString().padStart(6, "0")}</span>
-              <span className="text-blue-500 font-semibold">Modifier le profil →</span>
+              <span className="text-blue-500 font-semibold">{t("dash_edit_profile")}</span>
             </div>
           </button>
 
@@ -1701,8 +1694,8 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
                 <Shield className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1 text-left">
-                <p className="text-white font-bold text-sm">Panneau Administrateur</p>
-                <p className="text-gray-400 text-xs">Gérer les utilisateurs, commandes et paramètres</p>
+                <p className="text-white font-bold text-sm">{t("dash_admin_panel")}</p>
+                <p className="text-gray-400 text-xs">{t("dash_admin_desc")}</p>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
             </button>
@@ -1714,11 +1707,11 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border-2 border-red-200 text-red-600 font-bold text-sm hover:bg-red-50 transition-colors active:scale-95"
           >
             <LogOut className="w-4 h-4" />
-            Se déconnecter
+            {t("dash_logout")}
           </button>
 
           <div className="text-center pb-2">
-            <p className="text-xs text-gray-300 font-medium">ZyNum v1.0.0 · Votre numéro virtuel, votre liberté.</p>
+            <p className="text-xs text-gray-300 font-medium">ZyNum v1.0.0 · {t("dash_version")}</p>
           </div>
         </div>
         </div>
@@ -1731,10 +1724,11 @@ function CompteTab({ user, onLogout }: { user: UserWithAdmin; onLogout: () => vo
 
 // ─── BOTTOM NAV ──────────────────────────────────────────────────────────────
 function BottomNav({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
+  const { t } = useLanguage();
   const TABS: { id: Tab; label: string; icon: (active: boolean) => React.ReactNode }[] = [
     {
       id: "accueil",
-      label: "Accueil",
+      label: t("dash_nav_home"),
       icon: (a) => (
         <svg viewBox="0 0 24 24" className="w-5 h-5" fill={a ? "#2563EB" : "none"} stroke={a ? "#2563EB" : "#9CA3AF"} strokeWidth={2}>
           <path d="M3 12L12 3l9 9" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1745,7 +1739,7 @@ function BottomNav({ active, onChange }: { active: Tab; onChange: (t: Tab) => vo
     },
     {
       id: "numeros",
-      label: "Numéros",
+      label: t("dash_nav_numbers"),
       icon: (a) => (
         <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke={a ? "#2563EB" : "#9CA3AF"} strokeWidth={2}>
           <rect x="5" y="2" width="14" height="20" rx="2" ry="2" fill={a ? "#EFF6FF" : "none"}/>
@@ -1755,7 +1749,7 @@ function BottomNav({ active, onChange }: { active: Tab; onChange: (t: Tab) => vo
     },
     {
       id: "sms",
-      label: "Historique",
+      label: t("dash_nav_history"),
       icon: (a) => (
         <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke={a ? "#2563EB" : "#9CA3AF"} strokeWidth={2}>
           <path d="M12 8v4l3 3" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1765,7 +1759,7 @@ function BottomNav({ active, onChange }: { active: Tab; onChange: (t: Tab) => vo
     },
     {
       id: "compte",
-      label: "Compte",
+      label: t("dash_nav_account"),
       icon: (a) => (
         <svg viewBox="0 0 24 24" className="w-5 h-5" fill={a ? "#EFF6FF" : "none"} stroke={a ? "#2563EB" : "#9CA3AF"} strokeWidth={2}>
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -1808,6 +1802,7 @@ function BottomNav({ active, onChange }: { active: Tab; onChange: (t: Tab) => vo
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<Tab>("accueil");
 
@@ -1823,7 +1818,7 @@ export default function Dashboard() {
         localStorage.removeItem("zynum_token");
         queryClient.clear();
         setLocation("/");
-        toast({ title: "Déconnecté" });
+        toast({ title: t("dash_disconnected") });
       },
     },
   });
@@ -1870,10 +1865,10 @@ export default function Dashboard() {
   const navigate = (tab: Tab) => setActiveTab(tab);
 
   const HISTORY_FILTERS: { key: typeof historyFilter; label: string; color: string }[] = [
-    { key: "all",      label: "Tous les achats",    color: "#2563EB" },
-    { key: "received", label: "SMS reçus",           color: "#059669" },
-    { key: "pending",  label: "En attente",          color: "#D97706" },
-    { key: "canceled", label: "Annulés / Expirés",   color: "#6B7280" },
+    { key: "all",      label: t("dash_filter_all"),      color: "#2563EB" },
+    { key: "received", label: t("dash_filter_received"), color: "#059669" },
+    { key: "pending",  label: t("dash_filter_pending"),  color: "#D97706" },
+    { key: "canceled", label: t("dash_filter_canceled"), color: "#6B7280" },
   ];
 
   return (
@@ -1889,12 +1884,12 @@ export default function Dashboard() {
             <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-xl font-extrabold text-gray-900 leading-tight">Historique</h1>
+                  <h1 className="text-xl font-extrabold text-gray-900 leading-tight">{t("dash_nav_history")}</h1>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {historyFilter === "all" ? "Tous vos numéros achetés" :
-                     historyFilter === "received" ? "SMS reçus uniquement" :
-                     historyFilter === "pending"  ? "Commandes en attente" :
-                     "Commandes annulées / expirées"}
+                    {historyFilter === "all"      ? t("dash_history_all") :
+                     historyFilter === "received" ? t("dash_history_received") :
+                     historyFilter === "pending"  ? t("dash_history_pending") :
+                     t("dash_history_canceled")}
                   </p>
                 </div>
                 <button
@@ -1949,7 +1944,7 @@ export default function Dashboard() {
               <div style={{ width: 40, height: 4, borderRadius: 99, background: "#E5E7EB" }} />
             </div>
             <div style={{ padding: "8px 20px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <p style={{ fontWeight: 800, fontSize: 16, color: "#111827", margin: 0 }}>Filtrer l'historique</p>
+              <p style={{ fontWeight: 800, fontSize: 16, color: "#111827", margin: 0 }}>{t("dash_filter_history")}</p>
               <button
                 onClick={() => setFilterDrawerOpen(false)}
                 style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
@@ -1991,7 +1986,7 @@ export default function Dashboard() {
                     fontSize: 14, fontWeight: 600, color: "#6B7280", cursor: "pointer",
                   }}
                 >
-                  Réinitialiser le filtre
+                  {t("dash_filter_reset")}
                 </button>
               </div>
             )}

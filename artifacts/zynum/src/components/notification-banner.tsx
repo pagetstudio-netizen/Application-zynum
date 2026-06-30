@@ -188,7 +188,7 @@ export function NotificationBanner() {
                   className="mt-4 w-full py-3.5 rounded-2xl font-bold text-white text-sm flex items-center justify-center gap-2 active:opacity-90 transition-opacity"
                   style={{ backgroundColor: theme.icon }}
                 >
-                  {current.linkLabel ?? "En savoir plus"}
+                  {current.linkLabel ?? t("notif_learn_more")}
                   {current.linkUrl.startsWith("http") && <ExternalLink className="w-4 h-4" />}
                 </button>
               )}
@@ -237,7 +237,7 @@ export function NotificationBanner() {
                   onClick={handleLink}
                   className="mt-4 w-full py-3.5 rounded-2xl bg-gray-900 font-bold text-white text-sm flex items-center justify-center gap-2"
                 >
-                  {current.linkLabel ?? "En savoir plus"}
+                  {current.linkLabel ?? t("notif_learn_more")}
                   {current.linkUrl.startsWith("http") && <ExternalLink className="w-4 h-4" />}
                 </button>
               )}

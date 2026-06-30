@@ -445,7 +445,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
             padding: "14px 16px", overflow: "hidden",
             boxShadow: "0 1px 6px rgba(0,0,0,0.07)",
           }}>
-            <span style={{ fontSize: 17, fontWeight: 800, color: "#111827", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 8 }}>Choisir un service</span>
+            <span style={{ fontSize: 17, fontWeight: 800, color: "#111827", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 8 }}>{t("buy_choose_service")}</span>
             {user && <div style={{ flexShrink: 0 }}><BalancePill variant="colored" /></div>}
           </div>
 
@@ -453,7 +453,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
           <div style={{ position: "relative", margin: "10px 16px 8px" }}>
             <Search style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: "#9CA3AF", pointerEvents: "none" }} />
             <input
-              placeholder="Rechercher un service..."
+              placeholder={t("buy_search_service_ph")}
               value={searchService}
               onChange={(e) => setSearchService(e.target.value)}
               style={{
@@ -475,7 +475,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
             </div>
           ) : filtered.length === 0 ? (
             <div style={{ padding: "64px 24px", textAlign: "center", color: "#9CA3AF", fontSize: 14 }}>
-              Aucun service pour « <strong style={{ color: "#111827" }}>{searchService}</strong> »
+              {t("buy_no_service_msg")} « <strong style={{ color: "#111827" }}>{searchService}</strong> »
             </div>
           ) : (
             filtered.map((svc, i) => (
@@ -495,10 +495,10 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                 <ServiceLogo icon={svc.icon} color={svc.color} name={svc.name} size={50} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontWeight: 700, fontSize: 15, color: "#111827", margin: 0 }}>{svc.name}</p>
-                  <p style={{ fontSize: 12, color: "#9CA3AF", margin: "3px 0 0" }}>Disponible dans plusieurs pays</p>
+                  <p style={{ fontSize: 12, color: "#9CA3AF", margin: "3px 0 0" }}>{t("buy_service_countries")}</p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: "#2563EB" }}>Sélectionner</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "#2563EB" }}>{t("buy_select")}</span>
                   <ChevronRight style={{ width: 16, height: 16, color: "#60A5FA" }} />
                 </div>
               </button>
@@ -529,7 +529,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
             >
               <ArrowLeft style={{ width: 22, height: 22, color: "#374151" }} />
             </button>
-            <span style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 600, color: "#6B7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Changer de service</span>
+            <span style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 600, color: "#6B7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t("buy_change_service_btn")}</span>
             {user && <div style={{ flexShrink: 0 }}><BalancePill variant="white" /></div>}
           </div>
 
@@ -543,7 +543,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
             }}>
               <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={44} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 600, margin: 0, textTransform: "uppercase", letterSpacing: "0.05em" }}>Service sélectionné</p>
+                <p style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 600, margin: 0, textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("buy_service_selected_label")}</p>
                 <p style={{ fontSize: 15, fontWeight: 800, color: "#111827", margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedServiceInfo.name}</p>
               </div>
             </div>
@@ -552,16 +552,16 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
 
         {/* ── Titre section + recherche (scrollable) ── */}
         <div style={{ flexShrink: 0, padding: "16px 16px 0" }}>
-          <p style={{ fontSize: 20, fontWeight: 800, color: "#111827", margin: "0 0 4px" }}>Dans quel pays ?</p>
+          <p style={{ fontSize: 20, fontWeight: 800, color: "#111827", margin: "0 0 4px" }}>{t("buy_which_country")}</p>
           <p style={{ fontSize: 13, color: "#6B7280", margin: "0 0 12px", lineHeight: 1.5 }}>
-            Sélectionnez le pays pour lequel vous souhaitez un numéro virtuel.
+            {t("buy_select_country_hint")}
           </p>
 
           {/* Barre recherche pays */}
           <div style={{ position: "relative", marginBottom: 8 }}>
             <Search style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: "#9CA3AF", pointerEvents: "none" }} />
             <input
-              placeholder="Rechercher un pays..."
+              placeholder={t("buy_search_country_ph")}
               value={searchCountry}
               onChange={(e) => setSearchCountry(e.target.value)}
               style={{
@@ -718,15 +718,15 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
           {/* Code de réduction */}
           {selectedOperator && (
             <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 space-y-3">
-              <p className="text-sm font-semibold text-gray-700">Code de réduction</p>
+              <p className="text-sm font-semibold text-gray-700">{t("buy_discount_label")}</p>
               {discountApplied ? (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-green-50 border border-green-200">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
                       <div>
-                        <p className="text-sm font-bold text-green-700">{discountApplied.code} — {discountApplied.percent}% de réduction</p>
-                        <p className="text-xs text-green-600">Économie : {discountApplied.savedFcfa.toLocaleString("fr-FR")} FCFA</p>
+                        <p className="text-sm font-bold text-green-700">{discountApplied.code} — {discountApplied.percent}% {t("buy_discount_percent")}</p>
+                        <p className="text-xs text-green-600">{t("buy_savings_label")} {discountApplied.savedFcfa.toLocaleString("fr-FR")} FCFA</p>
                       </div>
                     </div>
                     <button onClick={removeDiscount} className="p-1 rounded-lg hover:bg-green-100 text-green-500">
@@ -752,7 +752,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                     value={discountInput}
                     onChange={e => { setDiscountInput(e.target.value.toUpperCase()); setDiscountError(null); }}
                     onKeyDown={e => e.key === "Enter" && validateDiscount()}
-                    placeholder="Entrez votre code promo"
+                    placeholder={t("buy_promo_placeholder")}
                     className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 uppercase"
                   />
                   <button
@@ -760,7 +760,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                     disabled={!discountInput.trim() || discountLoading}
                     className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold disabled:opacity-50 hover:bg-blue-700 transition-colors"
                   >
-                    {discountLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Appliquer"}
+                    {discountLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("buy_apply")}
                   </button>
                 </div>
               )}
@@ -811,7 +811,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
-              <h1 className="font-extrabold text-gray-900 text-base flex-1">Votre numéro</h1>
+              <h1 className="font-extrabold text-gray-900 text-base flex-1">{t("buy_your_number_title")}</h1>
               <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">
                 {currency === "FCFA" ? `${activeOrder.priceFcfa.toLocaleString("fr-FR")} FCFA` : `$${activeOrder.priceUsd.toFixed(2)}`}
               </span>
@@ -835,7 +835,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
 
               {/* Phone number */}
               <div className="bg-white rounded-3xl border border-gray-100 shadow-sm px-5 py-5">
-                <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">Votre Numéro</p>
+                <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">{t("buy_your_number_label")}</p>
                 <div className="flex items-center gap-3">
                   <Phone className="w-5 h-5 text-blue-500 shrink-0" />
                   <span className="text-2xl font-black text-blue-600 font-mono tracking-wide flex-1 select-all">{activeOrder.phone}</span>
@@ -848,7 +848,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                 className="w-full h-14 rounded-2xl bg-green-500 hover:bg-green-600 active:scale-98 text-white font-black text-base flex items-center justify-center gap-2 shadow-lg shadow-green-500/30 transition-all"
               >
                 <Copy className="w-5 h-5" />
-                Copier le numéro
+                {t("buy_copy_number")}
               </button>
 
               <button
@@ -856,7 +856,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                 className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-black text-base flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 transition-all"
               >
                 <MessageSquare className="w-5 h-5" />
-                Obtenir le code
+                {t("buy_get_code")}
               </button>
 
               <button
@@ -873,7 +873,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                 disabled={cancelMutation.isPending}
                 className="w-full text-red-500 text-sm font-semibold py-2 hover:text-red-700 transition-colors"
               >
-                {cancelMutation.isPending ? "Annulation…" : t("buy_cancel_refund")}
+                {cancelMutation.isPending ? t("buy_canceling") : t("buy_cancel_refund")}
               </button>
             </div>
           </div>
@@ -902,15 +902,15 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
-              <h1 className="font-extrabold text-gray-900 text-base flex-1">Code de vérification</h1>
+              <h1 className="font-extrabold text-gray-900 text-base flex-1">{t("buy_verification_code_title")}</h1>
               {isPending && (
-                <span className="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">En attente</span>
+                <span className="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">{t("buy_step_waiting_label")}</span>
               )}
               {isSuccess && (
-                <span className="text-xs font-bold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">✓ Reçu</span>
+                <span className="text-xs font-bold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">{t("buy_step_received_label")}</span>
               )}
               {isFailed && (
-                <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2.5 py-1 rounded-full">Expiré</span>
+                <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2.5 py-1 rounded-full">{t("buy_step_expired_label")}</span>
               )}
             </div>
 
@@ -934,14 +934,14 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
 
               {/* Phone number + copy */}
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-4">
-                <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1.5">Numéro de téléphone</p>
+                <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1.5">{t("buy_phone_number_label")}</p>
                 <div className="flex items-center gap-2">
                   <span className="text-xl font-black text-gray-900 font-mono tracking-wide flex-1 select-all">{activeOrder.phone}</span>
                   <button
                     onClick={() => copy(activeOrder.phone, "Numéro")}
                     className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold px-3 py-2 rounded-xl transition-colors"
                   >
-                    <Copy className="w-3.5 h-3.5" /> Copier
+                    <Copy className="w-3.5 h-3.5" /> {t("buy_copy_label")}
                   </button>
                 </div>
               </div>
@@ -959,7 +959,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                     }}
                   />
                   <div>
-                    <p className="font-bold text-gray-900 text-base">En attente du SMS…</p>
+                    <p className="font-bold text-gray-900 text-base">{t("buy_waiting_sms")}</p>
                     <p className="text-sm text-gray-400 mt-1 max-w-xs">
                       Utilisez le numéro ci-dessus dans <strong className="text-gray-700">{activeOrder.serviceName}</strong> pour demander la vérification.
                     </p>
@@ -969,7 +969,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                       onClick={() => refetchSms()}
                       className="flex-1 h-11 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
                     >
-                      <RefreshCw className="w-4 h-4" /> Vérifier
+                      <RefreshCw className="w-4 h-4" /> {t("buy_check_sms")}
                     </button>
                     <button
                       onClick={() => cancelMutation.mutate(activeOrder.id)}
@@ -977,7 +977,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                       className="flex-1 h-11 rounded-xl border-2 border-red-100 text-red-500 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-colors disabled:opacity-50"
                     >
                       {cancelMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
-                      Annuler
+                      {t("cancel")}
                     </button>
                   </div>
                 </div>
@@ -998,7 +998,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
 
                   {/* Code */}
                   <div className="px-6 py-5 text-center">
-                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-3">Code de vérification</p>
+                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-3">{t("buy_verification_code_title")}</p>
                     <button
                       onClick={() => copy(activeOrder.smsCode || "", "Code")}
                       className="group w-full"
@@ -1007,7 +1007,7 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                         {activeOrder.smsCode}
                       </p>
                       <p className="text-xs text-teal-500 font-semibold flex items-center justify-center gap-1.5 group-hover:text-teal-700 transition-colors">
-                        <Copy className="w-3.5 h-3.5" /> Appuyer pour copier
+                        <Copy className="w-3.5 h-3.5" /> {t("buy_tap_to_copy")}
                       </p>
                     </button>
                   </div>
