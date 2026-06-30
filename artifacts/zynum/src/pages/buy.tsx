@@ -187,10 +187,23 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
   const [selectedOperator, setSelectedOperator] = useState<string | null>(null);
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
   const [buyCount, setBuyCount] = useState(0);
+  const [promoEnabled, setPromoEnabled] = useState(true);
 
   // ── Persistence de la commande active ───────────────────────────────────────
   const clearSavedOrder = useCallback(() => {
     localStorage.removeItem("zynum_active_order");
+  }, []);
+
+  // Charger les settings publics (promo_codes_enabled)
+  useEffect(() => {
+    fetch("/api/v1/settings")
+      .then(r => r.json())
+      .then((data: { settings: Record<string, string> }) => {
+        if (data?.settings?.promo_codes_enabled === "false") {
+          setPromoEnabled(false);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Restaurer la commande active depuis localStorage au montage
@@ -385,21 +398,22 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
     if (variant === "white") {
       return (
         <div style={{
-          display: "inline-flex", alignItems: "center", gap: 6,
-          padding: "6px 14px", borderRadius: 999,
+          display: "inline-flex", alignItems: "center", gap: 5,
+          padding: "5px 10px", borderRadius: 999,
           background: "rgba(255,255,255,0.20)",
           border: "1px solid rgba(255,255,255,0.55)",
+          maxWidth: "100%", overflow: "hidden",
         }}>
-          <Wallet style={{ width: 15, height: 15, color: "#ffffff", flexShrink: 0 }} />
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#ffffff", whiteSpace: "nowrap" }}>
-            {t("buy_balance_pill")} {formatBalance()}
+          <Wallet style={{ width: 14, height: 14, color: "#ffffff", flexShrink: 0 }} />
+          <span style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {formatBalance()}
           </span>
           {balance === 0 && (
             <button
               onClick={() => { window.location.href = "/recharge"; }}
-              style={{ fontSize: 12, fontWeight: 800, color: "#ffffff", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0, marginLeft: 2 }}
+              style={{ fontSize: 11, fontWeight: 800, color: "#ffffff", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0, flexShrink: 0 }}
             >
-              {t("buy_top_up_pill")} →
+              +
             </button>
           )}
         </div>
@@ -642,16 +656,17 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
   // ── STEP 3 — OPERATOR ───────────────────────────────────────────────────────
   if (step === "operator") {
     return (
-      <div className="flex flex-col min-h-full" style={{ overflowX: "hidden", maxWidth: "100%" }}>
-        {/* Sticky header bleu */}
-        <div className="sticky top-0 z-20 px-4 pt-3 pb-3 space-y-2" style={{ backgroundColor: "#1A3FFF", overflowX: "hidden" }}>
+      <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+
+        {/* ── Header bleu — toujours visible ── */}
+        <div style={{ flexShrink: 0, padding: "12px 16px 12px", backgroundColor: "#1A3FFF", overflowX: "hidden" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, overflow: "hidden" }}>
-            <button onClick={() => goBack("country")} className="p-2 -ml-2 rounded-xl active:bg-blue-700 transition-colors shrink-0">
+            <button onClick={() => goBack("country")} style={{ background: "none", border: "none", cursor: "pointer", padding: "6px 4px", borderRadius: 12, flexShrink: 0 }}>
               <ArrowLeft style={{ width: 20, height: 20, color: "#ffffff" }} />
             </button>
-            <h1 className="text-base font-extrabold min-w-0 truncate" style={{ color: "#ffffff", flex: "1 1 0", overflow: "hidden" }}>{t("buy_s3_title")}</h1>
+            <h1 style={{ fontSize: 15, fontWeight: 800, color: "#ffffff", flex: "1 1 0", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", margin: 0 }}>{t("buy_s3_title")}</h1>
             {user && (
-              <div style={{ flexShrink: 0, maxWidth: "45%", overflow: "hidden" }}>
+              <div style={{ flexShrink: 0, maxWidth: "42%", overflow: "hidden" }}>
                 <BalancePill variant="white" />
               </div>
             )}
@@ -659,27 +674,27 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
 
           {/* Carte service + pays */}
           {selectedServiceInfo && (
-            <div className="flex items-center gap-3 p-3 rounded-2xl" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
-              <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={38} />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium" style={{ color: '#ffffff' }}>{selectedServiceInfo.name}</p>
-                <p className="font-bold text-sm truncate" style={{ color: '#ffffff' }}>{selectedCountryInfo?.name}</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 10, padding: "10px 12px", borderRadius: 16, backgroundColor: "rgba(255,255,255,0.15)", overflow: "hidden" }}>
+              <ServiceLogo icon={selectedServiceInfo.icon} color={selectedServiceInfo.color} name={selectedServiceInfo.name} size={36} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.85)", margin: 0 }}>{selectedServiceInfo.name}</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "#ffffff", margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedCountryInfo?.name}</p>
               </div>
             </div>
           )}
         </div>
 
-        {/* Sous-titre */}
-        <div className="px-4 pt-4 pb-2">
-          <p className="text-xs text-gray-500">{t("buy_s3_sub")}</p>
+        {/* ── Sous-titre — toujours visible ── */}
+        <div style={{ flexShrink: 0, padding: "10px 16px 6px", backgroundColor: "#ffffff" }}>
+          <p style={{ fontSize: 12, color: "#6B7280", margin: 0 }}>{t("buy_s3_sub")}</p>
         </div>
 
-        {/* Liste opérateurs */}
-        <div className="flex-1 px-4 space-y-3 pb-4">
+        {/* ── Liste opérateurs — scrollable ── */}
+        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "8px 16px 16px", backgroundColor: "#ffffff", display: "flex", flexDirection: "column", gap: 12 }}>
           {isLoadingOperators ? (
-            <div className="flex justify-center py-16"><Loader2 className="w-7 h-7 animate-spin text-blue-500" /></div>
+            <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}><Loader2 className="w-7 h-7 animate-spin text-blue-500" /></div>
           ) : operators.length === 0 ? (
-            <div className="py-16 text-center text-gray-400 text-sm">{t("buy_no_operator")}</div>
+            <div style={{ padding: "64px 0", textAlign: "center", color: "#9CA3AF", fontSize: 14 }}>{t("buy_no_operator")}</div>
           ) : (
             operators.map((op, i) => {
               const active = selectedOperator === op.name;
@@ -690,29 +705,26 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.07 }}
                   onClick={() => setSelectedOperator(op.name)}
-                  style={{ overflow: "hidden" }}
-                  className={`w-full flex items-center justify-between gap-3 px-4 py-4 rounded-2xl border text-left transition-all ${
-                    active ? "border-blue-400 bg-blue-50 shadow-md shadow-blue-100" : "border-gray-200 bg-white hover:bg-gray-50 shadow-sm"
-                  }`}
+                  style={{ overflow: "hidden", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 16px", borderRadius: 18, border: `2px solid ${active ? "#3b82f6" : "#E5E7EB"}`, background: active ? "#EFF6FF" : "#ffffff", boxShadow: active ? "0 2px 12px rgba(59,130,246,0.15)" : "0 1px 4px rgba(0,0,0,0.06)", cursor: "pointer", textAlign: "left" }}
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shrink-0 ${active ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-500"}`}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flex: 1 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, flexShrink: 0, background: active ? "#DBEAFE" : "#F3F4F6", color: active ? "#2563EB" : "#6B7280" }}>
                       {op.label?.slice(0, 1).toUpperCase() ?? "?"}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-semibold text-gray-900 text-sm truncate">{op.label ?? op.name}</p>
-                        {i === 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 border border-green-200 text-green-700 shrink-0">{t("buy_recommended")}</span>}
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                        <p style={{ fontWeight: 600, fontSize: 14, color: "#111827", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{op.label ?? op.name}</p>
+                        {i === 0 && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: "#F0FDF4", border: "1px solid #BBF7D0", color: "#15803D", flexShrink: 0 }}>{t("buy_recommended")}</span>}
                       </div>
-                      <p className="text-xs text-gray-400 mt-0.5">{op.available} {t("buy_num_dispo")}</p>
+                      <p style={{ fontSize: 12, color: "#9CA3AF", margin: "3px 0 0" }}>{op.available} {t("buy_num_dispo")}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0 ml-2">
-                    <p className="font-bold text-gray-900 text-sm whitespace-nowrap">
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                    <p style={{ fontWeight: 700, fontSize: 14, color: "#111827", margin: 0, whiteSpace: "nowrap" }}>
                       {currency === "FCFA" ? `${op.priceFcfa?.toLocaleString("fr-FR")} F` : `$${op.priceUsd?.toFixed(2)}`}
                     </p>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${active ? "border-blue-600 bg-blue-600" : "border-gray-300"}`}>
-                      {active && <Check className="w-3 h-3 text-white" />}
+                    <div style={{ width: 20, height: 20, borderRadius: "50%", border: `2px solid ${active ? "#2563EB" : "#D1D5DB"}`, background: active ? "#2563EB" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      {active && <Check style={{ width: 10, height: 10, color: "#ffffff" }} />}
                     </div>
                   </div>
                 </motion.button>
@@ -721,30 +733,30 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
           )}
 
           {/* Code de réduction */}
-          {selectedOperator && (
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 space-y-3">
-              <p className="text-sm font-semibold text-gray-700">{t("buy_discount_label")}</p>
+          {selectedOperator && promoEnabled && (
+            <div style={{ borderRadius: 18, border: "1px solid #E5E7EB", background: "#F9FAFB", padding: 16 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "#374151", margin: "0 0 10px" }}>{t("buy_discount_label")}</p>
               {discountApplied ? (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-green-50 border border-green-200">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 12, background: "#F0FDF4", border: "1px solid #BBF7D0" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <CheckCircle2 style={{ width: 16, height: 16, color: "#16A34A", flexShrink: 0 }} />
                       <div>
-                        <p className="text-sm font-bold text-green-700">{discountApplied.code} — {discountApplied.percent}% {t("buy_discount_percent")}</p>
-                        <p className="text-xs text-green-600">{t("buy_savings_label")} {discountApplied.savedFcfa.toLocaleString("fr-FR")} FCFA</p>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: "#15803D", margin: 0 }}>{discountApplied.code} — {discountApplied.percent}% {t("buy_discount_percent")}</p>
+                        <p style={{ fontSize: 11, color: "#16A34A", margin: "2px 0 0" }}>{t("buy_savings_label")} {discountApplied.savedFcfa.toLocaleString("fr-FR")} FCFA</p>
                       </div>
                     </div>
-                    <button onClick={removeDiscount} className="p-1 rounded-lg hover:bg-green-100 text-green-500">
-                      <X className="w-4 h-4" />
+                    <button onClick={removeDiscount} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, borderRadius: 8, color: "#16A34A" }}>
+                      <X style={{ width: 16, height: 16 }} />
                     </button>
                   </div>
-                  <div className="flex justify-between items-center px-3 py-2 rounded-xl bg-white border border-gray-200">
-                    <span className="text-xs text-gray-500 line-through">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderRadius: 12, background: "#ffffff", border: "1px solid #E5E7EB" }}>
+                    <span style={{ fontSize: 12, color: "#9CA3AF", textDecoration: "line-through" }}>
                       {currency === "FCFA"
                         ? `${(operatorsData?.operators?.find(o => o.name === selectedOperator)?.priceFcfa ?? 0).toLocaleString("fr-FR")} FCFA`
                         : `$${(operatorsData?.operators?.find(o => o.name === selectedOperator)?.priceUsd ?? 0).toFixed(2)}`}
                     </span>
-                    <span className="text-sm font-bold text-blue-600">
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#2563EB" }}>
                       {currency === "FCFA"
                         ? `${discountApplied.discountedPriceFcfa.toLocaleString("fr-FR")} FCFA`
                         : `$${discountApplied.discountedPriceUsd.toFixed(2)}`}
@@ -752,30 +764,30 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
                   </div>
                 </div>
               ) : (
-                <div className="flex gap-2">
+                <div style={{ display: "flex", gap: 8 }}>
                   <input
                     value={discountInput}
                     onChange={e => { setDiscountInput(e.target.value.toUpperCase()); setDiscountError(null); }}
                     onKeyDown={e => e.key === "Enter" && validateDiscount()}
                     placeholder={t("buy_promo_placeholder")}
-                    className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 uppercase"
+                    style={{ flex: 1, minWidth: 0, background: "#ffffff", border: "1.5px solid #E5E7EB", borderRadius: 12, padding: "10px 14px", fontSize: 14, color: "#111827", outline: "none" }}
                   />
                   <button
                     onClick={validateDiscount}
                     disabled={!discountInput.trim() || discountLoading}
-                    className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold disabled:opacity-50 hover:bg-blue-700 transition-colors"
+                    style={{ padding: "10px 16px", borderRadius: 12, background: "#2563EB", color: "#ffffff", fontSize: 13, fontWeight: 600, border: "none", cursor: "pointer", flexShrink: 0, opacity: (!discountInput.trim() || discountLoading) ? 0.5 : 1 }}
                   >
-                    {discountLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("buy_apply")}
+                    {discountLoading ? <Loader2 style={{ width: 16, height: 16, animation: "spin 1s linear infinite" }} /> : t("buy_apply")}
                   </button>
                 </div>
               )}
-              {discountError && <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{discountError}</p>}
+              {discountError && <p style={{ fontSize: 12, color: "#EF4444", display: "flex", alignItems: "center", gap: 4, margin: "8px 0 0" }}><AlertCircle style={{ width: 12, height: 12 }} />{discountError}</p>}
             </div>
           )}
         </div>
 
-        {/* Bouton fixé en bas */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-100 px-4 py-4">
+        {/* ── Bouton obtenir un numéro — toujours visible ── */}
+        <div style={{ flexShrink: 0, background: "#ffffff", borderTop: "1px solid #F3F4F6", padding: "14px 16px" }}>
           <Button
             className="w-full h-13 py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-base shadow-lg shadow-blue-500/30"
             disabled={!selectedOperator || buyMutation.isPending || balance === 0}
@@ -788,9 +800,9 @@ export default function BuyNumber({ isEmbedded = false, onStepChange }: { isEmbe
             )}
           </Button>
           {balance === 0 && (
-            <p className="text-center text-xs text-red-400 mt-2">
+            <p style={{ textAlign: "center", fontSize: 12, color: "#F87171", marginTop: 8 }}>
               {t("buy_insufficient")}.{" "}
-              <button onClick={() => { window.location.href = "/recharge"; }} className="underline hover:text-red-700">
+              <button onClick={() => { window.location.href = "/recharge"; }} style={{ textDecoration: "underline", background: "none", border: "none", cursor: "pointer", color: "#EF4444", fontSize: 12 }}>
                 {t("buy_insufficient_top_up")}
               </button>
             </p>
