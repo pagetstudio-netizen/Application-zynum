@@ -1018,7 +1018,7 @@ function ReferralPage({ user, onBack }: { user: UserWithAdmin; onBack: () => voi
   const authH = () => ({ Authorization: `Bearer ${token()}` });
 
   const refCode = stats?.referralCode ?? `ZY${user.id.toString().padStart(6, "0")}`;
-  const refLink = `${window.location.origin}/register?ref=${refCode}`;
+  const refLink = `https://zynum.net/register?ref=${refCode}`;
 
   const load = async () => {
     setLoading(true);
