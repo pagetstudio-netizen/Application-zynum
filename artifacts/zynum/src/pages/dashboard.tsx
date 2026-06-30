@@ -833,7 +833,7 @@ function InfosPage({ user, onBack }: { user: UserWithAdmin; onBack: () => void }
         <div className="flex flex-col items-center py-4">
           <div className="w-24 h-24 rounded-3xl overflow-hidden shadow-xl shadow-blue-500/30 mb-3">
             <img
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=4F46E5&color=fff&size=192&bold=true&format=png`}
+              src="/avatar-user.png"
               alt={user.name}
               className="w-full h-full object-cover"
             />
