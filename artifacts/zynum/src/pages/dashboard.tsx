@@ -391,16 +391,6 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
 
   const firstName = user.name?.split(" ")[0] ?? "là";
 
-  const AVANTAGES = [
-    { emoji: "🌍", title: t("dash_adv1_title"), desc: t("dash_adv1_desc") },
-    { emoji: "⚡", title: t("dash_adv2_title"), desc: t("dash_adv2_desc") },
-    { emoji: "💰", title: t("dash_adv3_title"), desc: t("dash_adv3_desc") },
-    { emoji: "🔒", title: t("dash_adv4_title"), desc: t("dash_adv4_desc") },
-    { emoji: "🎁", title: t("dash_adv5_title"), desc: t("dash_adv5_desc") },
-    { emoji: "📱", title: t("dash_adv6_title"), desc: t("dash_adv6_desc") },
-  ];
-
-
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative">
 
@@ -463,22 +453,6 @@ function HomeTab({ user, onNavigate }: { user: UserWithAdmin; onNavigate: (t: Ta
                     {n.linkUrl && <span style={{ color: "#00C87A", fontSize: "18px", flexShrink: 0 }}>›</span>}
                   </div>
                 ))}
-                {adminNotifs.length === 0 && (
-                  <>
-                    <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", marginTop: 8, paddingTop: 16 }}>
-                      <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "11px", textAlign: "center", marginBottom: 10 }}>{t("dash_advantages_title")}</p>
-                    </div>
-                    {AVANTAGES.map((a, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px", borderRadius: "16px", backgroundColor: "rgba(255,255,255,0.07)" }}>
-                        <span style={{ fontSize: "22px", flexShrink: 0, marginTop: 2 }}>{a.emoji}</span>
-                        <div style={{ minWidth: 0 }}>
-                          <p style={{ color: "#ffffff", fontWeight: 700, fontSize: "14px", margin: 0, lineHeight: 1.3 }}>{a.title}</p>
-                          <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "12px", marginTop: 3, lineHeight: 1.4 }}>{a.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                )}
               </div>
             </motion.div>
           </>
