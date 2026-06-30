@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart3, Users, ShoppingBag, CreditCard, MessageSquare,
@@ -2952,76 +2953,91 @@ const ADMIN_NAV: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<AdminTab>("stats");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
   const current = ADMIN_NAV.find((n) => n.id === activeTab);
 
   const selectTab = (id: AdminTab) => { setActiveTab(id); setMobileMenuOpen(false); };
 
   return (
-    <div className="w-full min-w-0 overflow-hidden">
+    <div style={{ width: "100%", minWidth: 0, overflow: "hidden" }}>
       {/* Admin header */}
-      <div className="flex items-center gap-3 mb-4 p-3 sm:p-4 rounded-2xl border border-primary/20 bg-primary/5">
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
-          <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, padding: isMobile ? "10px 12px" : "12px 16px", borderRadius: 16, border: "1px solid rgba(99,102,241,0.2)", background: "rgba(99,102,241,0.05)" }}>
+        <div style={{ width: isMobile ? 36 : 40, height: isMobile ? 36 : 40, borderRadius: 12, background: "rgba(99,102,241,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Shield style={{ width: isMobile ? 16 : 20, height: isMobile ? 16 : 20, color: "hsl(var(--primary))" }} />
         </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-base sm:text-lg font-bold text-white leading-tight">Panneau Admin</h2>
-          <p className="text-xs text-muted-foreground hidden sm:block">Gestion complète de la plateforme ZyNum</p>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <h2 style={{ fontSize: isMobile ? 14 : 18, fontWeight: 700, color: "hsl(var(--foreground))", margin: 0, lineHeight: 1.3 }}>Panneau Admin</h2>
+          {!isMobile && <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", margin: 0 }}>Gestion complète de la plateforme ZyNum</p>}
         </div>
-        {/* Mobile: current tab label */}
-        <button
-          onClick={() => setMobileMenuOpen(v => !v)}
-          className="sm:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs font-semibold shrink-0"
-        >
-          {current?.icon}
-          <span className="max-w-[80px] truncate">{current?.label}</span>
-          <ChevronRight className={`w-3 h-3 transition-transform ${mobileMenuOpen ? "rotate-90" : ""}`} />
-        </button>
+        {/* Mobile: current tab selector button */}
+        {isMobile && (
+          <button
+            onClick={() => setMobileMenuOpen(v => !v)}
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)", color: "hsl(var(--primary))", fontSize: 12, fontWeight: 600, flexShrink: 0, cursor: "pointer" }}
+          >
+            {current?.icon}
+            <span style={{ maxWidth: 80, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{current?.label}</span>
+            <ChevronRight style={{ width: 12, height: 12, transition: "transform 0.2s", transform: mobileMenuOpen ? "rotate(90deg)" : "rotate(0deg)" }} />
+          </button>
+        )}
       </div>
 
       {/* Mobile menu dropdown */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-            className="sm:hidden overflow-hidden mb-4 rounded-2xl border border-white/10 bg-card/60 backdrop-blur"
-          >
-            <div className="grid grid-cols-2 gap-1 p-2">
-              {ADMIN_NAV.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => selectTab(item.id)}
-                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium text-left transition-all ${
-                    activeTab === item.id
-                      ? "bg-primary text-white"
-                      : "text-muted-foreground hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  {item.icon}
-                  <span className="truncate">{item.label}</span>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isMobile && (
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+              style={{ overflow: "hidden", marginBottom: 16, borderRadius: 16, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(var(--card),0.6)", backdropFilter: "blur(8px)" }}
+            >
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, padding: 8 }}>
+                {ADMIN_NAV.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => selectTab(item.id)}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 8,
+                      padding: "10px 12px", borderRadius: 12,
+                      fontSize: 12, fontWeight: 500, textAlign: "left",
+                      cursor: "pointer", border: "none",
+                      background: activeTab === item.id ? "hsl(var(--primary))" : "transparent",
+                      color: activeTab === item.id ? "#ffffff" : "hsl(var(--muted-foreground))",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {item.icon}
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
 
       {/* Desktop Tab nav — horizontal scroll */}
-      <div className="hidden sm:flex gap-1 overflow-x-auto pb-1 mb-5 scrollbar-none">
-        {ADMIN_NAV.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveTab(item.id)}
-            className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
-              activeTab === item.id
-                ? "bg-primary text-white shadow-lg shadow-primary/20"
-                : "text-muted-foreground hover:text-white hover:bg-white/5 border border-transparent"
-            }`}
-          >
-            {item.icon}
-            <span className="hidden md:inline">{item.label}</span>
-          </button>
-        ))}
-      </div>
+      {!isMobile && (
+        <div style={{ display: "flex", gap: 4, overflowX: "auto", paddingBottom: 4, marginBottom: 20 }}>
+          {ADMIN_NAV.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "8px 10px", borderRadius: 12,
+                fontSize: 12, fontWeight: 500, whiteSpace: "nowrap",
+                cursor: "pointer", border: "1px solid transparent",
+                background: activeTab === item.id ? "hsl(var(--primary))" : "transparent",
+                color: activeTab === item.id ? "#ffffff" : "hsl(var(--muted-foreground))",
+                transition: "all 0.15s",
+              }}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Section title */}
       <div className="flex items-center gap-2 mb-4">
