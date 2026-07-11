@@ -69,7 +69,8 @@ The built `dist/` files are committed to git. To deploy on Plesk:
 
 ## Gotchas
 
-- `SUPABASE_DATABASE_URL` must be set — app crashes on start without it
+- The forced update gate (`update-gate.tsx`) excludes `/admin` from blocking, so a misconfigured "required version" in the admin settings can never lock the admin out of the panel that controls it
+- `SUPABASE_DATABASE_URL` must be set for the Plesk/production deployment — on Replit dev, the API server falls back to the Replit-provisioned `DATABASE_URL` (Postgres module) when `SUPABASE_DATABASE_URL` is unset
 - `PORT` is required at runtime — `artifacts/app.js` defaults it to `3000` if unset
 - The root `package.json` rejects non-pnpm installs — use `artifacts/package.json` and `node app.js` for Plesk
 - After DB schema changes, restart the API server — `initDb.ts` runs the migrations on startup

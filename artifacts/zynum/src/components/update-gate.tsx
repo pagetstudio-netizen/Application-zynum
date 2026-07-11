@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import { APP_VERSION } from "@/config";
 
 interface VersionConfig {
@@ -171,6 +172,8 @@ function OptionalModal({ config, onDismiss }: { config: VersionConfig; onDismiss
 export function UpdateGate({ children }: { children: React.ReactNode }) {
   const [config, setConfig] = useState<VersionConfig | null>(null);
   const [dismissed, setDismissed] = useState(false);
+  const [location] = useLocation();
+  const isAdminRoute = location.startsWith("/admin");
 
   useEffect(() => {
     fetch("/api/v1/app/version")
@@ -185,8 +188,11 @@ export function UpdateGate({ children }: { children: React.ReactNode }) {
     ? compareSemver(APP_VERSION, config.currentVersion) < 0
     : false;
 
-  const showForced   = isOutdated && config?.mode === "forced";
-  const showOptional = isOutdated && config?.mode === "optional" && !dismissed;
+  // The admin panel must always stay reachable, even during a forced update,
+  // otherwise an admin who sets a bad "required version" locks themselves out
+  // with no way to fix the setting.
+  const showForced   = isOutdated && config?.mode === "forced" && !isAdminRoute;
+  const showOptional = isOutdated && config?.mode === "optional" && !dismissed && !isAdminRoute;
 
   return (
     <>
